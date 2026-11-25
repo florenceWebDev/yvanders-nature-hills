@@ -1,3 +1,15 @@
+# Current handoff — 26 November 2026
+
+## System-check removal
+
+Complete on live Supabase: removed the exact fictional listing, its three bookings and dependent receipts/email jobs/payment entries/redemptions, test resource and test files. Verified zero related records remain; all ten real accommodation drafts are intact/unpublished. Public fixture copy and nonpayable QR were cleared and readiness disabled. Accounts are preserved.
+
+## Configurable payment QRs
+
+Implemented on `codex/payment-options-cleanup`: up to three ordered admin payment options with individual labels/images/recipients/instructions, add/edit/remove/reorder, responsive guest cards and legacy snapshot reads. Migration 003 enforces array rules in trusted database functions and preserves old snapshots. Application tests/build passed; see TESTING for final evidence. Live migration 003 and app deployment are pending database dashboard sign-in and the feature PR. Next: apply 003, deploy the passing PR, then save/verify real QR details. Real drafts stay unpublished until owner configuration. No payment details were invented.
+
+The following sections preserve previous milestone history. Their fixture instructions were superseded by the cleanup above.
+
 # Implementation handoff — 25 November 2026
 
 ## Current connected-service milestone

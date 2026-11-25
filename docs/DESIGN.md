@@ -21,3 +21,9 @@ Photographic homepage text now uses stronger overlays, white copy and supporting
 
 
 The full route/layout audit and remaining coverage limits are recorded in [AUDIT](AUDIT.md). Information and accommodation detail pages now have distinct browser titles.
+
+## Configurable payment QRs
+
+Admin → Website & payment provides up to three ordered payment options, each with a label, complete image preview/upload/replace, recipient and instructions. Add is disabled at three; remove and move up/down controls are keyboard accessible. Uploads preserve existing size/type checks, expose errors and disable payment controls/save while busy. Save persists the order; refresh remounts the editor from saved data. Zero options can be saved with payments disabled.
+
+Guest instructions use booking snapshots and show every option with a separate open/save link. Cards use a container-width grid with a 220px minimum when available, equal columns, wrapping and centered contents. Images use contain rather than crop and cap at 300px width/340px height. Narrow containers stack cards without horizontal scrolling. Old single-QR snapshots still render. Guests pay through one option; proof submission remains unchanged.

@@ -1,5 +1,9 @@
 # Release and recovery
 
+## Current change — 26 November 2026
+
+The fictional fixture, three bookings and dependencies were permanently removed through the guarded operator script. Ten real drafts are preserved/unpublished; readiness is off. Multi-QR administration is implemented and locally checked; migration 003 and production deployment are pending. Apply 003 after 002 before deploying the matching app; verify real images/recipients before enabling holds. General guest mail and prior unverified recovery/failure paths remain separate. Connected-status sections below are historical.
+
 ## Current connected status — 25 November 2026
 
 The public [Netlify site](https://yvanders-nature-hills.netlify.app/) is connected to the permanent Supabase database. Migrations 001/002, RLS/storage, protected server settings, a sending-only Resend credential and external minute scheduler are configured. Live session reports configured; scheduled requests return HTTP 200 with an empty queue. Owner registration/verification and first staff bootstrap succeeded. No domain purchase or paid upgrade was made.

@@ -4,7 +4,7 @@ The application reads environment values from Next.js; local secrets belong in `
 
 ## Current owner setup
 
-Netlify now uses the permanent Supabase project on the public HTTPS origin. Migrations 001/002 are applied, all twelve public tables have RLS, and ten actual accommodation drafts remain unpublished. An owner-approved fictional system-check listing is published with `payment_ready: true`, a nonpayable image and explicit do-not-pay instructions. Disable readiness and unpublish that fixture before verified real operation. Existing Supabase publishable/secret API keys work with the installed clients; the server secret uses the existing `SUPABASE_SERVICE_ROLE_KEY` variable name. No key values belong in this reference.
+Netlify now uses the permanent Supabase project on the public HTTPS origin. Migrations 001/002 are applied, all twelve public tables have RLS, and ten actual accommodation drafts remain unpublished. The fictional system-check listing and its three bookings/dependencies were removed on 26 November 2026. Readiness is disabled and the test QR is cleared. Migration 003 and the multi-QR application deployment remain pending. Existing Supabase publishable/secret API keys work with the installed clients; the server secret uses the existing `SUPABASE_SERVICE_ROLE_KEY` variable name. No key values belong in this reference.
 
 The Supabase Auth site URL is `https://yvanders-nature-hills.netlify.app`. The redirect allowlist contains the exact `/auth/callback` URL and `/auth/callback?next=/account?reset=1`. Email confirmation remains enabled. Default Supabase SMTP is limited to organization-authorized recipient addresses and a low sending rate; it is not ready for general guest verification/reset email.
 
@@ -23,7 +23,7 @@ For the temporary Netlify client preview, use [netlify.toml](../netlify.toml): r
 | Payment-enabled | Complete server settings plus verified public QR instructions | Verified guests can create holds; owner must still complete staged acceptance before taking money |
 | Production | HTTPS origin, isolated service configuration, verified sender, scheduler, policies and restore procedure | Real operation requires acceptance beyond the current fictional owner check |
 
-Providing only URL/key does not mean booking services are ready. The hold/settings endpoints additionally require service key, booking email key/from, admin email, app URL, and cron secret. A database `payment_ready` flag and nonempty QR/recipient are also required. Presence checks do not validate actual provider credentials or prove deliverability.
+Providing only URL/key does not mean booking services are ready. The hold/settings endpoints additionally require service key, booking email key/from, admin email, app URL, and cron secret. After migration 003, a database `payment_ready` flag and one to three complete payment options are also required. Configure labels, images, recipients, instructions and order in Admin → Website & payment. No new environment variables are introduced. Presence checks do not validate actual provider credentials or prove deliverability.
 
 ## Environment inventory
 

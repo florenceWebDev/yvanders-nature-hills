@@ -55,3 +55,7 @@ Settings are publicly readable business content. Keep credentials in environment
 ## Change policy
 
 Keep the relevant [handbook reference](README.md), changelog, tests, and current handoff with each change. Record consequential new boundaries/dependencies in an ADR. Preserve original decision history and mark superseded choices rather than rewriting why they were made.
+
+## Multiple QR payments and fixture removal
+
+Payment options remain public site settings and are copied into booking snapshots; administration changes affect future holds. Shared normalization renders legacy single-QR snapshots, while new writes use an ordered array of up to three options. HTTP and database validation enforce completeness, uniqueness, count and readiness. No payment gateway or automatic transfer verification is added. [ADR 0005](decisions/0005-configurable-payment-options.md) records migration and cleanup decisions.

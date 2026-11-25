@@ -1,7 +1,7 @@
 import type { Offering, Settings } from './types';
 export const defaults:Settings = {
  tagline:'A little closer to nature.',intro:'Open skies, green hills, and time to slow down. Find your own corner of nature at Yvander’s Nature Hills.',
- contact:'',email:'',address:'',qr_url:'',payment_recipient:'',payment_instructions:'',payment_ready:false,
+ contact:'',email:'',address:'',payment_options:[],payment_ready:false,
  cancellation_policy:'Contact the campsite to request a booking change or cancellation. Refunds are reviewed and processed manually.',
  faq:[{question:'When can I check in?',answer:'Arrival and departure times are shown for each accommodation. Check your reservation for its confirmed schedule.'},{question:'How is my reservation confirmed?',answer:'Choose your stay, pay the required amount through the campsite QR, and upload your payment screenshot within 30 minutes. Your reservation is confirmed after staff verify your payment.'},{question:'Can I bring my own food or pets?',answer:'The supplied campsite FAQ welcomes pets and outside food. Please confirm current policies with the campsite before your visit.'}]
 };

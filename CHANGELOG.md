@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-26
+
+- Added up to three separately configurable, ordered admin payment QRs with complete previews and responsive guest cards. Existing snapshots retain their instructions.
+- Added migration 003 for payment-array conversion, database validation and paid-hold/publication checks. Apply before the matching app deployment.
+- Removed the owner-authorized fictional listing, its three bookings/dependencies and test files through a guarded, resumable operator script. Real drafts/accounts are preserved and payments remain disabled.
+
 Record application, configuration, database, and tooling changes under Unreleased in the same PR. Move reviewed entries into a dated version section when an actual release is made. A package version or GitHub push alone does not mean a hosted production release occurred.
 
 ## Unreleased

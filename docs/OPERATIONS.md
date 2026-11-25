@@ -99,3 +99,18 @@ Staff reservation lists paginate and calendars fetch all range pages. A load fai
 Application CI now installs the lockfile, runs npm test, and builds on Node 22 for PRs/pushes. Documentation remains the required main-branch gate; wait for both jobs before merging application changes. Preview smoke checks now include every new admin read/write endpoint failing closed without services.
 
 Reverse proxies must preserve the incoming Host and request protocol for same-origin validation. The handler does not trust an arbitrary forwarded-host header.
+
+## Multiple QR rollout
+
+Apply [migration 003](../supabase/migrations/003_payment_options.sql) once after 002, then deploy the matching application through a passing feature PR. It preserves booking snapshots, converts legacy settings and retains first-option mirrors for the old reader. Do not roll back to an old settings writer: it cannot save the new array contract. Forward-fix the migration; app rollback does not undo settings/data. The new app can read legacy configuration before migration, but multi-QR writes and direct database enforcement require 003. Verify real payment images/recipients before enabling holds or publishing real accommodations.
+
+## System-check cleanup
+
+The owner-approved fixture was removed on 26 November 2026. [The cleanup script](../scripts/remove-system-check.mjs) supports preflight and apply:
+
+```powershell
+node --env-file=.env.local scripts/remove-system-check.mjs
+node --env-file=.env.local scripts/remove-system-check.mjs --apply
+```
+
+Use existing service configuration from a trusted operator terminal. Preflight validates exact identity, fictional snapshots and receipt scope; unexpected dependencies stop cleanup. Apply unpublishes first and compares current settings before changing recognized fixture content. It removes only identified records/files, leaves real accounts/drafts intact and disables readiness when the test QR is removed. It does not republish real offerings. The private ignored `.env-check/system-check-cleanup.json` holds scoped IDs/paths for retries; never commit it. Keep it until verification succeeds. On failure, inspect the error and rerun the same script; do not broaden IDs or delete shared resources. This multi-request operation is resumable rather than atomic. Previously sent fictional emails cannot be recalled; app rollback cannot restore deleted test history.

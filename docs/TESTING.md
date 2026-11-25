@@ -1,3 +1,22 @@
+# Verification update — 26 November 2026
+
+## System-check removal
+
+- **Pass:** guarded preflight identified the exact approved fixture, three fictional bookings with matching payment snapshots, and one receipt file. Apply removed the listing, bookings and related receipts/email jobs/payment entries/redemptions, test-only resource and storage objects. Service queries verified zero remaining dependent rows, ten real accommodation drafts intact/unpublished, readiness false, test QR empty, and zero marketing files under the fixture prefix. The public Netlify homepage reloaded with normal copy and the unpublished-listings empty state. No account deletion or real accommodation publication occurred.
+- **Pass:** cleanup uses count-only logs and an ignored private manifest for interrupted-run recovery. It is a sequence of scoped requests, not a database transaction.
+
+## Configurable payment QRs
+
+- **Pass:** `npm.cmd test` — 28 application/PostgreSQL tests, including zero through three options, four/incomplete/duplicate/unsafe rejection, direct nonadmin save denial, database readiness enforcement and unchanged booking snapshots. Migration 003 executes against the existing migration sequence; explicit legacy QR conversion assertions passed.
+- **Pass:** `npm.cmd run build` — production build and TypeScript passed.
+- **Pass:** browser component harness used the actual editor/guest components with a clearly fictional local image. Counts 1, 2 and 3 fit at widths 1280, 768, 375 and 320 without horizontal overflow. Desktop columns share width; mobile stacks; all complete images use contain. Screenshots inspected at desktop and 320px. Add-limit, remove, reorder, label/recipient editing, and harness save/load worked. Harness save/load was local simulation, not live persistence. Temporary harness route/image were removed before delivery.
+- **Pass:** local connected `/admin` denies an unsigned session.
+- **Blocked:** browser file selection: Chrome extension requires Allow access to file URLs. No extension permission was changed; upload/replace and transport failure browser checks remain unverified.
+- **Blocked:** live migration 003 and authenticated multi-QR save/reload. Dashboard required sign-in; the owner approved Continue with GitHub after its initial automatic-review rejection. The flow now requires manual GitHub credentials. Existing service credentials were used only for authorized fixture cleanup/verification. No real payment details were configured.
+- **Not run:** deployment of the multi-QR application; it requires migration 003 and the feature PR. `npm.cmd run docs:test` passed all 14 documentation-checker tests; `npm.cmd run docs:check` passed local links, endpoint/environment inventories and change-impact coverage.
+
+The sections below preserve prior testing history; historical statements that the fixture is still published are superseded above.
+
 # Verification evidence — 25 November 2026
 
 ## Connected services — 25 November 2026
