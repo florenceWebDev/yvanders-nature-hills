@@ -63,7 +63,7 @@ Strong random server-only scheduler secret, also configured in the scheduler's A
 
 ## Connect staging
 
-1. Create a fresh isolated Supabase project and apply [001_booking.sql](../supabase/migrations/001_booking.sql). Verify RLS/functions and storage buckets. Existing databases require additive migrations instead.
+1. Create a fresh isolated Supabase project and apply [001_booking.sql](../supabase/migrations/001_booking.sql), then [002_administration.sql](../supabase/migrations/002_administration.sql), in order. Verify RLS/functions and storage buckets. Existing databases require additive migrations instead.
 2. Set local URL/anon/service keys. Configure Supabase Auth site origin and allowlisted `/auth/callback` URL. Keep email confirmation enabled; use provider-approved SMTP for reliable Auth verification/reset mail.
 3. Register and verify the intended staff account. An authorized database administrator explicitly inserts its user ID into `public.admins`; never make this a public endpoint. Use the example in the project [README](../README.md).
 4. Optionally run `npx tsx --env-file=.env.local scripts/seed.ts`. It creates missing unpublished drafts by slug; it does not overwrite existing offerings or grant roles. Camping/day-use rates remain unset. Verify room/photo mappings and the Camp Hut resource relationship before publishing.

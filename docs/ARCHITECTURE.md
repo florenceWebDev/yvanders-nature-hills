@@ -26,13 +26,13 @@ Staff reads/writes require verified identity plus `admins` membership. SQL funct
 
 Hold creation locks offering then resource, calculates the server-owned amount/schedule, checks overlapping allocations/blackouts, and inserts a snapshot. Offering edits coordinate with these locks and reject incompatible changes to active pools. Intervals are half-open; money uses integer centavos; schedule conversion uses Asia/Manila.
 
-Receipt finalization is executable only by the service role after the HTTP handler verifies owner and file bytes. It accepts a trusted user ID rather than deriving the guest from the service session. Booking transitions and relevant email jobs commit together. HTTP success means persisted state, not that an email arrived.
+Discount and complimentary pricing are enforced by the administration wrappers; see DATABASE and ADR 0002. Receipt finalization is executable only by the service role after the HTTP handler verifies owner and file bytes. It accepts a trusted user ID rather than deriving the guest from the service session. Booking transitions and relevant email jobs commit together. HTTP success means persisted state, not that an email arrived.
 
 Email runs later through the outbox. Row locks and leases coordinate claims, retries reuse stable provider idempotency keys, and failures do not undo the booking. Provider acceptance is not inbox-delivery evidence. See [operations](OPERATIONS.md) for timing, limits, and recovery.
 
 ## Security and data handling
 
-Server Supabase clients use HTTP-only, same-site cookies; production cookies are secure. Use HTTPS in production. All dispatched POSTs reject missing or foreign Origin. This is an application boundary, not a substitute for database permissions or provider configuration.
+Server Supabase clients use HTTP-only, same-site cookies; production cookies are secure. Use HTTPS in production. All dispatched POSTs reject missing or foreign Origin against the incoming Host and request protocol, rather than the potentially rewritten internal Next.js hostname. This is an application boundary, not a substitute for database permissions or provider configuration.
 
 Receipts and marketing images use distinct buckets. The server issues a signed upload path scoped to the authorized user and booking where applicable; original bytes bypass function request-size limits. Completion downloads and validates the image signature/size before receipt state changes. Receipt downloads receive 60-second signed URLs. Never log these URLs or include real proof in public documentation.
 
@@ -40,7 +40,7 @@ Settings are publicly readable business content. Keep credentials in environment
 
 ## Limits and known gaps
 
-- Staff/guest data reads cap at 500 rows; current filtering/counts operate on that loaded subset.
+- Guest history and the legacy configuration/email/audit bundle cap at 500 rows. Staff reservations use 100-row pages and range fetching; dashboard SQL aggregates all matching bookings and payment entries.
 - Manual reservations have no attached guest account, even when an email matches an existing user.
 - Draft database prices can be null and manual ownership is nullable; shared UI types do not express every SQL possibility.
 - Dispatcher error status mapping depends on message text; there are no stable typed error codes.

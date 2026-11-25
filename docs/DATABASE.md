@@ -1,6 +1,6 @@
 # Database and business rules
 
-Authoritative schema: [001_booking.sql](../supabase/migrations/001_booking.sql). It targets a fresh Supabase project. Do not rerun it against an existing live schema: it creates tables/functions and broadly revokes default public-schema writes/function execution before granting application access.
+Authoritative schema: [001_booking.sql](../supabase/migrations/001_booking.sql), followed by [002_administration.sql](../supabase/migrations/002_administration.sql). Apply both in order to a fresh project; an existing 001 database needs only 002. Do not rerun it against an existing live schema: it creates tables/functions and broadly revokes default public-schema writes/function execution before granting application access.
 
 ## Records and relationships
 
@@ -12,7 +12,7 @@ All application tables are in `public` and have RLS enabled. UUID IDs default to
 | `resources` | `id`, `name`, `capacity` | Capacity 1–10000; shared pool used by offerings and allocations; admin reads |
 | `offerings` | Unique URL `slug`, name, kind, description, images/amenities, publication flag, resource FK, allocation basis, guest maximum, price/basis/deposit, schedule/times/slots, update time | Published rows require a rate; public reads see published rows, admins also see drafts |
 | `site_content` | Text primary key `key`, JSONB `value`; current key `settings` | Public read; editable through trusted admin function; never contains secrets |
-| `bookings` | UUID, unique human reference, nullable user FK, guest contact, offering/resource FKs, copied offering name, period, guests/units/allocation, total/deposit/paid, status/expiry, unique request UUID, snapshot, guest-visible admin note, timestamps | Positive period/counts/totals; deposit ≤ total; guest-owned reads and all-admin reads |
+| `bookings` | UUID, unique human reference, nullable user FK, guest contact, offering/resource FKs, copied offering name, period, guests/units/allocation, total/deposit/paid, status/expiry, unique request UUID, snapshot, guest-visible admin note, timestamps | Positive period/counts; nonnegative total/deposit, zero only for complimentary reservations; deposit ≤ total; guest-owned reads and all-admin reads |
 | `receipts` | UUID, booking FK, unique storage path, transaction reference, creation time | Metadata only; owner/admin reads through booking relationship; finalization is server-only |
 | `blackouts` | UUID, resource FK, start/end, reason | Positive interval; admin reads; creation rejects overlaps with active reservations |
 | `audit_events` | Identity bigint ID, actor UUID, action, record ID text, JSON detail, creation time | Admin-only reads; internal refund records are in detail, not guest booking columns |
@@ -42,12 +42,12 @@ Repeated decisions that already match status return the row without another stat
 ## Availability and pricing
 
 - Allocation uses half-open overlap: existing start < requested end AND existing end > requested start. Adjacent periods can coexist; configured overnight times still determine actual overlap.
-- Pending review, correction requested, and confirmed rows consume capacity. Unexpired awaiting-payment rows also consume it. Declined/cancelled/expired rows do not. No automatic timeout exists for uploaded proof awaiting review.
+- Pending review, correction requested, and confirmed rows consume capacity. Unexpired awaiting-payment rows also consume it. Declined/cancelled/expired rows do not. No automatic timeout exists for uploaded proof or complimentary reservations awaiting review.
 - `allocation_basis=unit` consumes requested units/pitches; guest basis consumes party size. Guest count must not exceed offering max-guests × units. Shared-guest offerings should configure a suitable per-booking guest maximum.
 - Quote permits arrival within the next 730 days and 1–60 overnight nights; the arrival timestamp must be in the future. Venue slots use the selected local date; end ≤ start rolls into the following day.
 - Cost = price × (guests for guest pricing, otherwise units) × (1 for per-booking unit pricing, otherwise nights). Slot nights are 1. Deposit rounds upward from total × percentage / 100. Total is capped at 1,000,000,000 centavos.
 - Bookings retain copied price, deposit, name, schedule, and payment instructions. Editing an offering/settings does not reprice existing bookings.
-- Hold creation locks the offering row, then its resource row, before rechecking availability. Admin offering edits use the same lock ordering; upcoming active reservations prevent pool reassignment/capacity changes. Blackouts lock the resource before checking overlaps.
+- Hold creation takes a request advisory lock, locks the promo row when supplied, then the offering and resource rows, before rechecking availability. Admin offering edits use the same lock ordering; upcoming active reservations prevent pool reassignment/capacity changes. Blackouts lock the resource before checking overlaps.
 
 ## Trusted functions
 
@@ -74,3 +74,18 @@ These security-definer functions set a fixed search path. Most mutations derive 
 Add numbered forward migrations for any database already initialized; do not edit 001 to change deployed data. Stage the migration with realistic data and roles, preserve booked snapshots, and test old/new application compatibility before rollout. Prefer expand/backfill/contract changes to immediate destructive edits. Document data effects and recovery in the same PR; an application rollback does not reverse a schema migration.
 
 Backups/restoration and retention periods depend on the owner's configured provider plan and business policy. They are not yet verified. See [operations](OPERATIONS.md) and [release readiness](RELEASE.md).
+
+## Administration migration and invariants
+
+002 adds bookings.subtotal/discount/promo_code, promo definitions and redemptions, and append-only payment_entries. Existing totals become subtotals with zero discount. Existing paid amounts become undated opening entries: no historical payment date is invented. Existing snapshots remain intact. The application requires 002 before its new API contracts are served.
+
+- promos: unique immutable code; percent basis points or fixed centavos; optional maximum saving, minimum subtotal, eligible offering UUIDs, inclusive local booking/stay dates and global/per-normalized-email limits. A fixed discount can exceed subtotal but the saving is clamped to subtotal. No stacking.
+- promo_redemptions: one row per booking, promo and guest email, consumed flag. Active holds/reviews reserve usage. Expired unpaid, declined or cancelled unconsumed uses stop counting. Verified-paid or approved complimentary uses are permanently consumed. Promo-row locks serialize final-use competition and edits across different inventory pools. Quotes are informational.
+- payment_entries: payment/refund/opening, positive amount, effective timestamp (null only for opening), reference, actor, unique request UUID and creation time. Direct client mutations are revoked. Review locks the booking, changes cumulative paid, and appends only a positive difference; refund recording uses the same booking lock and cannot exceed remaining collections. Dates supplied by staff are stored at local noon for daily reporting. Notes are not converted into monetary refunds.
+- Complimentary guests enter pending_review with total=deposit=0. No proof/correction is required; approve with paid=0 or decline with a reason. Capacity stays allocated until resolved. Manual staff reservations are already approved, including complimentary ones. Confirmation and cancellation use the existing outbox.
+- manage_admin locks membership changes before checking identity. Its delete trigger protects the final administrator (including normal account deletion cascading to membership); removal preserves the user's account. list_admins returns only staff identities. No owner/staff distinction exists by user choice. Server and SQL boundaries recheck access.
+- admin_report aggregates complete records by Asia/Manila boundaries: created cohorts for counts, current confirmed arrivals for booking value/outstanding, and effective ledger dates for collections/refunds. Cancelled paid bookings retain collection history but leave confirmed booking value. Outstanding is max(total-paid,0); refunds do not automatically reopen a receivable or reinstate a booking.
+
+Private *_base functions preserve the original allocation/review logic and have no PUBLIC/anon/authenticated execute access. The new wrappers are the supported entrypoints. Only privileged operators may alter ledger history for exceptional repair; the application exposes append-only recording.
+
+Upgrade in staging first, transactionally, after a database backup. Apply 002 exactly once; do not replay 001 on existing data. Validate opening balances, role membership and booking snapshots before deploying the matching application. A rollback to old app code cannot safely handle complimentary reservations or the changed RPC signatures: prefer a forward fix, and pause bookings during coordinated rollback. Independent-connection race verification remains a staging requirement.

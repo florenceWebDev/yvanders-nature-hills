@@ -52,7 +52,7 @@ Application validation: `npm test`. Generate Next.js types through dev/build bef
 
 ## Connect real booking services
 
-Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. Apply the initial SQL only to a fresh Supabase project, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
+Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql then 002_administration.sql; an existing 001 database needs only 002, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
 
 ```sql
 insert into public.admins(user_id)
@@ -60,6 +60,6 @@ select id from auth.users where email = 'YOUR_VERIFIED_STAFF_EMAIL'
 on conflict do nothing;
 ```
 
-Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and the actual QR recipient before publishing. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
+Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and the actual QR recipient before publishing. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
 
 Keep `.env.local`, service keys, auth codes, real guest details, private receipts, and signed URLs out of this public repository. The [example environment](.env.example) contains variable names and placeholders only. No software license has been selected. [Screenshots](docs/screenshots/homepage.jpg) illustrate the local design, not live-service verification.

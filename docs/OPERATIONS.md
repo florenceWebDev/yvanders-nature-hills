@@ -62,3 +62,18 @@ The `Documentation check` workflow uses Node 22 and needs no Supabase/Resend sec
 It tests its own checker, verifies links/inventories, then assesses documentation impact against the event's base/head. Pull requests use the three-dot merge-base diff; pushes use the exact before/after diff. Local checks include untracked files and tracked working changes. Documentation-only changes do not require unrelated changelog/reference edits.
 
 Verified on 25 November 2026: the active [Main documentation gate ruleset](https://github.com/florenceWebDev/yvanders-nature-hills/settings/rules/28036246) targets `refs/heads/main`, requires pull requests and the `Documentation check` from GitHub Actions, has an empty bypass list (including administrators), and blocks force pushes and deletion. Required independent approvals are zero, so the sole owner can merge their own passing PR. Branch-up-to-date enforcement is not enabled. Preserve these protections when changing repository settings. Rule configuration is external state: reverify it after settings changes. See [Testing](TESTING.md) for the actual accepted/rejected PR evidence.
+
+## Staff, promos and reporting operations
+
+Deploy migration 002 before the matching app. Bootstrap the first administrator as before; additional verified accounts are promoted by email in Administrators. Each admin has equal power. At least one must remain. Before removing your own membership, ensure another operator can sign in.
+
+Review complimentary requests alongside payment review; they reserve inventory indefinitely until approved, declined or cancelled. Never request or upload payment proof for a zero-total reservation. Promo usage displays reserved and permanently consumed counts; disabling a code prevents new uses but does not alter existing reservations. Codes cannot be renamed.
+
+Record cumulative verified payments with their actual received date. Record a refund only after it is completed externally, with a reference; cancelling is separate and does not imply a refund. Reports separate gross collections, refunds and net collections from confirmed arrival value, not profit. Undated migrated opening balances are excluded from trends and require operator reconciliation if historical reports are needed. Weeks begin Monday; all calendar/report dates use Asia/Manila.
+
+Staff reservation lists paginate and calendars fetch all range pages. A load failure is an error, not zero bookings. Configuration/resources/offerings/blackouts and email/audit bundles still cap at 500 rows; expand these separately before inventory/configuration reaches that size. Public guest history retains its 500-row cap. Live auth, email transport and independent database races require staging acceptance; local PGlite serializes queries.
+
+
+Application CI now installs the lockfile, runs npm test, and builds on Node 22 for PRs/pushes. Documentation remains the required main-branch gate; wait for both jobs before merging application changes. Preview smoke checks now include every new admin read/write endpoint failing closed without services.
+
+Reverse proxies must preserve the incoming Host and request protocol for same-origin validation. The handler does not trust an arbitrary forwarded-host header.

@@ -20,3 +20,7 @@
 - AC-06: Expired holds release capacity; failed upload and email have recoverable paths.
 
 See IMPLEMENTATION-BRIEF.md for settled rules. Poster facts are draft content, not verified launch data.
+
+## Approved administration expansion
+
+All admins may promote/remove existing verified accounts, with a last-admin safeguard. Reporting separates transaction-date collections/refunds from arrival-date confirmed booking value, with weekly/monthly/quarterly/yearly filtering. Full promo controls include complimentary reservations awaiting staff approval without payment proof. Booking calendars must use Philippines time and complete range data. Preserve the nature design while making active navigation and homepage text clearly visible.
