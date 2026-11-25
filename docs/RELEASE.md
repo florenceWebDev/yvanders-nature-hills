@@ -2,7 +2,7 @@
 
 ## Current change — 26 November 2026
 
-The fictional fixture, three bookings and dependencies were permanently removed through the guarded operator script. Ten real drafts are preserved/unpublished; readiness is off. Multi-QR administration is implemented and locally checked; migration 003 is applied and production deployment follows PR #6. On new projects apply 003 after 002 before deploying the matching app; verify real images/recipients before enabling holds. General guest mail and prior unverified recovery/failure paths remain separate. Connected-status sections below are historical.
+The fictional fixture, three bookings and dependencies were permanently removed through the guarded operator script. Ten real drafts are preserved/unpublished; readiness is off. Multi-QR administration is implemented and locally checked; migration 003 is applied and production deployment is Published at main `11e37b5` through the owner-approved PR #6 merge. On new projects apply 003 after 002 before deploying the matching app; verify real images/recipients before enabling holds. General guest mail and prior unverified recovery/failure paths remain separate. Connected-status sections below are historical.
 
 ## Current connected status — 25 November 2026
 
