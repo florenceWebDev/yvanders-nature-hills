@@ -32,3 +32,15 @@ Screenshots: [desktop](screenshots/homepage.jpg) and [mobile](screenshots/mobile
 - **Not run:** Vercel deployment, backup restoration, multi-browser/device accessibility.
 
 Do not accept real payments before completing these staged checks. No integrations or publication are represented as live.
+
+## Local startup recheck — 25 November 2026
+
+- **Pass:** existing dependencies detected; development server starts on 127.0.0.1:3000.
+- **Pass:** `node scripts/smoke.mjs` against the development server; all twelve application routes, session response, unauthenticated cron rejection, cross-origin rejection, missing-service guards, and 404 behavior passed.
+- **Pass:** homepage visibly rendered in the browser.
+- **Pass:** pre-publication tracked-path audit excludes environment files, dependencies, generated builds and private-key extensions; common credential-pattern scan found no matches. This is a focused scan, not proof that every possible secret format has been detected.
+
+## GitHub connection recheck — 25 November 2026
+
+- **Pass:** connector identifies the selected account as `florenceWebDev`; Git Credential Manager 2.6.0 is installed locally.
+- **Pending authentication:** target repository is not available through GitHub metadata, browser `/new` redirects to sign-in, and repository creation/push have not run. No remote or hosted deployment is claimed.

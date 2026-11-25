@@ -4,14 +4,59 @@ A Next.js booking application with a photographic public website, guest accounts
 
 ## Run locally
 
-Use Node 22 LTS or newer:
+The prepared local project is at:
+
+`C:\Users\USER\Documents\Codex\2026-11-25\i-x20\outputs\yvanders-nature-hills`
+
+Open PowerShell and run:
 
 ```powershell
-npm install
+cd "C:\Users\USER\Documents\Codex\2026-11-25\i-x20\outputs\yvanders-nature-hills"
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. Without service configuration the app renders clearly marked draft listings and a read-only admin preview. It does not pretend to book, accept payments, or send email.
+Dependencies are already installed in this prepared folder. Keep the terminal open while using the app. Open http://127.0.0.1:3000 in your browser. Stop the server with **Ctrl+C** in that terminal. Changes to application files reload automatically.
+
+Useful pages:
+
+- Home: http://127.0.0.1:3000
+- Accommodation: http://127.0.0.1:3000/stays
+- Guest account: http://127.0.0.1:3000/account
+- Admin preview: http://127.0.0.1:3000/admin (choose **Explore admin preview**)
+
+Without service configuration the app renders clearly marked draft listings and a read-only admin preview. No `.env.local` is needed for this mode. It does not create reservations, accept payments, or send email.
+
+If port 3000 is already occupied, use `npm run dev -- --port 3001` and open http://127.0.0.1:3001. Do not stop another application's server to free the port. If dependencies are missing, run `npm ci` in the project folder before starting.
+
+## Fresh clone and GitHub workflow
+
+Chosen public GitHub destination: `florenceWebDev/yvanders-nature-hills`. Repository creation and the first push require a signed-in GitHub browser session; completion is recorded in `docs/PLAN.md`.
+
+After the repository has been created and the source pushed, use Node 22 LTS or newer and Git:
+
+```powershell
+git clone https://github.com/florenceWebDev/yvanders-nature-hills.git
+cd yvanders-nature-hills
+npm ci
+npm run dev
+```
+
+To synchronize an existing checkout:
+
+```powershell
+git pull --ff-only
+```
+
+To publish your own changes after reviewing them:
+
+```powershell
+git status
+git add .
+git commit -m "Describe your changes"
+git push
+```
+
+Git Credential Manager may open a GitHub sign-in window. Sign in to the account authorized for the repository; do not paste access tokens into source files or chat. `.env.local`, `node_modules`, `.next`, and hosting credentials are excluded from Git. The selected repository will be public, including the supplied campsite photos and documentation. No software license has been selected.
 
 ## Connect real services
 

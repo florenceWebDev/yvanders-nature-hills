@@ -15,3 +15,13 @@ Owner configures Supabase/Resend/Vercel and required env values using README. Ap
 
 ## Deferred
 Payment gateway, automated refunds, SMS, booking-channel synchronization, multi-offering cart.
+
+## Local setup and GitHub handoff — 25 November 2026
+
+- Selected scope: working local preview first; live booking-service setup remains separate.
+- Local dependencies are installed; `npm run dev` starts at http://127.0.0.1:3000. README now contains exact PowerShell commands, page links, shutdown, port-conflict handling, and fresh-clone instructions.
+- Local route and protected-endpoint smoke checks passed again. Homepage rendered in the in-app browser. The preview has no live booking-service credentials.
+- GitHub connector account: `florenceWebDev`. Chosen destination: new **public** repository `florenceWebDev/yvanders-nature-hills`, with no generated README or license.
+- GitHub repository creation, adding `origin`, initial push, and matching local/remote commit verification are pending website authentication. The connector is connected, but its tools do not create repositories and the browser session is signed out. No remote is configured and no push has been performed.
+- Tracked-path and common credential-pattern audits passed before publication preparation. `.env.local`, dependencies, generated builds, and private-key file types are not tracked. Public source includes the supplied campsite photos and documentation as selected by the owner.
+- Next action: sign in to GitHub as `florenceWebDev` in the prepared repository-creation tab; then create the public repository, add its HTTPS URL as `origin`, push `main`, and verify the remote SHA. Git Credential Manager is installed and may separately request Git authentication.
