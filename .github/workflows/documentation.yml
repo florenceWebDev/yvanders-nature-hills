@@ -1,0 +1,41 @@
+name: Documentation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    name: Documentation check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run docs:test
+      - name: Verify handbook and change impact
+        env:
+          DOCS_EVENT: ${{ github.event_name }}
+          DOCS_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          DOCS_HEAD: ${{ github.sha }}
+        run: |
+          if [ "$DOCS_EVENT" = "pull_request" ]; then
+            npm run docs:check -- --base "$DOCS_BASE" --head "$DOCS_HEAD" --three-dot
+          elif [ "$DOCS_EVENT" = "push" ] && [ -n "$DOCS_BASE" ] && [ "$DOCS_BASE" != "0000000000000000000000000000000000000000" ]; then
+            npm run docs:check -- --base "$DOCS_BASE" --head "$DOCS_HEAD"
+          else
+            npm run docs:check -- --base "$DOCS_HEAD" --head "$DOCS_HEAD"
+          fi

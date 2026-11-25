@@ -27,3 +27,7 @@ Payment gateway, automated refunds, SMS, booking-channel synchronization, multi-
 - Project moved at the user's request to `C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills`, including installed dependencies and Git history. Restarted the preview there on http://127.0.0.1:3000. README startup commands use the new location. Local route checks passed after the move. Git Credential Manager successfully authenticated the push.
 
 - Current handoff: local preview and GitHub setup complete. Next product milestone remains owner configuration of Supabase/Resend and staged live-booking acceptance. GitHub source publication is separate from website hosting; the website is not publicly deployed.
+
+## Developer handbook and update enforcement
+
+In progress: expanded handbook, API/database/configuration/operations references, contribution and agent rules, changelog/decision records, and a tested documentation check. Next: verify local checks and GitHub PR workflow, enable the required main-branch gate with zero independent approvals, and demonstrate rejected incomplete and accepted complete documentation changes. No booking behavior or live-service setup is included in this milestone.

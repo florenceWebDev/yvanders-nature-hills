@@ -49,3 +49,11 @@ Do not accept real payments before completing these staged checks. No integratio
 
 - **Pass:** complete project moved to the requested `C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills` directory.
 - **Pass:** development server restarted from the new location at http://127.0.0.1:3000; route and protected-endpoint smoke checks passed after the move.
+
+## Documentation checks
+
+The handbook and contribution process add npm run docs:test (checker regression tests) and npm run docs:check (links, inventories and change-impact checks). Regression cases cover missing/relevant/unrelated/deleted/empty documentation, per-area requirements, generated/asset/doc exceptions, local links and code samples, endpoint/env drift, unsupported handler styles, computed env access, real Git rename/delete/untracked paths, and merge-base comparisons.
+
+Application database fixtures currently use fixed 2027 dates; update them before that booking window passes. This is a known test-maintenance limit, not a change to booking behavior.
+
+Rollout evidence will be recorded after actual local and GitHub checks. Live service checks remain blocked as recorded above.

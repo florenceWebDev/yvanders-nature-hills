@@ -11,7 +11,9 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "docs:check": "node scripts/docs-check.mjs",
+    "docs:test": "node --test tests/docs-check.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

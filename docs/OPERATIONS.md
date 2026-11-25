@@ -1,0 +1,64 @@
+# Operations, troubleshooting, and recovery
+
+Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and [release readiness](RELEASE.md). Hosting, real email delivery, live storage, and restore tests remain pending; the procedures below describe the implemented paths and required verification, not completed production operations.
+
+## Deployment runbook
+
+1. Merge the reviewed feature branch through the protected-main workflow in [CONTRIBUTING](../CONTRIBUTING.md). Record the commit and test evidence.
+2. Use isolated staging first. Apply reviewed additive migrations and configure auth callbacks, storage, server environment, sender DNS, and scheduler. Do not rerun the initial migration on an existing database.
+3. Run `npm ci`, documentation checks, appropriate tests, and `npm run build`. Deploy the Next.js application to the selected Vercel project; no production project is currently configured. Confirm the actual origin and HTTPS.
+4. Exercise registration/verification, availability, competing requests, hold expiry, an original receipt upload, admin decision, and actual guest/staff email on the deployed version. Check guest-to-guest denial and private receipt access directly.
+5. Verify backups/restore, support contact, current business policies, QR recipient, prices, capacities, and schedule. Only then enable real bookings. Record observed results in TESTING and RELEASE.
+
+## Scheduled work and email
+
+The [Vercel manifest](../vercel.json) requests a minute schedule for `/api/jobs`. Confirm the hosting plan supports this; otherwise use an external scheduler with the same authenticated request. No browser or user account should trigger this endpoint with a secret in its URL.
+
+The handler requires `Authorization: Bearer <CRON_SECRET>`, email key/from, and the service client. It calls `claim_email_jobs()`, which expires unpaid holds and claims at most 20 due jobs under row locks with SKIP LOCKED. Concurrent workers should not claim the same current lease. Sending leases older than five minutes can be reclaimed.
+
+Jobs move `queued/failed → sending → sent` or `failed`. Attempts increment at claim, with at most eight automatic attempts. Failure delay is `min(1 hour, 30 seconds × 2^attempts)`; starting from attempt one this is 60 seconds. Each send has a 12-second timeout; the handler declares a 300-second duration limit, subject to hosting support. Stable job UUIDs are passed as provider idempotency keys. Do not claim exactly-once delivery across arbitrary outages or provider retention windows.
+
+`sent` means the provider accepted the request and the application recorded success; it does not prove inbox delivery. The current app has no delivery/bounce webhook consumer. Staff receive BCC copies when configured. Balance-only updates create no mail. Receipt acknowledgment and reservation decisions are queued in the same SQL transaction as their state changes.
+
+Staff can retry failed jobs in Email & Activity. Retry resets attempts and availability; it does not send immediately. Inspect actual queue status afterward. Investigate permanently stuck/reclaimed leases with the operator and database before changing records; avoid blindly creating replacement jobs that could duplicate notifications.
+
+## Daily staff tasks
+
+- Review pending and corrected proofs against the actual payment account. Proof alone does not verify funds.
+- Resolve pending review/correction rows: they retain capacity without automatic expiry.
+- Review failed email jobs and confirm that the scheduler continues running.
+- Record cumulative payments and internal refund notes. Refund money through the owner's external process.
+- Keep walk-ins, blackouts, rates, and shared-resource relationships consistent with physical inventory.
+
+## Troubleshooting
+
+| Symptom | Inspect | Recovery |
+| --- | --- | --- |
+| Port 3000 occupied | Another local listener | Use `npm run dev -- --port 3001`; do not terminate an unrelated process |
+| Preview shown unexpectedly | URL/key presence and server restart | Configure the intended staging environment; preview is expected without these values |
+| Connected catalog unavailable | Migration, published rows, RLS, correct project | Fix configuration/query failure; do not replace errors with fake bookable records |
+| Account verification/reset fails | Supabase callback allowlist, origin, SMTP, link age | Correct provider settings and request a fresh link; do not copy session codes into logs |
+| Admin access denied | Verified account and `admins` membership | Authorized owner promotes the correct user; hiding UI is not a fix |
+| Payment activation/hold rejected | Required settings, QR/recipient, account verification | Complete setup and test staging; presence of keys alone is insufficient |
+| Dates unavailable | Active allocations, shared pool, blackouts, configured timezone/slots | Choose another date or investigate physical inventory; do not override capacity casually |
+| Screenshot upload fails | Ownership, hold expiry, actual JPEG/PNG/WebP bytes, size ≤10 MB, bucket setup | Retry original upload if still eligible; paid-after-expiry cases require staff review without a second payment |
+| Confirmation email missing | Booking state, outbox, scheduler, sender/domain/provider response | Resolve delivery issue and retry failed job; booking remains persisted |
+| Expired rows still say awaiting payment | Email configuration and claim-job execution | Availability already excludes expired holds; repair scheduled cleanup rather than reallocating blindly |
+| Older bookings missing from dashboard | Current 500-row cap | Implement pagination before operating at this scale; UI search only covers loaded rows |
+| Docs check fails | Named affected reference, inventory marker, relative link, Git base | Update the relevant handbook/changelog and rerun; see CONTRIBUTING |
+
+## Recovery and change management
+
+Record the deployed application version and migration state before changing them. Roll back application code through hosting only after checking database compatibility. Prefer an additive forward fix for schema/data issues; code rollback does not undo migrations, verified payments, or sent emails.
+
+Agree backup frequency, retention, acceptable data loss, and restore ownership with the campsite owner. Demonstrate restore into an isolated project with application permissions before calling recovery verified. No restore procedure has yet been exercised against the owner's live service.
+
+For credential exposure: stop using the affected key, rotate it with the provider, update all server/scheduler environments, and assess public Git history separately. Removing a value from the latest commit does not remove historical exposure. Never include real guest data or payment proof in a public issue.
+
+## Documentation merge gate
+
+The `Documentation check` workflow uses Node 22 and needs no Supabase/Resend secrets. It runs on all pull requests to main, pushes to main, and manual dispatch; it has read-only repository permission and no path filter that could leave a required job missing. Checkout credentials are not persisted.
+
+It tests its own checker, verifies links/inventories, then assesses documentation impact against the event's base/head. Pull requests use the three-dot merge-base diff; pushes use the exact before/after diff. Local checks include untracked files and tracked working changes. Documentation-only changes do not require unrelated changelog/reference edits.
+
+After the workflow reports success, configure an active main-branch rule requiring pull requests, zero independent approvals, the `Documentation check` status, administrator enforcement/no bypass, and no force pushes/deletion. Zero approvals lets the sole owner merge their own passing PR. Preserve stronger existing protections. Rule configuration is external repository state: verify it on GitHub and record actual rollout evidence in TESTING/PLAN rather than assuming a YAML file enforces merging.
