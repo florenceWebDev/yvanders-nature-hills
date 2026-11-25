@@ -1,5 +1,9 @@
 # Implementation handoff — 25 November 2026
 
+## Temporary Netlify client preview
+
+Owner selected their own Netlify account and the existing draft/demo mode. Node 22 build configuration and the deployment/rollback runbook are prepared on `codex/netlify-client-preview`. Git connection, publication, public URL and hosted verification remain pending. Keep application service credentials unset and payments disabled. Final custom domain and permanent hosting remain a separate decision; no purchase or DNS change is included. See [ADR 0003](decisions/0003-temporary-netlify-preview.md) and [Operations](OPERATIONS.md#temporary-netlify-client-review).
+
 ## Implemented
 Milestone 0: starter pack, all 15 images, reference and environment inspected; agreed planning docs saved before code scaffold.
 Milestones 1–2: public marketing/listings/detail/gallery/info pages; guest auth and history; server-generated 30-minute holds; original private receipt uploads; protected booking/content/inventory admin; configurable deposits, schedules and capacity pools; manual bookings/blackouts; audit trail and email outbox with retries.

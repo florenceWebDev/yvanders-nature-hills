@@ -23,6 +23,8 @@ For a production-build preview, run `npm run build`, then `npm start`. Use the d
 
 ## Developer documentation
 
+Temporary client review is configured for Netlify via [netlify.toml](netlify.toml), using Node 22 and the existing demo mode. See the [Netlify runbook](docs/OPERATIONS.md#temporary-netlify-client-review) for Git connection, updates and rollback, and [current handoff](docs/PLAN.md) for the actual deployment result. Final domain/hosting and real booking services remain separate work.
+
 Begin with the [handbook index](docs/README.md). New developers should read [Development](docs/DEVELOPMENT.md), [Architecture](docs/ARCHITECTURE.md), and [current handoff](docs/PLAN.md).
 
 | Task | Reference |

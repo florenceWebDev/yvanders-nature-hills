@@ -2,6 +2,8 @@
 
 ## Current system
 
+Temporary client review uses Netlify with the existing configuration-free preview path; see [ADR 0003](decisions/0003-temporary-netlify-preview.md). The original Vercel target below is a production candidate, not a completed deployment or final hosting commitment. Netlify's automatic Next.js adapter retains dynamic rendering and server routes; no application API or database contract changes are needed.
+
 The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabase PostgreSQL/Auth/Storage, and a Resend booking-email adapter. Vercel is the intended hosting destination; live hosting and provider configuration have not been completed. See the [accepted baseline decision](decisions/0001-application-baseline.md).
 
 | Boundary | Responsibility | Trust |

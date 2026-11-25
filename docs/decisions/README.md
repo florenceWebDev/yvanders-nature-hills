@@ -7,6 +7,7 @@ Create the next numbered file, describe the actual decision and tradeoff, and li
 ## Index
 
 - [0001 — Application baseline](0001-application-baseline.md)
+- [0003 — Temporary Netlify client preview](0003-temporary-netlify-preview.md)
 
 ## New-record template
 

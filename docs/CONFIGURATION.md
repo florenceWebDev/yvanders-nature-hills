@@ -4,6 +4,8 @@ The application reads environment values from Next.js; local secrets belong in `
 
 ## Modes
 
+For the temporary Netlify client preview, use [netlify.toml](../netlify.toml): repository root, `npm run build`, publish `.next`, Node 22. Netlify installs its Next.js adapter automatically. Leave every application service environment value unset in every deployment context, including inherited team values; in particular, do not set the Supabase URL/key pair. No live secrets, auth callbacks, database migration or scheduler are required for this demo. Netlify-managed build variables are platform settings, not new application environment entries.
+
 | Mode | Configuration | Behavior |
 | --- | --- | --- |
 | Preview | Supabase URL/key absent | Shipped draft listings and non-saving staff preview; no real passwords, payments, uploads, or reservations |

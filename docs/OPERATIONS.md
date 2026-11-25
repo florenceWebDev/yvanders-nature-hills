@@ -4,6 +4,18 @@ Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and
 
 ## Deployment runbook
 
+### Temporary Netlify client review
+
+1. Merge the Netlify setup PR through the required Documentation check and wait for application CI. In the owner's Netlify team, import `florenceWebDev/yvanders-nature-hills` from GitHub, limiting repository authorization to this public repository where possible.
+2. Deploy branch `main` from the repository root with Node 22, `npm run build` and publish directory `.next`, as declared in [netlify.toml](../netlify.toml). Use Netlify's automatic Next.js adapter; do not upload `.next` as a static site or configure a catch-all SPA redirect.
+3. Request site name `yvanders-nature-hills-preview`, or retain the generated name if unavailable. Leave application service environment values unset in all contexts (including inherited settings) to retain draft listings and the non-saving admin demo. No paid plan or domain purchase is authorized by this setup.
+4. Confirm the actual public HTTPS URL and deployed commit. Run `node scripts/smoke.mjs` with `SMOKE_URL` set to that origin, then inspect desktop/mobile pages, direct URL reloads, images, account setup and staff demo. Record results in TESTING and the URL in PLAN/RELEASE. A successful build alone is not hosted verification.
+5. Keep Git continuous deployment enabled for main. Updates go through a feature PR and required checks; Netlify rebuilds after merge. Inspect failed deployment logs without sharing secrets. A failed build must not be described as a successful update. To roll back, select a known-good published deploy in Netlify's Deploys history; pause automatic publishing if needed so a later build does not replace the rollback. Revert the source via a protected PR before restoring automatic publication.
+
+This is public demo hosting only. [ADR 0003](decisions/0003-temporary-netlify-preview.md) preserves the separate permanent-hosting decision. A final custom domain can be connected later or pointed at another host. `vercel.json` has no scheduling effect on Netlify; real booking deployment on another host requires an explicitly configured authenticated scheduler and the full release acceptance matrix.
+
+### Live booking release
+
 1. Merge the reviewed feature branch through the protected-main workflow in [CONTRIBUTING](../CONTRIBUTING.md). Record the commit and test evidence.
 2. Use isolated staging first. Apply reviewed additive migrations and configure auth callbacks, storage, server environment, sender DNS, and scheduler. Do not rerun the initial migration on an existing database.
 3. Run `npm ci`, documentation checks, appropriate tests, and `npm run build`. Deploy the Next.js application to the selected Vercel project; no production project is currently configured. Confirm the actual origin and HTTPS.

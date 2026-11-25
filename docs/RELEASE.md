@@ -1,5 +1,9 @@
 # Release and recovery
 
+## Temporary client preview — 25 November 2026
+
+Netlify is selected for temporary client review using configuration-free draft/demo mode (see [ADR 0003](decisions/0003-temporary-netlify-preview.md)). Hosting configuration is prepared; publication and hosted verification are pending. No real booking credentials, domain purchase, DNS changes or production booking release are included. The Vercel target below is the original candidate; final hosting remains undecided.
+
 Target: Vercel + isolated Supabase projects for staging/production, Resend owned sending domain. Owner supplies accounts, QR, current rates/capacities/schedules, address/contact/policies. No credentials have been supplied.
 
 Apply SQL migration; configure storage/auth redirects and server secrets; promote first admin using SQL; set verified payment instructions and offerings; verify sender DNS; deploy; configure authenticated cron for outbox/expiry; run staged booking/receipt/approval journey; test restore before accepting real payments.

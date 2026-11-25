@@ -4,6 +4,11 @@ Record application, configuration, database, and tooling changes under Unrelease
 
 ## Unreleased
 
+### Temporary client hosting
+
+- Added Node 22 Netlify build configuration for a Git-connected client preview using the existing draft/demo mode. Permanent domain and hosting selection remains separate.
+- Documented deployment, rollback, service isolation and production release boundaries; ignored local Netlify state.
+
 ### Campsite administration and usability
 
 - Fixed same-origin validation for the real request host when Next.js internally names the server localhost; foreign/malformed origins remain denied.
