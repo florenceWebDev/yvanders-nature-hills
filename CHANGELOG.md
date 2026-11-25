@@ -10,6 +10,7 @@ Record application, configuration, database, and tooling changes under Unrelease
 
 - Added equal-privilege administrator management for verified existing accounts, protecting the final administrator.
 - Added complete period reporting, payment/refund ledger and paginated reservations with month/week/mobile agenda calendar.
+- Refund retries require identical details when reusing a request UUID, avoiding silent reuse for a different refund.
 - Added customizable promo codes, usage limits, price snapshots and staff-approved complimentary reservations.
 - Added persistent active navigation and improved homepage text contrast/tablet/mobile readability.
 - Added migration 002 and regression coverage; live-service setup remains pending.

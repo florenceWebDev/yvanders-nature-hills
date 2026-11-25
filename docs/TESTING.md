@@ -75,3 +75,5 @@ The gate enforces changed references/changelog and mechanical consistency; it ca
 - **Blocked:** live connected admin/guest browser writes, invitation-free promotion against real Auth, email delivery, independent database races and hosted deployment require staging credentials. No production database was migrated.
 
 Application validation now runs in GitHub Actions on Node 22 (tests and production build), separately from the required Documentation check (fourteen checker regressions, inventories, links and change-impact). CI results must be verified on the feature PR before merging.
+
+Initial feature CI verified on [PR #4](https://github.com/florenceWebDev/yvanders-nature-hills/pull/4): [Application run 45557063633](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45557063633) passed tests/build on Node 22 and [Documentation run 45557063445](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45557063445) passed. Refund retry coverage also rejects changed details under an already-used request UUID; subsequent PR commits must pass again before merging.

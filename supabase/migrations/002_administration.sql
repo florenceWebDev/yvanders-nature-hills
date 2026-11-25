@@ -179,13 +179,16 @@ end $$;
 
 create function record_refund(p_booking uuid,p_amount integer,p_day date,p_reference text,p_request uuid) returns uuid
 language plpgsql security definer set search_path=public as $$
-declare remaining bigint; result uuid;
+declare remaining bigint; result uuid; previous payment_entries;
 begin
  if not is_admin() then raise exception 'Admin access required'; end if;
  perform 1 from bookings where id=p_booking for update;
  if not found then raise exception 'Booking not found'; end if;
- select id into result from payment_entries where request_id=p_request and booking_id=p_booking and kind='refund';
- if found then return result; end if;
+ select * into previous from payment_entries where request_id=p_request and booking_id=p_booking and kind='refund';
+ if found then
+  if previous.amount is distinct from p_amount or (previous.occurred_at at time zone 'Asia/Manila')::date is distinct from p_day or previous.reference is distinct from left(p_reference,2000) then raise exception 'Refund retry differs from the recorded request; reload the booking'; end if;
+  return previous.id;
+ end if;
  if p_amount is null or p_amount<=0 or p_day is null or p_day>(now() at time zone 'Asia/Manila')::date or length(trim(p_reference))<3 then raise exception 'Enter a positive refund, past/current date, and reference'; end if;
  select coalesce(sum(case when kind='refund' then -amount else amount end),0) into remaining from payment_entries where booking_id=p_booking;
  if p_amount>remaining then raise exception 'Refund exceeds recorded collections'; end if;

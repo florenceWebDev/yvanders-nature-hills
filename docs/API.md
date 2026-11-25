@@ -172,4 +172,4 @@ Body {id?,code,enabled,kind,value,max_discount,min_subtotal,offering_ids,booking
 
 <!-- endpoint: POST /api/admin/refund -->
 ### POST /api/admin/refund
-Body {booking,amount,day,reference,request}; returns {id}. amount is positive centavos, day is a nonfuture Philippines date, reference is 3–2000 characters, request is a retry UUID. Records a completed external refund; does not move funds or cancel the booking. Cannot exceed verified payment/opening entries minus earlier refunds. Duplicate retries do not add another refund. Gross paid is retained; refunds and net collections are reported separately.
+Body {booking,amount,day,reference,request}; returns {id}. amount is positive centavos, day is a nonfuture Philippines date, reference is 3–2000 characters, request is a retry UUID. Records a completed external refund; does not move funds or cancel the booking. Cannot exceed verified payment/opening entries minus earlier refunds. Identical retries do not add another refund; reusing a UUID with different refund details is rejected. Gross paid is retained; refunds and net collections are reported separately.

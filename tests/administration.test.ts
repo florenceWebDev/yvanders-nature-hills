@@ -91,6 +91,7 @@ test('payment deltas, retry safety, refunds and period totals reconcile',async()
  const today=campDate(),request=crypto.randomUUID();await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);
  await sql("select review_booking($1,'balance','Balance',20000,'',$2,$3)",[b.id,today,crypto.randomUUID()]);
  const refundRequest=crypto.randomUUID();await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);
+ await assert.rejects(sql('select record_refund($1,6000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]),/retry differs/);
  await assert.rejects(sql('select record_refund($1,16000,$2,\'REFUND-2\',$3)',[b.id,today,crypto.randomUUID()]),/exceeds/);
  const payments=await sql<{kind:string;amount:number}>('select kind,amount from payment_entries where booking_id=$1',[b.id]);assert.equal(payments.length,3);assert.equal(payments.filter(p=>p.kind==='payment').reduce((n,p)=>n+p.amount,0),20000);
  const report=(await sql<{r:{collections:number;refunds:number;bookings:number}}>('select admin_report($1,$2,$3) r',[today,addDays(today,1),offering]))[0].r;assert.equal(report.collections,20000);assert.equal(report.refunds,5000);assert.equal(report.bookings,1);
