@@ -1,6 +1,10 @@
 # System architecture
 
+Current service deployment follows [ADR 0004](decisions/0004-connected-netlify-services.md): Netlify Next.js hosting, permanent Supabase data, sending-only Resend credential and Vault-backed pg_cron/pg_net worker requests. See [Testing](TESTING.md#connected-services--25-november-2026) for observed evidence and remaining acceptance checks.
+
 ## Current system
+
+Temporary client review uses Netlify with the existing configuration-free preview path; see [ADR 0003](decisions/0003-temporary-netlify-preview.md). The original Vercel target below is a production candidate, not a completed deployment or final hosting commitment. Netlify's automatic Next.js adapter retains dynamic rendering and server routes; no application API or database contract changes are needed.
 
 The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabase PostgreSQL/Auth/Storage, and a Resend booking-email adapter. Vercel is the intended hosting destination; live hosting and provider configuration have not been completed. See the [accepted baseline decision](decisions/0001-application-baseline.md).
 
@@ -46,8 +50,12 @@ Settings are publicly readable business content. Keep credentials in environment
 - Dispatcher error status mapping depends on message text; there are no stable typed error codes.
 - Uploaded proof pending review/correction has no automatic timeout. Staff must resolve it.
 - No provider bounce/delivery webhook, automated refunds, gateway, SMS, or channel synchronization exists.
-- Live storage/auth, independent connection races, email delivery, deployment, retention, and restore remain unverified. Local fixtures are not evidence that these services operate.
+- Live Auth, signed receipt transport, independent capacity contention, deployment and owner inbox delivery passed a fictional check; general guest mail, retention, restore and remaining failure paths are unverified. See TESTING for the precise evidence and limits.
 
 ## Change policy
 
 Keep the relevant [handbook reference](README.md), changelog, tests, and current handoff with each change. Record consequential new boundaries/dependencies in an ADR. Preserve original decision history and mark superseded choices rather than rewriting why they were made.
+
+## Multiple QR payments and fixture removal
+
+Payment options remain public site settings and are copied into booking snapshots; administration changes affect future holds. Shared normalization renders legacy single-QR snapshots, while new writes use an ordered array of up to three options. HTTP and database validation enforce completeness, uniqueness, count and readiness. No payment gateway or automatic transfer verification is added. [ADR 0005](decisions/0005-configurable-payment-options.md) records migration and cleanup decisions.

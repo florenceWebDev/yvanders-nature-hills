@@ -2,7 +2,7 @@
 
 A campsite promotion and booking app built with Next.js/TypeScript, Supabase Auth/PostgreSQL/Storage, and a Resend booking-email adapter. Public source: [florenceWebDev/yvanders-nature-hills](https://github.com/florenceWebDev/yvanders-nature-hills).
 
-**Current status:** local preview and application implementation exist; live Supabase, email delivery, hosting, and restore verification remain pending. Preview listings are drafts and cannot accept real reservations or payments.
+**Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) uses the owner's permanent Supabase database. The fictional system-check listing and its three bookings/dependencies have been removed; ten real accommodation drafts remain unpublished and payments are disabled. Multi-QR administration is implemented on the feature branch; migration 003 is applied and application deployment follows PR #6. General guest email and verified business configuration remain incomplete. See [current handoff](docs/PLAN.md).
 
 ## Start locally
 
@@ -22,6 +22,8 @@ Without `.env.local`, the app opens in configuration-free preview mode. Accommod
 For a production-build preview, run `npm run build`, then `npm start`. Use the development server for local connected-auth work; live hosting must use HTTPS.
 
 ## Developer documentation
+
+Netlify hosts the Next.js application with Node 22. See the [connected-service runbook](docs/OPERATIONS.md#connected-netlify-services) for settings, scheduling and rollback. A custom domain remains deferred; account and booking emails currently have provider restrictions described in [Configuration](docs/CONFIGURATION.md#current-owner-setup).
 
 Begin with the [handbook index](docs/README.md). New developers should read [Development](docs/DEVELOPMENT.md), [Architecture](docs/ARCHITECTURE.md), and [current handoff](docs/PLAN.md).
 
@@ -52,7 +54,7 @@ Application validation: `npm test`. Generate Next.js types through dev/build bef
 
 ## Connect real booking services
 
-Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql then 002_administration.sql; an existing 001 database needs only 002, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
+Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql then 002_administration.sql and 003_payment_options.sql; an existing 002 database needs only 003, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
 
 ```sql
 insert into public.admins(user_id)
@@ -60,6 +62,6 @@ select id from auth.users where email = 'YOUR_VERIFIED_STAFF_EMAIL'
 on conflict do nothing;
 ```
 
-Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and the actual QR recipient before publishing. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
+Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and each payment QR/recipient before publishing. Configure up to three ordered payment options in Admin → Website & payment. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
 
 Keep `.env.local`, service keys, auth codes, real guest details, private receipts, and signed URLs out of this public repository. The [example environment](.env.example) contains variable names and placeholders only. No software license has been selected. [Screenshots](docs/screenshots/homepage.jpg) illustrate the local design, not live-service verification.

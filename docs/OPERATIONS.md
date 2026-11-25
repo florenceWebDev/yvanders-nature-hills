@@ -1,8 +1,30 @@
 # Operations, troubleshooting, and recovery
 
-Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and [release readiness](RELEASE.md). Hosting, real email delivery, live storage, and restore tests remain pending; the procedures below describe the implemented paths and required verification, not completed production operations.
+Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and [release readiness](RELEASE.md). Netlify hosting and permanent Supabase are live. Owner-approved fictional booking, signed storage transport and owner inbox checks passed; general guest mail, verified business configuration and restore remain pending.
 
 ## Deployment runbook
+
+### Connected Netlify services
+
+The owner retained Netlify for the connected application. The preview-only instructions below are historical; live now has service settings. Build from protected main with Node 22 and the automatic Next.js adapter. Initial schema installation used SQL Editor to apply exact migrations 001 then 002. This does not establish CLI migration-history entries; do not rerun initial migrations against the installed schema. Use additive migrations and independent backups.
+
+Supabase pg_cron/pg_net runs `ynh-email-outbox` every minute (`* * * * *`), calling the HTTPS `/api/jobs` endpoint with an Authorization Bearer header. It reads the token from Vault secret `ynh_cron_secret`, matching Netlify's protected `CRON_SECRET`; no token literal belongs in saved SQL or documentation. Inspect `cron.job`, `cron.job_run_details` and `net._http_response` as an authorized operator. Cron success only proves HTTP queuing; inspect HTTP response status/content too. Observed responses after redeploy were HTTP 200 with zero jobs. Inbox delivery and maximum-batch duration under Netlify remain unverified.
+
+To pause scheduling, set the named job inactive. Token rotation requires updating Vault and Netlify, redeploying, then checking responses. Pausing Supabase or exhausting provider allowances interrupts scheduled work. `vercel.json` has no scheduling effect on Netlify. Code rollback does not undo database records or service settings.
+
+The sending-only Resend key is a Netlify secret. Default Resend sender and Supabase Auth SMTP restrict recipients; configure an owned verified sender and suitable Auth SMTP before inviting general guests. Verify real offerings and actual payment instructions separately from explicitly labeled system checks.
+
+### Temporary Netlify client review
+
+1. Merge the Netlify setup PR through the required Documentation check and wait for application CI. In the owner's Netlify team, import `florenceWebDev/yvanders-nature-hills` from GitHub, limiting repository authorization to this public repository where possible.
+2. Deploy branch `main` from the repository root with Node 22, `npm run build` and publish directory `.next`, as declared in [netlify.toml](../netlify.toml). Use Netlify's automatic Next.js adapter; do not upload `.next` as a static site or configure a catch-all SPA redirect.
+3. Request site name `yvanders-nature-hills-preview`, or retain the generated name if unavailable. Leave application service environment values unset in all contexts (including inherited settings) to retain draft listings and the non-saving admin demo. No paid plan or domain purchase is authorized by this setup.
+4. Confirm the actual public HTTPS URL and deployed commit. Run `node scripts/smoke.mjs` with `SMOKE_URL` set to that origin, then inspect desktop/mobile pages, direct URL reloads, images, account setup and staff demo. Record results in TESTING and the URL in PLAN/RELEASE. A successful build alone is not hosted verification.
+5. Keep Git continuous deployment enabled for main. Updates go through a feature PR and required checks; Netlify rebuilds after merge. Inspect failed deployment logs without sharing secrets. A failed build must not be described as a successful update. To roll back, select a known-good published deploy in Netlify's Deploys history; pause automatic publishing if needed so a later build does not replace the rollback. Revert the source via a protected PR before restoring automatic publication.
+
+This is public demo hosting only. [ADR 0003](decisions/0003-temporary-netlify-preview.md) preserves the separate permanent-hosting decision. A final custom domain can be connected later or pointed at another host. `vercel.json` has no scheduling effect on Netlify; real booking deployment on another host requires an explicitly configured authenticated scheduler and the full release acceptance matrix.
+
+### Live booking release
 
 1. Merge the reviewed feature branch through the protected-main workflow in [CONTRIBUTING](../CONTRIBUTING.md). Record the commit and test evidence.
 2. Use isolated staging first. Apply reviewed additive migrations and configure auth callbacks, storage, server environment, sender DNS, and scheduler. Do not rerun the initial migration on an existing database.
@@ -77,3 +99,18 @@ Staff reservation lists paginate and calendars fetch all range pages. A load fai
 Application CI now installs the lockfile, runs npm test, and builds on Node 22 for PRs/pushes. Documentation remains the required main-branch gate; wait for both jobs before merging application changes. Preview smoke checks now include every new admin read/write endpoint failing closed without services.
 
 Reverse proxies must preserve the incoming Host and request protocol for same-origin validation. The handler does not trust an arbitrary forwarded-host header.
+
+## Multiple QR rollout
+
+Apply [migration 003](../supabase/migrations/003_payment_options.sql) once after 002, then deploy the matching application through a passing feature PR. It preserves booking snapshots, converts legacy settings and retains first-option mirrors for the old reader. Do not roll back to an old settings writer: it cannot save the new array contract. Forward-fix the migration; app rollback does not undo settings/data. The new app can read legacy configuration before migration, but multi-QR writes and direct database enforcement require 003. Verify real payment images/recipients before enabling holds or publishing real accommodations.
+
+## System-check cleanup
+
+The owner-approved fixture was removed on 26 November 2026. [The cleanup script](../scripts/remove-system-check.mjs) supports preflight and apply:
+
+```powershell
+node --env-file=.env.local scripts/remove-system-check.mjs
+node --env-file=.env.local scripts/remove-system-check.mjs --apply
+```
+
+Use existing service configuration from a trusted operator terminal. Preflight validates exact identity, fictional snapshots and receipt scope; unexpected dependencies stop cleanup. Apply unpublishes first and compares current settings before changing recognized fixture content. It removes only identified records/files, leaves real accounts/drafts intact and disables readiness when the test QR is removed. It does not republish real offerings. The private ignored `.env-check/system-check-cleanup.json` holds scoped IDs/paths for retries; never commit it. Keep it until verification succeeds. On failure, inspect the error and rerun the same script; do not broaden IDs or delete shared resources. This multi-request operation is resumable rather than atomic. Previously sent fictional emails cannot be recalled; app rollback cannot restore deleted test history.

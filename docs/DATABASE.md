@@ -1,6 +1,6 @@
 # Database and business rules
 
-Authoritative schema: [001_booking.sql](../supabase/migrations/001_booking.sql), followed by [002_administration.sql](../supabase/migrations/002_administration.sql). Apply both in order to a fresh project; an existing 001 database needs only 002. Do not rerun it against an existing live schema: it creates tables/functions and broadly revokes default public-schema writes/function execution before granting application access.
+Authoritative schema: [001_booking.sql](../supabase/migrations/001_booking.sql), followed by [002_administration.sql](../supabase/migrations/002_administration.sql) and [003_payment_options.sql](../supabase/migrations/003_payment_options.sql). Apply all three in order to a fresh project; an existing 002 database needs only 003. Do not rerun it against an existing live schema: it creates tables/functions and broadly revokes default public-schema writes/function execution before granting application access.
 
 ## Records and relationships
 
@@ -89,3 +89,9 @@ Backups/restoration and retention periods depend on the owner's configured provi
 Private *_base functions preserve the original allocation/review logic and have no PUBLIC/anon/authenticated execute access. The new wrappers are the supported entrypoints. Only privileged operators may alter ledger history for exceptional repair; the application exposes append-only recording.
 
 Upgrade in staging first, transactionally, after a database backup. Apply 002 exactly once; do not replay 001 on existing data. Validate opening balances, role membership and booking snapshots before deploying the matching application. A rollback to old app code cannot safely handle complimentary reservations or the changed RPC signatures: prefer a forward fix, and pause bookings during coordinated rollback. Independent-connection race verification remains a staging requirement.
+
+## Multiple payment options
+
+Migration 003 clears the specifically recognized nonpayable test QR rather than converting it. It converts a legitimate legacy QR/recipient into one ordered `payment_options` entry with a generated UUID and existing instructions. Empty configuration becomes an empty array. Existing booking snapshots are unchanged; new holds snapshot the complete settings. Options contain `id,label,qr_url,recipient,instructions`; there are zero to three complete entries, unique IDs, and at least one when `payment_ready` is true. Admin-only `save_content` validates these rules and mirrors the first entry into legacy fields. Paid guest holds and offering publication check the new array in the database; complimentary/manual behavior is unchanged. Validation helpers have no anonymous/authenticated execute grant and run inside existing security-definer functions.
+
+The separate owner-authorized cleanup script targets one exact fixture ID, slug, name and resource, rejecting bookings without matching fictional payment snapshots. It unpublishes first, clears recognized test content/payment options, removes scoped Storage objects, then dependent email/redemption/payment/receipt/audit rows, bookings and listing. It removes only an unused, named test resource. Requests are sequential, not one database transaction; an ignored private manifest permits scoped retries after partial failure. Real accommodations/accounts are preserved. See [Operations](OPERATIONS.md#system-check-cleanup).

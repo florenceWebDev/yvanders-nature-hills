@@ -18,11 +18,16 @@ before(async()=>{
  grant usage on schema public,auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
- for(const name of ['001_booking.sql','002_administration.sql'])try{
+ for(const name of ['001_booking.sql','002_administration.sql','003_payment_options.sql'])try{
   if(name==='002_administration.sql')await db.exec(`insert into resources(id,name,capacity) values('20000000-0000-4000-8000-000000000099','Legacy pool',1);insert into offerings(id,name,slug,kind,resource_id,max_guests,price,price_basis,schedule) values('30000000-0000-4000-8000-000000000099','Legacy','legacy','room','20000000-0000-4000-8000-000000000099',2,10000,'night','overnight');insert into bookings(id,guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,paid,request_id,snapshot,status) values('40000000-0000-4000-8000-000000000099','legacy@example.test','Legacy','123456','30000000-0000-4000-8000-000000000099','20000000-0000-4000-8000-000000000099','Legacy',now()+interval '1 day',now()+interval '2 days',1,1,1,10000,5000,5000,gen_random_uuid(),'{}','confirmed');`);
+  if(name==='003_payment_options.sql')await db.exec(`update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/legacy-qr.png","payment_recipient":"Legacy camp","payment_instructions":"Original instructions"}'::jsonb where key='settings'`);
   await db.exec((await readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto;',''));
+  if(name==='003_payment_options.sql'){
+   const converted=(await sql<{value:{payment_options:{label:string;qr_url:string;recipient:string;instructions:string}[]}}>("select value from site_content where key='settings'"))[0].value.payment_options;
+   assert.equal(converted.length,1);assert.equal(converted[0].qr_url,'/images/legacy-qr.png');assert.equal(converted[0].recipient,'Legacy camp');assert.equal(converted[0].instructions,'Original instructions');
+  }
  }catch(e){throw new Error(`${name}: ${e instanceof Error?e.message:String(e)}`);}
- await db.exec(`insert into auth.users values('${staff}','staff@example.test',now()),('${guest}','guest@example.test',now()),('${second}','second@example.test',now());insert into admins values('${staff}');update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/qr.jpg","payment_recipient":"Test"}' where key='settings';`);
+ await db.exec(`insert into auth.users values('${staff}','staff@example.test',now()),('${guest}','guest@example.test',now()),('${second}','second@example.test',now());insert into admins values('${staff}');update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/qr.jpg","payment_recipient":"Test","payment_options":[{"id":"10000000-0000-4000-8000-000000000005","label":"Test QR","qr_url":"/images/qr.jpg","recipient":"Test","instructions":""}]}' where key='settings';`);
 });
 after(()=>db.close());
 test('periods use Monday weeks, calendar quarters, leap years and Manila dates',()=>{
@@ -106,4 +111,23 @@ test('reports include more than 500 rows and exclude undated opening balances fr
 test('promo request validation rejects percentages above 100 and reversed date windows',()=>{
  const p={code:'TEST',enabled:true,kind:'percent',value:10001,max_discount:null,min_subtotal:0,offering_ids:[],booking_from:null,booking_until:null,stay_from:null,stay_until:null,usage_limit:null,customer_limit:null};
  assert.equal(promoSchema.safeParse(p).success,false);assert.equal(promoSchema.safeParse({...p,value:10000,booking_from:'2027-02-02',booking_until:'2027-01-01'}).success,false);
+});
+
+test('multi-QR settings enforce direct database validation and preserve booking snapshots',async()=>{
+ const offering=await room();await identity(staff);
+ const initial=(await sql<{value:Record<string,unknown>}>("select value from site_content where key='settings'"))[0].value;
+ const options=Array.from({length:3},(_,i)=>({id:crypto.randomUUID(),label:'Method '+(i+1),qr_url:'/images/qr.jpg',recipient:'Test recipient',instructions:'Fictional test only'}));
+ const settings={...initial,payment_options:options,payment_ready:true};
+ await sql('select save_content($1)',[settings]);await identity(guest);
+ const booking=await hold(offering);
+ const snapshot=(await sql<{snapshot:{payment:{payment_options:unknown[]}}}>('select snapshot from bookings where id=$1',[booking.id]))[0].snapshot;
+ assert.deepEqual(snapshot.payment.payment_options,options);
+ await assert.rejects(sql('select save_content($1)',[settings]),/Admin access/);
+ await identity(staff);
+ for(const invalid of [null,{},[...options,{...options[0],id:crypto.randomUUID()}],[options[0],options[0]],[{...options[0],recipient:' '}],[{...options[0],qr_url:'javascript:alert(1)'}]])await assert.rejects(sql('select save_content($1)',[{...settings,payment_options:invalid}]),/complete payment options/);
+ await assert.rejects(sql('select save_content($1)',[{...settings,payment_options:[]}]),/complete payment option/);
+ await sql('select save_content($1)',[{...settings,payment_options:[],payment_ready:false}]);
+ await identity(guest);await assert.rejects(hold(offering),/payment is not configured/);
+ assert.deepEqual((await sql<{snapshot:unknown}>('select snapshot from bookings where id=$1',[booking.id]))[0].snapshot,snapshot);
+ await identity(staff);await sql('select save_content($1)',[initial]);
 });

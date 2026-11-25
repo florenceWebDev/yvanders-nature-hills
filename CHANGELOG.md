@@ -1,8 +1,24 @@
 # Changelog
 
+## 2026-11-26
+
+- Added up to three separately configurable, ordered admin payment QRs with complete previews and responsive guest cards. Existing snapshots retain their instructions.
+- Added migration 003 for payment-array conversion, database validation and paid-hold/publication checks. Apply before the matching app deployment.
+- Removed the owner-authorized fictional listing, its three bookings/dependencies and test files through a guarded, resumable operator script. Real drafts/accounts are preserved and payments remain disabled.
+
 Record application, configuration, database, and tooling changes under Unreleased in the same PR. Move reviewed entries into a dated version section when an actual release is made. A package version or GitHub push alone does not mean a hosted production release occurred.
 
 ## Unreleased
+
+### Connected booking services
+
+- Connected Netlify to the permanent Supabase project, applied migrations 001/002, configured exact Auth redirects, seeded ten unpublished accommodation drafts and bootstrapped the verified owner as staff.
+- Configured protected live server settings, sending-only Resend access and a minute scheduler through Supabase pg_cron/pg_net and Vault. Owner-approved fictional booking checks passed signed receipt transport, persistence, confirmation, owner inbox delivery, nonadmin permissions and independent capacity contention. Only the labeled nonpayable check is published; real release gates remain. No domain purchase or paid upgrade.
+
+### Temporary client hosting
+
+- Added Node 22 Netlify build configuration for a Git-connected client preview using the existing draft/demo mode. Permanent domain and hosting selection remains separate.
+- Documented deployment, rollback, service isolation and production release boundaries; ignored local Netlify state.
 
 ### Campsite administration and usability
 

@@ -1,4 +1,32 @@
+# Current handoff — 26 November 2026
+
+## System-check removal
+
+Complete on live Supabase: removed the exact fictional listing, its three bookings and dependent receipts/email jobs/payment entries/redemptions, test resource and test files. Verified zero related records remain; all ten real accommodation drafts are intact/unpublished. Public fixture copy and nonpayable QR were cleared and readiness disabled. Accounts are preserved.
+
+## Configurable payment QRs
+
+Implemented on `codex/payment-options-cleanup`: up to three ordered admin payment options with individual labels/images/recipients/instructions, add/edit/remove/reorder, responsive guest cards and legacy snapshot reads. Migration 003 enforces array rules in trusted database functions and preserves old snapshots. Application tests/build passed; see TESTING for final evidence. Live migration 003 was applied through the approved Supabase dashboard session and verified: valid empty options, payment readiness false, anonymous writes denied, private helper access denied, and ten drafts intact. [PR #6](https://github.com/florenceWebDev/yvanders-nature-hills/pull/6) passed Application, Documentation and Netlify preview checks on its implementation commit. Next: deploy the passing PR. The owner will configure real QRs later in admin and enable payment holds after saving a complete option. Real drafts stay unpublished until owner configuration. No payment details were invented.
+
+The following sections preserve previous milestone history. Their fixture instructions were superseded by the cleanup above.
+
 # Implementation handoff — 25 November 2026
+
+## Current connected-service milestone
+
+The owner selected Netlify hosting and a permanent Supabase project, deferring domain purchase. The public site is https://yvanders-nature-hills.netlify.app/. A production redeploy of main `b9b3521` loaded the configured services; `/api/session` returns `configured: true`. Both checked-in migrations were applied in order through SQL Editor. All twelve public tables have RLS; receipts are private, marketing images public. The verified owner has staff access. Ten actual accommodation drafts remain unpublished. The only published listing is the explicitly approved fictional `system-check-do-not-pay`, with a nonpayable image and prominent instructions.
+
+Netlify contains the public URL/publishable key and protected server, sending-only Resend and scheduler keys. Nonproduction deployments do not receive working server/email credentials. Supabase Vault stores the scheduler token; `ynh-email-outbox` runs every minute through pg_cron/pg_net. Observed scheduled responses are HTTP 200 with an empty queue. No domain or paid plan was purchased. [ADR 0004](decisions/0004-connected-netlify-services.md) supersedes the preview-only constraint of ADR 0003.
+
+Verified: browser quote/hold; signed fictional proof upload/download and review through deployed APIs; persistence after browser reload; direct nonadmin ownership/storage/write denials; exactly one winner from two independent requests; owner inbox acknowledgment and confirmation. The fictional confirmation includes a clearly labeled fictional deposit, and the race hold is expired. No money was sent. A synthetic nonadmin account is banned after checks. Browser automated file selection remains blocked by extension permission; manual selection needs owner verification.
+
+Next: owner may repeat the labeled booking check, then supply verified business rates/capacities/contact/payment instructions before replacing the fixture. Current `payment_ready` is enabled solely for this explicit nonpayable check; turn it off, unpublish the fixture, and exclude its fictional bookings/payment ledger from real reports before launch. Preserve real records and use a reviewed cleanup migration if fixture removal is desired. General guest email needs an owned verified sender and suitable Auth SMTP; defaults restrict recipients. Restore, prolonged performance and remaining failure-path checks are incomplete. See [Testing](TESTING.md#connected-services--25-november-2026).
+
+The sections below preserve earlier milestone history; their pending-provider statements describe those earlier checkpoints.
+
+## Temporary Netlify client preview
+
+Owner selected their own Netlify account and the existing draft/demo mode. Node 22 build configuration and the deployment/rollback runbook are prepared on `codex/netlify-client-preview`. Git connection, publication, public URL and hosted verification remain pending. Keep application service credentials unset and payments disabled. Final custom domain and permanent hosting remain a separate decision; no purchase or DNS change is included. See [ADR 0003](decisions/0003-temporary-netlify-preview.md) and [Operations](OPERATIONS.md#temporary-netlify-client-review).
 
 ## Implemented
 Milestone 0: starter pack, all 15 images, reference and environment inspected; agreed planning docs saved before code scaffold.

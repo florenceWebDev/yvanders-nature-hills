@@ -1,4 +1,51 @@
+# Verification update — 26 November 2026
+
+## System-check removal
+
+- **Pass:** guarded preflight identified the exact approved fixture, three fictional bookings with matching payment snapshots, and one receipt file. Apply removed the listing, bookings and related receipts/email jobs/payment entries/redemptions, test-only resource and storage objects. Service queries verified zero remaining dependent rows, ten real accommodation drafts intact/unpublished, readiness false, test QR empty, and zero marketing files under the fixture prefix. The public Netlify homepage reloaded with normal copy and the unpublished-listings empty state. No account deletion or real accommodation publication occurred.
+- **Pass:** cleanup uses count-only logs and an ignored private manifest for interrupted-run recovery. It is a sequence of scoped requests, not a database transaction.
+
+## Configurable payment QRs
+
+- **Pass:** `npm.cmd test` — 28 application/PostgreSQL tests, including zero through three options, four/incomplete/duplicate/unsafe rejection, direct nonadmin save denial, database readiness enforcement and unchanged booking snapshots. Migration 003 executes against the existing migration sequence; explicit legacy QR conversion assertions passed.
+- **Pass:** `npm.cmd run build` — production build and TypeScript passed.
+- **Pass:** browser component harness used the actual editor/guest components with a clearly fictional local image. Counts 1, 2 and 3 fit at widths 1280, 768, 375 and 320 without horizontal overflow. Desktop columns share width; mobile stacks; all complete images use contain. Screenshots inspected at desktop and 320px. Add-limit, remove, reorder, label/recipient editing, and harness save/load worked. Harness save/load was local simulation, not live persistence. Temporary harness route/image were removed before delivery.
+- **Pass:** local connected `/admin` denies an unsigned session.
+- **Blocked:** browser file selection: Chrome extension requires Allow access to file URLs. No extension permission was changed; upload/replace and transport failure browser checks remain unverified.
+- **Pass:** after owner-approved sign-in, applied the exact migration 003 from reviewed commit `83c0d17` through Supabase SQL Editor; execution returned Success. Live queries verified migration helper present, zero valid options, readiness false, anonymous save_content execution denied, authenticated helper execution denied, and ten real drafts intact. No test booking or payment option was committed.
+- **Pass:** [PR #6](https://github.com/florenceWebDev/yvanders-nature-hills/pull/6) implementation commit passed GitHub Application and Documentation workflows and Netlify deploy preview.
+- **Not run:** authenticated live multi-QR save/reload with real payment details. The owner elected to configure them later through admin; readiness requires at least one complete option.
+- **Not run:** production deployment of the multi-QR application at this documentation checkpoint; migration is applied and feature PR is ready for final checks/merge. `npm.cmd run docs:test` passed all 14 documentation-checker tests; `npm.cmd run docs:check` passed local links, endpoint/environment inventories and change-impact coverage.
+
+The sections below preserve prior testing history; historical statements that the fixture is still published are superseded above.
+
 # Verification evidence — 25 November 2026
+
+## Connected services — 25 November 2026
+
+- **Pass:** public Netlify production redeploy; live `/api/session` returns HTTP 200 and `configured: true`. Existing permanent Supabase project is used. Exact migrations 001/002 applied through SQL Editor; twelve public tables have RLS; receipts bucket private, marketing public. Seed created ten unpublished accommodation drafts.
+- **Pass:** owner completed registration and email verification; exact confirmed account bootstrapped as first administrator. Browser staff page shows membership and last-admin removal disabled. This is actual public signup evidence; supplemental API tests use temporary in-memory sessions.
+- **Pass:** owner explicitly approved a labeled fictional listing, nonpayable instruction image and fictional proof. Only `system-check-do-not-pay` is published. Public content and instructions say do not pay; no actual accommodation or payment account is published. Displayed PHP 100 price/PHP 50 deposit are fictional. No money moved.
+- **Pass:** actual browser quote and hold; account navigation persists hold. Direct live HTTP APIs issue signed upload, accept the original fictional PNG, persist pending review and a private receipt, issue a working short-lived download and persist staff confirmation. Zero-paid confirmation was correctly rejected; confirmation with the explicitly fictional deposit passed. Reloaded browser shows confirmed status, fictional staff note and receipt link.
+- **Pass:** separate nonadmin synthetic Auth account cannot read the owner's booking/receipt, list administrators or directly update booking rows. Anonymous private storage download denied. Two independent authenticated Supabase clients simultaneously compete for one unit: exactly one hold succeeds. The resulting synthetic hold was marked expired and its synthetic account banned after checks; no guest email was sent for that hold. These labeled records remain in the permanent database, including the fictional confirmation/payment ledger, and must be excluded from real operating totals before launch.
+- **Pass:** Vault-backed minute pg_cron/pg_net calls returned HTTP 200 and an empty queue after redeploy. Both subsequent owner-only proof/confirmation email jobs reached `sent`, one attempt each, no errors. Gmail inbox visibly contains both acknowledgment and confirmation for the fictional booking. This proves owner-mailbox delivery with the default sender, not arbitrary guest delivery.
+- **Pass, limited:** narrow rendered account layout inspected after reload, including confirmed/expired records and explicit fictional notes. No layout code changed. No Safari/Firefox or physical-device checks were run.
+- **Pass:** final hosted GET checks: home, stays, fictional detail, account and admin shell returned 200; anonymous `/api/admin` and `/api/jobs` returned 401. Single sequential observations from this workstation ranged about 0.57–1.77 seconds for page responses. These are basic reachability observations, not a sustained performance benchmark or browser load metric.
+- **Blocked for browser automation:** Brave extension file chooser needs file-URL access. Native chooser was attempted but did not attach a file; no extension security setting was changed. Signed upload/download and completion were instead verified directly against deployed APIs. Manual browser file selection still needs an owner check.
+- **Not run:** password reset, expired-session behavior, guest-to-guest signed-upload abuse, network interruption/retry transport, full batch function-duration load, prolonged availability/performance and backup restoration. Default Supabase Auth SMTP and Resend sender restrict recipients. Domain and custom Auth SMTP remain deferred.
+
+Automatic approval review rejected a manual `/api/jobs` probe because it could send pending mail. That probe was not executed; read-only queue checks and observed scheduled HTTP results supplied verification. Booking notifications above came from the owner-approved fictional workflow and the installed scheduler. No credentials, session material or signed URLs are included in evidence.
+
+### Current verification commands
+
+**Pass:** `npm run docs:test` (14 tests) and `npm run docs:check` (links, inventories and 13 changed paths). No application source or schema definition changed during this configuration milestone, so the existing application suite/build evidence is not relabeled as a fresh run. Provider probes/fixtures are ignored local operator files, not a reusable production acceptance suite. Earlier blocked-provider entries below describe historical checkpoints and are superseded only for the specific checks above.
+
+## Temporary Netlify setup — 25 November 2026
+
+- **Pass:** `npm run docs:test` (14 tests), `npm run docs:check`, `npm test` (26 tests), and `npm run build` including TypeScript on local Node 23.2.0. Netlify configuration selects Node 22; hosted adapter execution is not established by this local build.
+- **Pass:** production server on port 3003 and `SMOKE_URL=http://127.0.0.1:3003 node scripts/smoke.mjs` (environment assigned through PowerShell): twelve page routes, session, unauthorized jobs, foreign-origin mutation, unconfigured-service read/write denial and 404. Initial sandbox-server connections timed out; restarting the temporary server outside the sandbox allowed the checks to pass.
+- **Blocked:** Netlify Git connection is at GitHub's **Authorize Netlify** prompt for the owner. Account authorization must be completed by the owner before repository import/publication can continue.
+- **Not run:** Netlify build, public HTTPS smoke checks and hosted desktop/mobile browser checks; no public deployment URL is claimed. Live booking/email/storage/concurrency/recovery remain outside this preview milestone.
 
 Environment: Windows; Node 23.2.0, npm 10.9.2; Next.js 16.4.6. Node 22 LTS is the recommended deployment runtime but was not exercised on this host.
 

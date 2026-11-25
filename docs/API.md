@@ -112,7 +112,7 @@ Omit resource ID to create a new pool; provide it to share an existing pool. Act
 <!-- endpoint: POST /api/admin/content -->
 ### POST /api/admin/content
 
-Replaces settings using `{tagline,intro,contact,email,address,qr_url,payment_recipient,payment_instructions,payment_ready,cancellation_policy,faq?}`. FAQ entries are `{question,answer}`. Empty contact email/QR are allowed while configuring. Enabling payment requires QR/recipient plus the server-side service settings listed under hold. Returns `{ok:true}`. Settings are public content; never store credentials here.
+Replaces settings using `{tagline,intro,contact,email,address,payment_options,payment_ready,cancellation_policy,faq?}`. Each ordered payment option is `{id,label,qr_url,recipient,instructions}`: unique UUID, nonblank label (max 100), HTTPS or supplied image path (max 2048), nonblank recipient (max 200), and instructions (string, may be empty, max 4000). Maximum three options; zero is allowed only while payments are disabled. Incomplete entries are rejected even when disabled. FAQ entries are `{question,answer}`. Enabling payment also requires the server-side service settings listed under hold. Returns `{ok:true}`; validation failures return 400 and nonadmins are denied. Images use the existing admin-only marketing upload flow. Migration 003 repeats payment validation in `save_content` for direct RPC callers and mirrors the first option into legacy fields during deployment. Old booking snapshots remain readable. Settings are public content; never store credentials here.
 
 <!-- endpoint: POST /api/admin/blackout -->
 ### POST /api/admin/blackout
