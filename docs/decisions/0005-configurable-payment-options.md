@@ -14,4 +14,4 @@ Remove only the exact fixture and dependencies through a guarded service-only sc
 Three unrelated image fields duplicate validation and complicate ordering/details. Rewriting snapshots changes instructions for guests who may already have paid. The owner selected deletion over archival. Storage and REST cannot share one transaction, so cleanup unpublishes first and supports scoped retries. App rollback cannot restore deleted test history.
 
 ## Verification and follow-up
-Application/database tests and production build pass. Live cleanup verified three bookings/dependencies removed, ten drafts intact and readiness disabled. Live migration 003 is applied and its settings/access checks passed. Production deployment and authenticated live editor checks remain pending; see [Testing](../TESTING.md).
+Application/database tests and production build pass. Live cleanup verified three bookings/dependencies removed, ten drafts intact and readiness disabled. Live migration 003 is applied and its settings/access checks passed. Production deployment is published through PR #6; authenticated real-option editor checks await owner configuration; see [Testing](../TESTING.md).
