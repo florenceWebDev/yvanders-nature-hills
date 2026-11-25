@@ -6,12 +6,12 @@ A Next.js booking application with a photographic public website, guest accounts
 
 The prepared local project is at:
 
-`C:\Users\USER\Documents\Codex\2026-11-25\i-x20\outputs\yvanders-nature-hills`
+`C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills`
 
 Open PowerShell and run:
 
 ```powershell
-cd "C:\Users\USER\Documents\Codex\2026-11-25\i-x20\outputs\yvanders-nature-hills"
+cd "C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills"
 npm run dev
 ```
 
@@ -30,9 +30,9 @@ If port 3000 is already occupied, use `npm run dev -- --port 3001` and open http
 
 ## Fresh clone and GitHub workflow
 
-Chosen public GitHub destination: `florenceWebDev/yvanders-nature-hills`. Repository creation and the first push require a signed-in GitHub browser session; completion is recorded in `docs/PLAN.md`.
+Public GitHub repository: [florenceWebDev/yvanders-nature-hills](https://github.com/florenceWebDev/yvanders-nature-hills).
 
-After the repository has been created and the source pushed, use Node 22 LTS or newer and Git:
+For a fresh checkout on another computer, use Node 22 LTS or newer and Git:
 
 ```powershell
 git clone https://github.com/florenceWebDev/yvanders-nature-hills.git
@@ -56,7 +56,7 @@ git commit -m "Describe your changes"
 git push
 ```
 
-Git Credential Manager may open a GitHub sign-in window. Sign in to the account authorized for the repository; do not paste access tokens into source files or chat. `.env.local`, `node_modules`, `.next`, and hosting credentials are excluded from Git. The selected repository will be public, including the supplied campsite photos and documentation. No software license has been selected.
+Git Credential Manager may open a GitHub sign-in window. Sign in to the account authorized for the repository; do not paste access tokens into source files or chat. `.env.local`, `node_modules`, `.next`, and hosting credentials are excluded from Git. The repository is public, including the supplied campsite photos and documentation. No software license has been selected.
 
 ## Connect real services
 

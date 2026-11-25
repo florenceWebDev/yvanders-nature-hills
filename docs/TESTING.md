@@ -43,4 +43,9 @@ Do not accept real payments before completing these staged checks. No integratio
 ## GitHub connection recheck — 25 November 2026
 
 - **Pass:** connector identifies the selected account as `florenceWebDev`; Git Credential Manager 2.6.0 is installed locally.
-- **Pending authentication:** target repository is not available through GitHub metadata, browser `/new` redirects to sign-in, and repository creation/push have not run. No remote or hosted deployment is claimed.
+- **Pass:** after owner sign-in, the public repository was created under `florenceWebDev`, the local HTTPS remote configured, and the initial push succeeded with `main` tracking `origin/main`. No hosted website deployment is claimed.
+
+## Relocated project verification — 25 November 2026
+
+- **Pass:** complete project moved to the requested `C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills` directory.
+- **Pass:** development server restarted from the new location at http://127.0.0.1:3000; route and protected-endpoint smoke checks passed after the move.
