@@ -41,7 +41,7 @@ Changing a filename is not proof of an accurate explanation. Review requests/res
 
 ## Running documentation checks
 
-`npm run docs:check` compares the current working tree (including untracked files) with `origin/main`. Fetch first if your remote reference is stale. On main immediately after a pull there may be no change-impact requirements, but link and inventory checks still run. To check a committed change use `npm run docs:check -- --base REF --head HEAD`. `--three-dot` uses the merge base, as pull requests do. A missing/invalid base is an error, not an automatic pass.
+`npm run docs:check` compares the current working tree (including untracked files) with `origin/main`. Fetch first if your remote reference is stale. On main immediately after a pull there may be no change-impact requirements, but link and inventory checks still run. To check a committed change use `node scripts/docs-check.mjs --base REF --head HEAD`. `--three-dot` uses the merge base, as pull requests do. A missing/invalid base is an error, not an automatic pass.
 
 API markers in API.md must exactly cover supported methods/paths discovered from route handlers. Env markers in CONFIGURATION.md must exactly cover `.env.example` keys, and literal runtime `process.env` references must have example entries (except framework `NODE_ENV`). The script parses the current centralized route comparisons with TypeScript's AST; a new dispatcher style needs checker coverage in the same PR. Dynamic/computed endpoints or env access need explicit review rather than an assumption of coverage.
 
@@ -54,3 +54,5 @@ The link check validates local Markdown targets, including images, and permits e
 - Actual validation is recorded; unavailable services are marked Blocked/Not run.
 - Documentation check is green, examples use fictional data, and no secrets are included.
 - Any migration, release, recovery, and significant architecture consequences are reviewable.
+
+On Windows PowerShell, use the direct `node scripts/docs-check.mjs` command for explicit base/head flags; some npm PowerShell shims consume npm-run flag forwarding. The no-argument `npm run docs:check` command works normally. GitHub Actions runs its argument-forwarding command under Bash.

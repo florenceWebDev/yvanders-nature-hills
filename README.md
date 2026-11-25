@@ -46,7 +46,7 @@ npm run docs:test
 npm run docs:check
 ```
 
-`docs:check` compares local changes with `origin/main` and checks local links, the endpoint inventory, and environment-variable coverage. For committed changes: `npm run docs:check -- --base REF --head HEAD`. See the contribution guide for exact change-impact rules and supported syntax.
+`docs:check` compares local changes with `origin/main` and checks local links, the endpoint inventory, and environment-variable coverage. For committed changes: `node scripts/docs-check.mjs --base REF --head HEAD`. See the contribution guide for exact change-impact rules and supported syntax.
 
 Application validation: `npm test`. Generate Next.js types through dev/build before `npm run typecheck` in a fresh clone. `npm run build` performs the production build and its TypeScript check. With a preview server already running, `node scripts/smoke.mjs` verifies HTTP routes and configuration-free safety states. Do not use preview-specific smoke expectations against real guest data.
 

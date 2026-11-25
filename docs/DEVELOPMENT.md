@@ -73,7 +73,7 @@ Follow the existing dispatcher or add a standard App Router route handler. Valid
 | `npm test` | Existing application validation and PGlite SQL tests |
 | `npm run docs:test` | Documentation-check regression tests, independent of providers |
 | `npm run docs:check` | Documentation checks against `origin/main`, including tracked working changes and untracked files |
-| `npm run docs:check -- --base REF --head HEAD` | Check a committed comparison explicitly |
+| `node scripts/docs-check.mjs --base REF --head HEAD` | Check a committed comparison explicitly |
 | `npm run build` | Production build, including Next-generated types |
 | `npm start` | Serve the existing production build locally |
 | `node scripts/smoke.mjs` | Configuration-free HTTP smoke checks; server must already be running |
