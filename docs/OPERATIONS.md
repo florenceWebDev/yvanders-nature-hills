@@ -1,8 +1,18 @@
 # Operations, troubleshooting, and recovery
 
-Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and [release readiness](RELEASE.md). Hosting, real email delivery, live storage, and restore tests remain pending; the procedures below describe the implemented paths and required verification, not completed production operations.
+Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and [release readiness](RELEASE.md). Netlify hosting and permanent Supabase are live. Owner-approved fictional booking, signed storage transport and owner inbox checks passed; general guest mail, verified business configuration and restore remain pending.
 
 ## Deployment runbook
+
+### Connected Netlify services
+
+The owner retained Netlify for the connected application. The preview-only instructions below are historical; live now has service settings. Build from protected main with Node 22 and the automatic Next.js adapter. Initial schema installation used SQL Editor to apply exact migrations 001 then 002. This does not establish CLI migration-history entries; do not rerun initial migrations against the installed schema. Use additive migrations and independent backups.
+
+Supabase pg_cron/pg_net runs `ynh-email-outbox` every minute (`* * * * *`), calling the HTTPS `/api/jobs` endpoint with an Authorization Bearer header. It reads the token from Vault secret `ynh_cron_secret`, matching Netlify's protected `CRON_SECRET`; no token literal belongs in saved SQL or documentation. Inspect `cron.job`, `cron.job_run_details` and `net._http_response` as an authorized operator. Cron success only proves HTTP queuing; inspect HTTP response status/content too. Observed responses after redeploy were HTTP 200 with zero jobs. Inbox delivery and maximum-batch duration under Netlify remain unverified.
+
+To pause scheduling, set the named job inactive. Token rotation requires updating Vault and Netlify, redeploying, then checking responses. Pausing Supabase or exhausting provider allowances interrupts scheduled work. `vercel.json` has no scheduling effect on Netlify. Code rollback does not undo database records or service settings.
+
+The sending-only Resend key is a Netlify secret. Default Resend sender and Supabase Auth SMTP restrict recipients; configure an owned verified sender and suitable Auth SMTP before inviting general guests. Verify real offerings and actual payment instructions separately from explicitly labeled system checks.
 
 ### Temporary Netlify client review
 

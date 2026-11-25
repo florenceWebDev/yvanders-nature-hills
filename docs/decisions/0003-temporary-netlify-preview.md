@@ -1,6 +1,6 @@
 # 0003 — Temporary Netlify client preview
 Date: 2026-11-25
-Status: Accepted
+Status: Superseded for connected services by [0004](0004-connected-netlify-services.md); retained as the original preview decision.
 
 ## Context
 The owner needs a public client-review link before live booking services and permanent hosting are ready.

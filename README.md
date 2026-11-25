@@ -2,7 +2,7 @@
 
 A campsite promotion and booking app built with Next.js/TypeScript, Supabase Auth/PostgreSQL/Storage, and a Resend booking-email adapter. Public source: [florenceWebDev/yvanders-nature-hills](https://github.com/florenceWebDev/yvanders-nature-hills).
 
-**Current status:** local preview and application implementation exist; live Supabase, email delivery, hosting, and restore verification remain pending. Preview listings are drafts and cannot accept real reservations or payments.
+**Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) uses the owner's permanent Supabase database. Staff access, booking persistence, signed proof transport, confirmation, owner inbox delivery and an independent capacity race have passed live checks. Only an explicitly labeled fictional system-check listing is bookable; do not send money. Ten actual accommodation drafts remain unpublished. General guest email, verified business configuration and recovery/failure-path checks remain incomplete. See [current handoff](docs/PLAN.md).
 
 ## Start locally
 
@@ -23,7 +23,7 @@ For a production-build preview, run `npm run build`, then `npm start`. Use the d
 
 ## Developer documentation
 
-Temporary client review is configured for Netlify via [netlify.toml](netlify.toml), using Node 22 and the existing demo mode. See the [Netlify runbook](docs/OPERATIONS.md#temporary-netlify-client-review) for Git connection, updates and rollback, and [current handoff](docs/PLAN.md) for the actual deployment result. Final domain/hosting and real booking services remain separate work.
+Netlify hosts the Next.js application with Node 22. See the [connected-service runbook](docs/OPERATIONS.md#connected-netlify-services) for settings, scheduling and rollback. A custom domain remains deferred; account and booking emails currently have provider restrictions described in [Configuration](docs/CONFIGURATION.md#current-owner-setup).
 
 Begin with the [handbook index](docs/README.md). New developers should read [Development](docs/DEVELOPMENT.md), [Architecture](docs/ARCHITECTURE.md), and [current handoff](docs/PLAN.md).
 

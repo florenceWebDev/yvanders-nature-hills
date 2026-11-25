@@ -8,6 +8,7 @@ Create the next numbered file, describe the actual decision and tradeoff, and li
 
 - [0001 — Application baseline](0001-application-baseline.md)
 - [0003 — Temporary Netlify client preview](0003-temporary-netlify-preview.md)
+- [0004 — Connected Netlify services](0004-connected-netlify-services.md)
 
 ## New-record template
 

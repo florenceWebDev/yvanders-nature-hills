@@ -1,5 +1,7 @@
 # System architecture
 
+Current service deployment follows [ADR 0004](decisions/0004-connected-netlify-services.md): Netlify Next.js hosting, permanent Supabase data, sending-only Resend credential and Vault-backed pg_cron/pg_net worker requests. See [Testing](TESTING.md#connected-services--25-november-2026) for observed evidence and remaining acceptance checks.
+
 ## Current system
 
 Temporary client review uses Netlify with the existing configuration-free preview path; see [ADR 0003](decisions/0003-temporary-netlify-preview.md). The original Vercel target below is a production candidate, not a completed deployment or final hosting commitment. Netlify's automatic Next.js adapter retains dynamic rendering and server routes; no application API or database contract changes are needed.
@@ -48,7 +50,7 @@ Settings are publicly readable business content. Keep credentials in environment
 - Dispatcher error status mapping depends on message text; there are no stable typed error codes.
 - Uploaded proof pending review/correction has no automatic timeout. Staff must resolve it.
 - No provider bounce/delivery webhook, automated refunds, gateway, SMS, or channel synchronization exists.
-- Live storage/auth, independent connection races, email delivery, deployment, retention, and restore remain unverified. Local fixtures are not evidence that these services operate.
+- Live Auth, signed receipt transport, independent capacity contention, deployment and owner inbox delivery passed a fictional check; general guest mail, retention, restore and remaining failure paths are unverified. See TESTING for the precise evidence and limits.
 
 ## Change policy
 

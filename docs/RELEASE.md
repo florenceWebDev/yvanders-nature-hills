@@ -1,5 +1,11 @@
 # Release and recovery
 
+## Current connected status — 25 November 2026
+
+The public [Netlify site](https://yvanders-nature-hills.netlify.app/) is connected to the permanent Supabase database. Migrations 001/002, RLS/storage, protected server settings, a sending-only Resend credential and external minute scheduler are configured. Live session reports configured; scheduled requests return HTTP 200 with an empty queue. Owner registration/verification and first staff bootstrap succeeded. No domain purchase or paid upgrade was made.
+
+Owner-approved fictional booking checks passed persistence, signed proof transport, confirmation, owner inbox delivery, nonadmin ownership/storage denial and independent capacity contention. Real booking release still requires verified business configuration, general guest email, manual browser upload verification, remaining failure-path checks and restore. Only a clearly labeled nonpayable system-check listing is published; ten actual drafts remain unpublished. Disable its readiness flag and unpublish it, and exclude fictional financial records before real operations. See [current handoff](PLAN.md) and [Testing](TESTING.md#connected-services--25-november-2026). The sections below preserve earlier release checkpoints and hosting candidates.
+
 ## Temporary client preview — 25 November 2026
 
 Netlify is selected for temporary client review using configuration-free draft/demo mode (see [ADR 0003](decisions/0003-temporary-netlify-preview.md)). Hosting configuration is prepared; publication and hosted verification are pending. No real booking credentials, domain purchase, DNS changes or production booking release are included. The Vercel target below is the original candidate; final hosting remains undecided.
