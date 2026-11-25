@@ -34,7 +34,7 @@ Staff can retry failed jobs in Email & Activity. Retry resets attempts and avail
 
 | Symptom | Inspect | Recovery |
 | --- | --- | --- |
-| Port 3000 occupied | Another local listener | Use `npm run dev -- --port 3001`; do not terminate an unrelated process |
+| Port 3000 occupied | Another local listener | Use `npm.cmd run dev -- --port 3001`; do not terminate an unrelated process |
 | Preview shown unexpectedly | URL/key presence and server restart | Configure the intended staging environment; preview is expected without these values |
 | Connected catalog unavailable | Migration, published rows, RLS, correct project | Fix configuration/query failure; do not replace errors with fake bookable records |
 | Account verification/reset fails | Supabase callback allowlist, origin, SMTP, link age | Correct provider settings and request a fresh link; do not copy session codes into logs |
@@ -61,4 +61,4 @@ The `Documentation check` workflow uses Node 22 and needs no Supabase/Resend sec
 
 It tests its own checker, verifies links/inventories, then assesses documentation impact against the event's base/head. Pull requests use the three-dot merge-base diff; pushes use the exact before/after diff. Local checks include untracked files and tracked working changes. Documentation-only changes do not require unrelated changelog/reference edits.
 
-After the workflow reports success, configure an active main-branch rule requiring pull requests, zero independent approvals, the `Documentation check` status, administrator enforcement/no bypass, and no force pushes/deletion. Zero approvals lets the sole owner merge their own passing PR. Preserve stronger existing protections. Rule configuration is external repository state: verify it on GitHub and record actual rollout evidence in TESTING/PLAN rather than assuming a YAML file enforces merging.
+Verified on 25 November 2026: the active [Main documentation gate ruleset](https://github.com/florenceWebDev/yvanders-nature-hills/settings/rules/28036246) targets `refs/heads/main`, requires pull requests and the `Documentation check` from GitHub Actions, has an empty bypass list (including administrators), and blocks force pushes and deletion. Required independent approvals are zero, so the sole owner can merge their own passing PR. Branch-up-to-date enforcement is not enabled. Preserve these protections when changing repository settings. Rule configuration is external state: reverify it after settings changes. See [Testing](TESTING.md) for the actual accepted/rejected PR evidence.

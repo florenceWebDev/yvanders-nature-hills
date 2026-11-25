@@ -17,7 +17,7 @@ npm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Keep the terminal open; stop with **Ctrl+C**. If you already have this checkout with dependencies installed, run only `npm run dev` from its folder. The owner's prepared folder is `C:\Users\USER\Documents\FG\Projects\yvanders-nature-hills`.
 
-Without `.env.local`, the app opens in configuration-free preview mode. Accommodation: [/stays](http://127.0.0.1:3000/stays). Guest setup: [/account](http://127.0.0.1:3000/account). Staff preview: [/admin](http://127.0.0.1:3000/admin), then **Explore admin preview**. If port 3000 is occupied, use `npm run dev -- --port 3001` and the corresponding origin; do not stop unrelated servers.
+Without `.env.local`, the app opens in configuration-free preview mode. Accommodation: [/stays](http://127.0.0.1:3000/stays). Guest setup: [/account](http://127.0.0.1:3000/account). Staff preview: [/admin](http://127.0.0.1:3000/admin), then **Explore admin preview**. If port 3000 is occupied, use `npm.cmd run dev -- --port 3001` and the corresponding origin; do not stop unrelated servers.
 
 For a production-build preview, run `npm run build`, then `npm start`. Use the development server for local connected-auth work; live hosting must use HTTPS.
 
@@ -39,7 +39,7 @@ Begin with the [handbook index](docs/README.md). New developers should read [Dev
 
 ## Changes must include documentation
 
-Follow [CONTRIBUTING](CONTRIBUTING.md): work on a feature branch, update affected canonical references and changelog, run relevant checks, and open a pull request. Documentation is checked on GitHub and required before merging to main once the documented rollout is verified. The checker detects mechanical omissions; reviewers must verify explanations and examples against the code. Coding agents follow the same requirements in [AGENTS](AGENTS.md).
+Follow [CONTRIBUTING](CONTRIBUTING.md): work on a feature branch, update affected canonical references and changelog, run relevant checks, and open a pull request. Documentation is checked on GitHub and required before merging to main. The checker detects mechanical omissions; reviewers must verify explanations and examples against the code. Coding agents follow the same requirements in [AGENTS](AGENTS.md).
 
 ```powershell
 npm run docs:test
