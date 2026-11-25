@@ -8,7 +8,8 @@ Record application, configuration, database, and tooling changes under Unrelease
 
 - Added a developer handbook with codebase map, walkthroughs, API/database references, configuration, operations, and architecture decisions.
 - Added documentation link, endpoint/env inventory, and change-impact checks with regression coverage and a GitHub Actions job.
-- Added contribution and PR rules requiring documentation with code; main-branch enforcement is configured and verified as part of the documentation rollout evidence.
+- Added contribution and PR rules requiring documentation with code; active main-branch enforcement was verified with passing and blocked PRs.
+- Corrected Windows port-override instructions to preserve flags through the npm PowerShell shim.
 
 ### Initial application baseline
 

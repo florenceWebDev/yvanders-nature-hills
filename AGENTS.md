@@ -42,7 +42,7 @@
 - Maintain API endpoint markers and environment-variable inventory when contracts/configuration change. Explain permissions, failure/retry behavior, migrations and recovery as applicable.
 - Keep docs/PLAN.md current at milestone handoff; record observed checks honestly in docs/TESTING.md. Preserve blocked live-service verification instead of claiming it passed.
 - Run npm run docs:test and npm run docs:check plus checks appropriate to the changed application behavior. Resolve failures before declaring completion.
-- Use feature branches and pull requests. Main requires the Documentation check after enforcement rollout; do not push directly or weaken the rule to bypass missing documentation.
+- Use feature branches and pull requests. Main requires the Documentation check; do not push directly or weaken the rule to bypass missing documentation.
 - Write an architecture decision record for consequential new choices. Keep examples fictional and exclude credentials, guest/payment data, session material and signed URLs.
 - Checks establish mechanical coverage, not semantic accuracy. Review every affected explanation against the implementation; a changelog-only edit does not satisfy reference requirements.
 
