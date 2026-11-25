@@ -1,0 +1,108 @@
+import {test,before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+import {campDate,addDays,periodRange,overlapsDay} from '../src/lib/admin-dates';
+import {promoSchema,sameOrigin} from '../src/lib/validation';
+const db=new PGlite();
+const staff='10000000-0000-4000-8000-000000000003',guest='10000000-0000-4000-8000-000000000001',second='10000000-0000-4000-8000-000000000002';
+const day=addDays(campDate(),60),end=addDays(day,2);
+async function identity(id:string,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec(`set role ${role}`);}
+async function sql<T=Record<string,unknown>>(query:string,params:unknown[]=[]){return(await db.query<T>(query,params)).rows;}
+async function room(price=10000){await identity(staff);const resource=crypto.randomUUID(),offering=crypto.randomUUID();await db.exec('reset role');await db.query('insert into resources(id,name,capacity) values($1,$2,1)',[resource,'Test pool']);await db.query("insert into offerings(id,name,slug,kind,published,resource_id,max_guests,price,price_basis,schedule) values($1,'Cabana',$2,'room',true,$3,4,$4,'night','overnight')",[offering,offering,resource,price]);await identity(guest);return offering;}
+async function promo(code:string,overrides:Record<string,unknown>={}){await identity(staff);const p={code,enabled:true,kind:'percent',value:2500,min_subtotal:0,max_discount:null,offering_ids:[],booking_from:null,booking_until:null,stay_from:null,stay_until:null,usage_limit:null,customer_limit:null,...overrides};return(await sql<{id:string}>('select save_promo($1) id',[p]))[0].id;}
+async function hold(offering:string,code:string|null=null,request=crypto.randomUUID()){return(await sql<{id:string;total:number;subtotal:number;discount:number;deposit:number;status:string;paid:number;promo_code:string}>('select * from create_hold($1,$2,$3,\'\',2,1,\'Guest Name\',\'09123456789\',$4,null,$5)',[offering,day,end,request,code]))[0];}
+before(async()=>{
+ await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;
+ create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ grant usage on schema public,auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
+ create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+ create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
+ for(const name of ['001_booking.sql','002_administration.sql'])try{
+  if(name==='002_administration.sql')await db.exec(`insert into resources(id,name,capacity) values('20000000-0000-4000-8000-000000000099','Legacy pool',1);insert into offerings(id,name,slug,kind,resource_id,max_guests,price,price_basis,schedule) values('30000000-0000-4000-8000-000000000099','Legacy','legacy','room','20000000-0000-4000-8000-000000000099',2,10000,'night','overnight');insert into bookings(id,guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,paid,request_id,snapshot,status) values('40000000-0000-4000-8000-000000000099','legacy@example.test','Legacy','123456','30000000-0000-4000-8000-000000000099','20000000-0000-4000-8000-000000000099','Legacy',now()+interval '1 day',now()+interval '2 days',1,1,1,10000,5000,5000,gen_random_uuid(),'{}','confirmed');`);
+  await db.exec((await readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto;',''));
+ }catch(e){throw new Error(`${name}: ${e instanceof Error?e.message:String(e)}`);}
+ await db.exec(`insert into auth.users values('${staff}','staff@example.test',now()),('${guest}','guest@example.test',now()),('${second}','second@example.test',now());insert into admins values('${staff}');update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/qr.jpg","payment_recipient":"Test"}' where key='settings';`);
+});
+after(()=>db.close());
+test('periods use Monday weeks, calendar quarters, leap years and Manila dates',()=>{
+ assert.deepEqual(periodRange('week','2027-01-03'),{from:'2026-12-28',until:'2027-01-04'});
+ assert.deepEqual(periodRange('quarter','2027-12-03',1),{from:'2028-01-01',until:'2028-04-01'});
+ assert.deepEqual(periodRange('year','2028-02-29'),{from:'2028-01-01',until:'2029-01-01'});
+ assert.equal(campDate('2027-01-01T18:00:00Z'),'2027-01-02');
+ assert.equal(overlapsDay('2027-01-01T14:00:00+08:00','2027-01-02T00:00:00+08:00','2027-01-02'),false);
+});
+test('same-origin checks use actual host and protocol, rejecting missing, foreign and malformed origins',()=>{
+ assert.equal(sameOrigin('http://127.0.0.1:3003','127.0.0.1:3003','http:'),true);
+ assert.equal(sameOrigin('https://camp.example','camp.example','https:'),true);
+ for(const origin of [null,'null','https://other.example','https://camp.example.evil','http://camp.example','https://user@camp.example','https://camp.example/path'])assert.equal(sameOrigin(origin,'camp.example','https:'),false);
+ assert.equal(sameOrigin('http://localhost:3003','127.0.0.1:3003','http:'),false);
+});
+test('admin promotion, duplicate denial, revocation and last administrator protection',async()=>{
+ await identity(staff);await assert.rejects(sql('select manage_admin($1)',['missing@example.test']),/verified account/);
+ await sql('select manage_admin($1)',['SECOND@example.test']);await assert.rejects(sql('select manage_admin($1)',['second@example.test']),/already/);
+ await identity(second);assert.equal((await sql('select * from list_admins()')).length,2);await sql('select manage_admin(null,$1)',[second]);
+ await assert.rejects(sql('select * from list_admins()'),/Admin access/);await identity(staff);await assert.rejects(sql('select manage_admin(null,$1)',[staff]),/last administrator/);
+ await db.exec('reset role');await db.query('update auth.users set email_confirmed_at=null where id=$1',[second]);await identity(staff);await assert.rejects(sql('select manage_admin($1)',['second@example.test']),/verified account/);
+});
+test('guest cannot read private reporting, promos, memberships or write financial data',async()=>{
+ await identity(guest);for(const q of ["select admin_report(current_date,current_date+1)","select list_promos()","select list_admins()","select manage_admin('guest@example.test')","select record_refund(gen_random_uuid(),1,current_date,'ref',gen_random_uuid())"])await assert.rejects(sql(q),/Admin access/);
+ assert.equal((await sql('select * from payment_entries')).length,0);assert.equal((await sql('select * from promos')).length,0);
+ await assert.rejects(sql("insert into promos(code,kind,value) values('FORGED','fixed',1)"),/permission denied/);
+ await assert.rejects(sql('select * from create_hold_base(null,null,null,null,1,1,null,null,null,null)'),/permission denied/);
+});
+test('discount quote, centavo rounding, discounted deposit, idempotency and snapshot stability',async()=>{
+ const offering=await room(10001);const pid=await promo('NATURE25',{usage_limit:1});await identity(guest);
+ const request=crypto.randomUUID(),b=await hold(offering,'nature25',request);assert.equal(b.subtotal,20002);assert.equal(b.discount,5000);assert.equal(b.total,15002);assert.equal(b.deposit,7501);
+ assert.equal((await hold(offering,'nature25',request)).id,b.id);
+ await promo('NATURE25',{id:pid,enabled:false});await identity(guest);assert.equal((await hold(offering,'NATURE25',request)).total,15002);
+ const other=await room();await assert.rejects(hold(other,'NATURE25'),/invalid or disabled/);
+});
+test('promo eligibility, full stay window, limits and expiry of a reserved use',async()=>{
+ const offering=await room(),other=await room();await promo('ONEUSE',{usage_limit:1,customer_limit:1,offering_ids:[offering]});await identity(guest);
+ await assert.rejects(hold(other,'ONEUSE'),/does not apply/);const b=await hold(offering,'ONEUSE');await assert.rejects(hold(other,'ONEUSE'),/does not apply/);
+ await assert.rejects(hold(offering,'ONEUSE'),/limit/);await db.exec('reset role');await db.query("update bookings set expires_at=now()-interval '1 second' where id=$1",[b.id]);await identity(guest);await hold(offering,'ONEUSE');
+ await promo('LATER',{booking_from:addDays(campDate(),1)});await identity(guest);await assert.rejects(hold(other,'LATER'),/does not apply/);
+ await promo('SHORT',{stay_until:day});await identity(guest);await assert.rejects(hold(other,'SHORT'),/does not apply/);
+ await promo('MINIMUM',{min_subtotal:999999});await identity(guest);await assert.rejects(hold(other,'MINIMUM'),/does not apply/);
+});
+test('complimentary bookings need staff approval without proof and consume usage permanently',async()=>{
+ const offering=await room();await promo('FREE',{value:10000,usage_limit:1});await identity(guest);const b=await hold(offering,'FREE');assert.equal(b.total,0);assert.equal(b.deposit,0);assert.equal(b.status,'pending_review');
+ await identity(staff);await assert.rejects(sql("select review_booking($1,'correction','Please retry',0)",[b.id]),/do not require/);
+ const approved=(await sql<{status:string}>("select * from review_booking($1,'confirm','Approved',0)",[b.id]))[0];assert.equal(approved.status,'confirmed');
+ await sql("select review_booking($1,'cancel','Cancelled by guest',0)",[b.id]);const other=await room();await assert.rejects(hold(other,'FREE'),/limit/);
+ await identity(staff);assert.equal((await sql<{n:number}>('select count(*)::int n from payment_entries where booking_id=$1',[b.id]))[0].n,0);
+});
+test('per-customer limits are independent of the global limit',async()=>{
+ const a=await room(),b=await room();await promo('CUSTOMER',{usage_limit:3,customer_limit:1});await identity(guest);await hold(a,'CUSTOMER');await assert.rejects(hold(b,'CUSTOMER'),/limit/);
+ await db.exec('reset role');await db.query('update auth.users set email_confirmed_at=now() where id=$1',[second]);await identity(second);assert.equal((await hold(b,'CUSTOMER')).discount,5000);
+});
+test('serialized competing requests cannot both consume the last promo use',async()=>{
+ const a=await room(),b=await room();await promo('FINALUSE',{usage_limit:1});await identity(guest);
+ const result=await Promise.allSettled([hold(a,'FINALUSE'),hold(b,'FINALUSE')]);assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal(result.filter(r=>r.status==='rejected').length,1);
+});
+test('fixed discounts cap at zero, optional max discount limits savings, declined unpaid uses release',async()=>{
+ const offering=await room();await promo('FIXED',{kind:'fixed',value:999999,usage_limit:1});await identity(guest);const b=await hold(offering,'FIXED');assert.equal(b.total,0);
+ await identity(staff);await sql("select review_booking($1,'decline','Not approved',0)",[b.id]);await identity(guest);assert.equal((await hold(offering,'FIXED')).total,0);
+ const other=await room();await promo('CAPPED',{value:10000,max_discount:5000});await identity(guest);assert.equal((await hold(other,'CAPPED')).discount,5000);
+});
+test('payment deltas, retry safety, refunds and period totals reconcile',async()=>{
+ const offering=await room();await identity(staff);const b=(await sql<{id:string}>("select * from create_hold($1,$2,$3,'',2,1,'Manual Guest','09123456789',$4,'manual@example.test')",[offering,day,end,crypto.randomUUID()]))[0];
+ const today=campDate(),request=crypto.randomUUID();await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);
+ await sql("select review_booking($1,'balance','Balance',20000,'',$2,$3)",[b.id,today,crypto.randomUUID()]);
+ const refundRequest=crypto.randomUUID();await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);
+ await assert.rejects(sql('select record_refund($1,16000,$2,\'REFUND-2\',$3)',[b.id,today,crypto.randomUUID()]),/exceeds/);
+ const payments=await sql<{kind:string;amount:number}>('select kind,amount from payment_entries where booking_id=$1',[b.id]);assert.equal(payments.length,3);assert.equal(payments.filter(p=>p.kind==='payment').reduce((n,p)=>n+p.amount,0),20000);
+ const report=(await sql<{r:{collections:number;refunds:number;bookings:number}}>('select admin_report($1,$2,$3) r',[today,addDays(today,1),offering]))[0].r;assert.equal(report.collections,20000);assert.equal(report.refunds,5000);assert.equal(report.bookings,1);
+ const arrivals=(await sql<{r:{booking_value:number;outstanding:number}}>('select admin_report($1,$2,$3) r',[day,end,offering]))[0].r;assert.equal(arrivals.booking_value,20000);assert.equal(arrivals.outstanding,0);
+});
+test('reports include more than 500 rows and exclude undated opening balances from periods',async()=>{
+ const offering=await room();await db.exec('reset role');await db.query(`insert into bookings(guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,request_id,snapshot,status)
+ select 'manual@example.test','Guest','09123456789',o.id,o.resource_id,o.name,$2::date+time '14:00',$3::date+time '12:00',1,1,1,100,50,gen_random_uuid(),'{}','confirmed' from offerings o cross join generate_series(1,601) n where o.id=$1`,[offering,day,end]);
+ await identity(staff);const report=(await sql<{r:{booking_value:number}}>('select admin_report($1,$2,$3) r',[day,end,offering]))[0].r;assert.equal(report.booking_value,60100);
+ const legacy=(await sql<{r:{opening:number;collections:number}}>('select admin_report($1,$2,$3) r',[campDate(),addDays(campDate(),7),'30000000-0000-4000-8000-000000000099']))[0].r;assert.equal(legacy.opening,5000);assert.equal(legacy.collections,0);
+});
+test('promo request validation rejects percentages above 100 and reversed date windows',()=>{
+ const p={code:'TEST',enabled:true,kind:'percent',value:10001,max_discount:null,min_subtotal:0,offering_ids:[],booking_from:null,booking_until:null,stay_from:null,stay_until:null,usage_limit:null,customer_limit:null};
+ assert.equal(promoSchema.safeParse(p).success,false);assert.equal(promoSchema.safeParse({...p,value:10000,booking_from:'2027-02-02',booking_until:'2027-01-01'}).success,false);
+});

@@ -30,3 +30,5 @@ Requirements belong in PROJECT; technical facts in the technical references; obs
 Read [CONTRIBUTING](../CONTRIBUTING.md) before editing. Update the affected reference in the same pull request as the code. A passing check proves mechanical coverage and change presence, not that prose is accurate. Review explanations, examples, and failure cases against the implementation.
 
 Never put real credentials, payment screenshots, guest details, session cookies, or signed URLs in this public repository. Use fictional examples and redact operational evidence.
+
+See [website audit](AUDIT.md) for the latest route/layout findings, fixes, screenshots and unverified live-service behavior.

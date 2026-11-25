@@ -12,3 +12,12 @@ Forest #173f35, deep #103329, ivory #f7f6f0, gold #e4c496; Libre Caslon Display 
 Desktop and mobile previews reviewed. Body content uses 16px and task controls use readable labels. Mobile hero sizing corrected after screenshot inspection. No fabricated reviews, ratings, addresses or business metrics.
 
 Developer onboarding and workflow documentation now live in the handbook. Use the design guide for visible UI patterns and PROJECT for changed user journeys; no visual behavior changed in the documentation milestone.
+
+## Navigation, readability and administration update
+
+Active public links carry aria-current=page, stronger gold text and an underline; mobile uses a gold border/background. Nested accommodation pages activate Stay with us. Filters use aria-pressed and admin navigation marks the current section. Collapse header navigation at 1100px to avoid crowded tablet layouts.
+
+Photographic homepage text now uses stronger overlays, white copy and supporting shadows. Body/muted colors are darker; small section labels and operational notices are larger. Preserve contrast when changing images. Desktop reporting uses labeled cards, bar trends with exact accessible tables, explicit date bases, and no invented demo earnings. Calendar maintains Monday-start seven-day geometry on desktop and switches to a chronological agenda at 800px rather than a misleading three-column month. Status text accompanies colors.
+
+
+The full route/layout audit and remaining coverage limits are recorded in [AUDIT](AUDIT.md). Information and accommodation detail pages now have distinct browser titles.

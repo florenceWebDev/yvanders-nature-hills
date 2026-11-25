@@ -66,3 +66,12 @@ Application database fixtures currently use fixed 2027 dates; update them before
 - **Pass:** preview smoke checks against the fresh clone on port 3002 (twelve application routes, session, unauthenticated cron denial, cross-origin rejection, missing-service guards, 404). The temporary verification server was stopped afterward; the owner's existing preview was left running.
 
 The gate enforces changed references/changelog and mechanical consistency; it cannot prove that a prose edit accurately describes a feature. Review remains necessary. This documentation milestone does not establish production readiness. Live service checks remain blocked as recorded above.
+
+## Administration and website audit — 25 November 2026
+
+- **Pass:** npm test — 26 tests, including original booking/input/receipt invariants against both migrations and thirteen administration/report/date/promo/origin scenarios. Opening-balance backfill, 601-row aggregates, duplicate payment/refund retries, per-email and global limits, complimentary review, revoked access and last-admin protection are exercised. Competing promo requests run through PGlite serialization; independent connections remain unverified.
+- **Pass:** production build and its TypeScript check; all twelve preview routes and protected-endpoint smoke checks passed. Additional tests/build checks follow any subsequent code changes.
+- **Pass:** browser desktop/mobile route coverage, active navigation, tablet header, admin section previews, quarter filter and mobile agenda as detailed in the [audit](AUDIT.md). No real guest/financial data is represented in preview.
+- **Blocked:** live connected admin/guest browser writes, invitation-free promotion against real Auth, email delivery, independent database races and hosted deployment require staging credentials. No production database was migrated.
+
+Application validation now runs in GitHub Actions on Node 22 (tests and production build), separately from the required Documentation check (fourteen checker regressions, inventories, links and change-impact). CI results must be verified on the feature PR before merging.

@@ -79,3 +79,9 @@ Follow the existing dispatcher or add a standard App Router route handler. Valid
 | `node scripts/smoke.mjs` | Configuration-free HTTP smoke checks; server must already be running |
 
 When testing, record what actually ran in [TESTING](TESTING.md). Local SQL fixtures do not prove live Supabase storage, auth sessions, independent connection races, or email delivery.
+
+## Administration modules
+
+admin.tsx keeps the workspace, inventory/content editors, manual reservations/blackouts while admin-review.tsx provides the shared accessible reservation modal. admin-dashboard.tsx loads complete SQL reports and renders comparisons/trends; admin-reservations.tsx fetches range/paginated bookings and displays month/week/mobile agenda; admin-tools.tsx owns staff and promo forms. admin-dates.ts contains tested calendar-period and half-open interval helpers. No chart/calendar dependency was added.
+
+Use the protected detail endpoint to review a reservation and its receipts/payment history. Do not calculate financial totals from the config bundle or calendar's currently loaded page. Keep promo pricing and final usage checks in database transactions, never client calculations. Use current migrations in every SQL test fixture.

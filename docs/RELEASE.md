@@ -8,3 +8,14 @@ Rollback application to prior deployment; forward-fix database with additive mig
 
 ## Actual result
 Local production build passed and was previewed. No hosted Vercel deployment exists: account access and runtime service configuration were not supplied. No credentials are included in the deliverable. Configure the authenticated scheduler and verify real email/storage before enabling payments. Keep this source checkpoint as the initial rollback reference; no production database has been migrated.
+## Administration expansion staging gate
+
+Apply migration 002 after 001 and validate opening balances before deploying the matching app. Use isolated test accounts/data to verify:
+
+- Two administrators can promote/revoke verified accounts; concurrent removals cannot leave zero administrators. Revoked sessions cannot perform later admin requests.
+- Independent callers competing for the final promo use (including different inventory pools) produce only one reservation. Expired unpaid uses release; paid or approved complimentary uses remain consumed after cancellation.
+- A complimentary guest is queued for approval without QR/proof, receives a real pending/confirmation email, and cannot upload a receipt. Manual complimentary bookings are already staff-approved.
+- Concurrent payment/refund requests preserve ledger totals and refund bounds. Compare received-date collections against arrival-date booking value, including cancellations and opening entries.
+- More than 500 reservations remain reachable through list pages and the selected calendar range. Verify occupied dates, overnight slots, blackouts and mobile agenda against the actual database.
+
+These live checks remain pending until provider credentials are configured; local fixtures do not replace them.

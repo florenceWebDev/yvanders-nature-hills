@@ -14,7 +14,7 @@ before(async()=>{
  grant usage on schema public,auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
- const migration=await readFile(new URL('../supabase/migrations/001_booking.sql',import.meta.url),'utf8');
+ const migration=(await readFile(new URL('../supabase/migrations/001_booking.sql',import.meta.url),'utf8'))+'\n'+await readFile(new URL('../supabase/migrations/002_administration.sql',import.meta.url),'utf8');
  // Supabase installs pgcrypto; PGlite provides the used gen_random_uuid builtin.
  await db.exec(migration.replace('create extension if not exists pgcrypto;',''));
  await db.exec(`insert into auth.users values('${guest}','guest@example.test',now()),('${other}','other@example.test',now()),('${admin}','admin@example.test',now());insert into admins values('${admin}');insert into resources(id,name,capacity) values('${pool}','Room pool',1);insert into offerings(id,slug,name,kind,published,resource_id,max_guests,price,price_basis,schedule) values('${room}','test-room','Test room','room',true,'${pool}',4,300000,'night','overnight');update site_content set value=value||' {"payment_ready":true,"qr_url":"https://example.test/qr.png","payment_recipient":"Camp"}'::jsonb;`);
