@@ -1,3 +1,20 @@
+# Deployment tooling merge refresh — 26 November 2026
+
+- Pass: updated PR #15 against main 5078468, retaining the homepage source and release evidence. Resolved only competing documentation additions; no homepage/API/database change.
+- Pass: npm test (56), npm run deployment:test (8), npm run docs:test (14), npm run docs:check, production build/TypeScript and whitespace checks on the combined tree. Final refreshed PR CI/Netlify and postmerge HTTP checks remain pending until observed; their outcomes will be attached to PR #15 without another documentation-only PR.
+- Audit PR #16 remains gated by isolated independent PostgreSQL/provider acceptance and independent backup/restore. This tooling release requires no SQL, secrets, pause or recovery snapshot.
+
+# Homepage layout release — 26 November 2026
+
+- Pass (prior branch context): 320px, 390px, active 650px breakpoint and 1280px desktop layout/defaults/search navigation; original evidence remains in PR #17. Windows/IAB boundary rounding required the adjacent override for active max-width:650px.
+- Pass on isolated main-based release: npm run build (production compilation/TypeScript), npm run docs:test (14 tests), npm run docs:check (six affected files). Final PR Application 45836202250, Documentation 45836202246 and Netlify preview passed at e7fea5c. Main e61ac97 passed Application 45838045177 and Documentation 45838045126.
+
+- Pass: protected PR #18 mobile preview inspected in the owner’s already authenticated Chrome/Netlify window. Existing browser inventory did not expose those tabs; native computer-use inspection found them. No new login, permission or security change was needed. Check existing browser windows/tabs first on future releases.
+- Pass: PR #18 merged as e61ac97afbe83e51135e668c88c778a27e982084; Netlify deployment 6b084036550ff209a493ffd7 observed Live for main@e61ac97. This supersedes earlier pending-release wording. No SQL, configuration or business-record writes.
+- Pass: existing read-only release-check.mjs from codex/efficient-deployment was loaded directly from Git for verification (tooling branch was not merged). All 17 anonymous HTTP/configured-service/permission checks passed in 5,073 ms. No cookies, provider secrets or response bodies were logged.
+- Pass: live IAB geometry at 320px, 390px, innerWidth 650 with max-width:650px active (649 override due Windows rounding), and 1280px: paired mobile rows/full-width action, unchanged single desktop row, no document overflow. Native live controls retain 14:00/2 guests. Filling 1–3 May 2027, 09:15, four guests navigated to the correct /stays query, both in the owner’s existing mobile simulator and a clean IAB view. The simulator’s injected viewport gave inconsistent overflow measurements, so it was not used as width/overflow evidence. No extension settings were changed; temporary viewport overrides were reset.
+- Not run: physical Safari/device matrix, real booking/payment mutations and unrelated audit-hardening acceptance. Audit #16/migration 007 and tooling #15 remain excluded.
+
 # Deployment tooling verification — 26 November 2026
 
 - Pass: `npm run deployment:test` — eight regressions covering anonymous GET-only success/CLI exit zero; protected 200 failures and body redaction; unconfigured/malformed sessions; invalid/preview HTML, redirects and soft 404s; disconnected sockets, header/body timeouts; safe origin handling; recognized docs versus runtime/assets/SQL/unknown paths; real Git docs/mixed/rename/deletion/nonancestor/missing-history comparisons; and actual Netlify skip/build exit semantics. Local HTTP/Git fixtures do not establish hosted Netlify behavior. An initial missing fixture directory was corrected before the passing rerun.

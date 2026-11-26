@@ -1,6 +1,10 @@
+# Homepage mobile search live — 26 November 2026
+
+[PR #18](https://github.com/florenceWebDev/yvanders-nature-hills/pull/18) merged as e61ac97. Netlify deployment 6b084036550ff209a493ffd7 reports Live for the matching main commit. GUESTS and the paired mobile search rows are published. Required PR/main CI, hosted mobile preview, live responsive geometry/search navigation and 17/17 anonymous production checks passed; see [Testing](TESTING.md). No API, database, migration or environment changes. The separate audit PR #16/migration 007 and tooling PR #15 were excluded. Existing service/restore/SMTP limits below remain unchanged.
+
 # Current release process
 
-Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest recorded application release is c6a911d with migrations 001–006 applied. Deployment tooling improvements are prepared on a feature branch; this work does not apply SQL or publish production. General email/SMTP, isolated integration and independent restore acceptance remain outstanding as recorded in TESTING.
+Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest recorded application includes homepage release e61ac97 and documentation main 5078468, with migrations 001–006 applied. Deployment tooling improvements are prepared on a feature branch; this work does not apply SQL or publish production. General email/SMTP, isolated integration and independent restore acceptance remain outstanding as recorded in TESTING.
 
 ## Historical rollout evidence
 
