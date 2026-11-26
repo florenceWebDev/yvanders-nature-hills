@@ -8,7 +8,7 @@ App POST requests use JSON and must have an `Origin` matching the actual request
 
 Money is integer PHP centavos. Dates are `YYYY-MM-DD`; scheduled times are interpreted in Asia/Manila. UUID values are required where indicated. Unknown object fields are stripped by object Zod schemas; client totals and statuses are never authoritative.
 
-The dispatcher returns `{ "error": "message" }`: 401 when the message matches “Sign in”, 403 when it matches “Admin access”, otherwise 400. This is the current message-based mapping, not a general typed error contract. Verification failures and missing service configuration can therefore return 400. Unknown dispatched routes return 404; unsupported HTTP methods return framework 405. Do not depend on database error text as a stable machine code.
+Dispatcher failures return {error,code}, with an incident UUID for unexpected failures. Codes include AUTH_REQUIRED/INVALID_CREDENTIALS (401), ADMIN_REQUIRED/EMAIL_UNVERIFIED (403), INVALID_INPUT/INVALID_JSON/REQUEST_REJECTED (400), BODY_TOO_LARGE (413), RATE_LIMITED/HOLD_LIMIT/PROVIDER_LIMIT (429), NOT_CONFIGURED/CLIENT_IDENTITY_UNAVAILABLE/LIMITER_UNAVAILABLE/SERVICE_UNAVAILABLE (503), and INTERNAL_ERROR (500). HTTP 429 includes Retry-After seconds. Unexpected provider/SQL messages stay private; recognized database business errors remain actionable. Unknown routes return 404 and unsupported methods return framework 405. JSON bodies are limited to 256 KiB, including streamed bodies without a truthful Content-Length.
 
 The separate jobs endpoint uses its own 401/503 responses. [Booking row fields and nullability](DATABASE.md) define booking responses; server responses can contain more fields than the UI type lists.
 
@@ -17,7 +17,7 @@ The separate jobs endpoint uses its own 401/503 responses. [Booking row fields a
 <!-- endpoint: GET /api/session -->
 ### GET /api/session
 
-Public. Returns `{configured, user, admin}`. `user` is null or `{id,email}`. Without Supabase URL/key, returns `{configured:false,user:null,admin:false}`. This is session/configuration state, not proof that all payment/email services are operational.
+Public, limited to 120 requests per trusted IP per minute when configured. Returns `{configured, user, admin}`. `user` is null or `{id,email}`. Without Supabase URL/key, returns `{configured:false,user:null,admin:false}`. This is session/configuration state, not proof that all payment/email services are operational.
 
 <!-- endpoint: POST /api/auth -->
 ### POST /api/auth
@@ -34,12 +34,12 @@ Query `code` is exchanged for a session. A validated next=/stays/slug destinatio
 <!-- endpoint: GET /api/bookings -->
 ### GET /api/bookings
 
-Verified account. Returns only rows whose user_id equals the authenticated user ID, with receipts metadata. This server filter applies to admins too; caller-supplied owner filters are ignored. Database staff read permission remains available only for intentional staff workflows. Newest created rows first, capped at 500; there is no pagination parameter yet. Receipt metadata contains an object path, not a public download URL.
+Verified account. Returns only rows whose user_id equals the authenticated user ID, with receipts metadata. This server filter applies to admins too; caller-supplied owner filters are ignored. Database staff read permission remains available only for intentional staff workflows. Query page is zero-based (default 0); returns {bookings,total,page}, 50 rows per page, newest created first with UUID tie-breaking. The former bare-array response is replaced; stale account pages must reload. Receipt metadata contains an object path, not a public download URL.
 
 <!-- endpoint: GET /api/admin -->
 ### GET /api/admin
 
-Verified admin. Returns `{offerings,resources,blackouts,site_content,email_jobs,audit_events}`, each an array capped at 500. Emails and audit events sort by creation descending. Bookings and reporting use the separate range/paginated and aggregate endpoints below. This changes the previous bundled admin response.
+Verified admin. Returns core offerings/resources/site_content arrays and an empty compatibility blackouts array. Email/activity/blackouts have dedicated paginated endpoints; they are no longer fetched at workspace initialization. Core configuration reads retain the provider row limit. Bookings and reporting use the separate paginated/aggregate endpoints below.
 
 <!-- endpoint: GET /api/receipt -->
 ### GET /api/receipt
@@ -132,7 +132,7 @@ Body `{id}` with job UUID. Resets a failed job to queued, attempts zero, and imm
 <!-- endpoint: GET /api/jobs -->
 ### GET /api/jobs
 
-Scheduler only: `Authorization: Bearer <CRON_SECRET>`. Requires configured email settings and service client. Claims up to 20 jobs, expires unpaid holds through the claim function, sends guest/staff mail, and returns {processed,sent,cleaned,cleanupFailed}. Admin jobs link to /admin?booking=UUID; guest jobs link to /account. No blanket BCC is sent. `sent` records provider acceptance plus successful database recording, not inbox delivery. Missing/invalid secret: 401. Missing email configuration returns 200 with email status and cleanup counts; queue error returns 503. The implementation's pre-claim configuration check means expiry cleanup also waits for email configuration; availability excludes expired holds regardless. See [operations](OPERATIONS.md) for retries and recovery.
+Scheduler only: `Authorization: Bearer <CRON_SECRET>`. Requires configured email settings and service client. Claims up to five jobs at a time (up to 20/run), expires unpaid holds through the claim function, sends guest/staff mail, and returns {processed,sent,cleaned,cleanupFailed}. Admin jobs link to /admin?booking=UUID; guest jobs link to /account. No blanket BCC is sent. `sent` records provider acceptance plus successful database recording, not inbox delivery. Missing/invalid secret: 401. Missing email configuration returns 200 with email status and cleanup counts; queue error returns 503. The implementation's pre-claim configuration check means expiry cleanup also waits for email configuration; availability excludes expired holds regardless. See [operations](OPERATIONS.md) for retries and recovery.
 
 ## Expanded administration
 
@@ -215,3 +215,37 @@ POST /api/admin/review no longer accepts financial confirmation or balance updat
 POST /api/upload/prepare and /api/upload/complete additionally support kind payment-proof: verified staff only, booking required, stored in private receipts. Preparation registers the cleanup prefix; completion verifies original bytes and returns the registered receipt row. It does not record funds. Guest receipt completion now also requires option: an ID from that booking's snapshotted payment options. Guest-selected method is derived in SQL; the admin still verifies actual receipt of funds. Existing file type/size/signature, scoped path and ownership checks remain. GET /api/receipt continues issuing 60-second links only for the owner/admin, including staff-uploaded proofs. Do not log signed URLs.
 
 Receipt finalization errors preserve the private object rather than deleting potentially committed evidence on a retry. Unregistered leftovers remain under the booking prefix for its eventual deletion cleanup; failed metadata lookup also prevents invalid-byte cleanup. No automatic orphan-retention SLA is claimed.
+
+## Audit hardening contracts (migration 007)
+
+### Shared limits
+
+Application HTTP limits share atomic counters across server instances. Login/signup/password actions: 10 per trusted IP per 10 minutes; recovery: 10 per trusted IP per hour and 3 per normalized email per hour. Logout is exempt. Quotes and availability share 60 per trusted IP per minute. Authenticated reads share 120 per user/minute and writes 30 per user/minute, except each upload phase has its own 10/user/minute allowance and receipt links have 60/user/minute. Supabase Auth provider limits remain separate. Missing trusted ingress identity, HMAC secret or counter service prevents protected operations with 503. Default window timing starts with the first request; hold creation has the independent rolling-hour rule.
+
+The hold HTTP contract retains its existing payload/booking response. The database rejects a fourth unresolved unpaid guest reservation and an eleventh successful creation within an hour, even through direct authenticated RPC calls. Identical retries do not consume quota again; staff manual bookings are exempt. HTTP maps quota SQLSTATE to HOLD_LIMIT/429 with a 60-second retry hint; active limits still require releasing a hold or staff resolution.
+
+POST /api/quote keeps its response shape but now calls service-only quote_for_actor after input/rate/identity checks. Anonymous/authenticated direct booking_quote execution is revoked. Prices and availability are never cached. Relevant successful admin content/offering/settings saves expire the public catalog tag; direct administrative database edits appear after cache revalidation.
+
+<!-- endpoint: POST /api/availability -->
+### POST /api/availability
+
+Same-origin JSON, anonymous: {arrival,departure,arrival_time,guests}, with the same date/time/count requirements as quote. Returns an array of {id,available} for published offerings accepting that guest count, maximum 100 published offerings. Offerings too small for the guest count are omitted. Invalid dates and service failures fail the whole request; this is never a reservation guarantee. One HTTP call and one service RPC replace per-offering HTTP fan-out.
+
+<!-- endpoint: GET /api/admin/emails -->
+### GET /api/admin/emails
+
+Verified admin. Query page (zero-based, default 0); returns {rows,total,page}, 100 email jobs/page ordered by created_at descending then UUID. Jobs retain provider-safe failure summaries, attempts and exhausted-job staff retry. No email is sent by reading this endpoint.
+
+<!-- endpoint: GET /api/admin/activity -->
+### GET /api/admin/activity
+
+Verified admin. Same pagination envelope/order, 100 audit events/page. Internal activity stays staff-only.
+
+<!-- endpoint: GET /api/admin/blackouts -->
+### GET /api/admin/blackouts
+
+Verified admin. Same 100-row pagination; optional from/until ISO dates filter half-open overlap with Philippines day boundaries. Ordered by starts_at descending then UUID. The calendar fetches every page in its visible range and rejects changed/incomplete batches; staff blackout management has explicit pages.
+
+### Worker changes
+
+GET /api/jobs keeps bearer-secret authentication and now limits execution to 60 seconds, with a 40-second processing deadline and bounded provider IO. Claims at most five emails per batch, four batches per run, and two cleanup jobs, matching completion/release by lease_token. Unstarted mail is requeued without consuming an attempt; failed attempts remain retryable up to eight sends. Expired final-attempt leases become failed for staff retry. Provider Retry-After/reset headers and daily/monthly quota responses delay delivery; a shared provider cooldown prevents further queue claims. Conservative shared pacing is one send/second for this application. Returns {processed,sent,deferred,cleaned,cleanupFailed,health}; health contains oldestQueuedSeconds/exhaustedJobs/cleanupFailedJobs or null if its read fails. Missing email configuration returns cleanup counts and an email explanation, still performing abuse-history/storage maintenance. Logs contain counts/timing only. Inbox delivery remains outside the response guarantee.

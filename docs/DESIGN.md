@@ -58,6 +58,16 @@ Every offering uses arrival/departure dates plus a whole-minute Philippines arri
 
 Anonymous guests can check price and availability and choose Sign in & continue. The same selection returns after authentication, is requoted, and requires confirmation. A changed price, unavailable dates, expired draft, or storage failure produces a visible message. Personal Your reservations is always owner-only, including staff accounts; managing all reservations is a separate staff workspace.
 
+## Audit optimization and limits
+
+The existing DM Sans and Libre Caslon Display typography is self-hosted with next/font/local and bundled licenses. Marketing/detail/gallery/account images use responsive delivery for shipped images and the configured Supabase public marketing bucket; arbitrary external HTTPS images retain direct rendering. Hero remains eager/high priority. Small-screen body/search spacing reserves room around the hosting badge. Hosted desktop and 320/390/650px search layouts passed. Nonce CSP blocks Netlify’s injected badge/toolbar scripts as documented by the provider; application hydration and images remain functional. Do not add unsafe-inline to script policy merely to restore this optional overlay.
+
+Availability search sends one request for all published offerings. Guest history has 50-row pages; Email & activity and blackout management use 100-row pages loaded only when needed. Major dashboard/settings/reservation/admin tools load as separate client chunks. Guest page requests cancel superseded loads, and staff calendar rejects incomplete or changed booking/blackout batches.
+
+Rate-limit messages remain visible in the existing status/error areas and expose retry guidance; controls become available again after failure. Three unresolved unpaid reservations are allowed, including unverified proof/correction states; normal existing booking/payment status copy and staff manual-booking behavior are preserved. No invented metrics or provider-delivery success are displayed.
+
+If the initial session check is throttled or unavailable, My bookings shows the error with a Try again button. Staff shows its existing retryable workspace-error state and booking forms retain the session error message. These failures do not show the setup preview or silently change sign-in state. Internal refund notes remain visible in paginated staff activity.
+
 ## Homepage mobile booking search
 
 The homepage SearchBar labels its existing guest selector GUESTS, retaining uppercase styling and its accessible name Number of guests. At the existing max-width:650px breakpoint, the form uses two equal zero-minimum grid tracks: Check In/Check Out first, Arrival Time/Guests second, and the full-width Find a stay button third. Mobile labels stretch to a common row height and place controls at the bottom so a wrapped Arrival Time label at 320px does not misalign its input. Zero minimum widths and mobile-only removal of redundant right padding keep native date/time controls within the panel. Desktop grid rules and all inputs/defaults/navigation remain unchanged. Listings/detail booking forms are outside this change.

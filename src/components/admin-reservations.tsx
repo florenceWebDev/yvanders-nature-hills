@@ -8,7 +8,8 @@ import {money,localTime} from '@/lib/catalog';
 import type {Booking,Offering,Resource} from '@/lib/types';
 type Blackout={id:string;resource_id:string;starts_at:string;ends_at:string;reason:string};
 type Page={bookings:Booking[];total:number};
-export function Reservations({offerings,resources,blackouts,preview,revision,run}:{offerings:Offering[];resources:Resource[];blackouts:Blackout[];preview:boolean;revision:number;run:(task:()=>Promise<unknown>)=>Promise<void>}){
+export function Reservations({offerings,resources,blackouts:initialBlackouts,preview,revision,run}:{offerings:Offering[];resources:Resource[];blackouts:Blackout[];preview:boolean;revision:number;run:(task:()=>Promise<unknown>)=>Promise<void>}){
+ const [blackouts,setBlackouts]=useState<Blackout[]>(initialBlackouts);
  const[view,setView]=useState('newest'),[anchor,setAnchor]=useState(campDate()),[status,setStatus]=useState(''),[offering,setOffering]=useState(''),[query,setQuery]=useState(''),[search,setSearch]=useState(''),[page,setPage]=useState(0),[rows,setRows]=useState<Booking[]>([]),[total,setTotal]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState(''),[selected,setSelected]=useState<Booking|null>(null),[version,setVersion]=useState(0);
  const period=view==='week'?'week':'month';const range=periodRange(period,anchor);
  const from=view==='day'?anchor:view==='month'?periodRange('week',range.from).from:range.from;
@@ -17,7 +18,12 @@ export function Reservations({offerings,resources,blackouts,preview,revision,run
   const params=new URLSearchParams({order:view==='newest'?'newest':'arrival',...(['list','newest'].includes(view)?{}:{from,until}),...(status?{status}:{}),...(offering?{offering}:{}),query:search,page:String(['list','day','newest'].includes(view)?page:0)});
   (async()=>{let result=await adminGet<Page>(`admin/bookings?${params}`,controller.signal);let all=result.bookings;const count=result.total;let next=1;
    if(!['list','day','newest'].includes(view))while(all.length<count){params.set('page',String(next++));result=await adminGet<Page>(`admin/bookings?${params}`,controller.signal);const combined=all.concat(result.bookings);if(!result.bookings.length||result.total!==count||new Set(combined.map(b=>b.id)).size!==combined.length)throw new Error('Bookings changed while loading. Refresh the calendar.');all=combined;}
-   if(!controller.signal.aborted){setRows(all);setTotal(count);}
+   let blocks:Blackout[]=[];
+   if(!['list','newest'].includes(view)){
+    const bp=new URLSearchParams({from,until,page:'0'});let chunk=await adminGet<{rows:Blackout[];total:number}>('admin/blackouts?'+bp,controller.signal);blocks=chunk.rows;const blockCount=chunk.total;let n=1;
+    while(blocks.length<blockCount){bp.set('page',String(n++));chunk=await adminGet('admin/blackouts?'+bp,controller.signal);if(!chunk.rows.length||chunk.total!==blockCount)throw new Error('Blackouts changed while loading. Refresh the calendar.');const combined=blocks.concat(chunk.rows);if(new Set(combined.map(b=>b.id)).size!==combined.length)throw new Error('Blackouts changed while loading. Refresh the calendar.');blocks=combined;}
+   }
+   if(!controller.signal.aborted){setRows(all);setTotal(count);setBlackouts(blocks);}
   })().catch(e=>{if(!controller.signal.aborted)setError(e.message);}).finally(()=>{if(!controller.signal.aborted)setBusy(false);});return()=>controller.abort();
  },[view,from,until,status,offering,search,page,preview,version,revision]);
  async function open(id:string){setError('');try{setSelected(await adminGet<Booking>(`admin/booking?id=${id}`));}catch(e){setError(e instanceof Error?e.message:'Unable to open reservation');}}

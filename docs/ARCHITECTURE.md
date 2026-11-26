@@ -11,7 +11,7 @@ The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabas
 | Boundary | Responsibility | Trust |
 | --- | --- | --- |
 | Browser/client components | Marketing interactions, forms, guest history, staff UI, direct scoped upload | Untrusted input; never decides identity, price, final booking state, or capacity |
-| Next.js server pages | Per-request published catalog and settings reads | Public content only; preview explicitly labeled when unconfigured |
+| Next.js server pages | Published catalog/settings reads with 30-second data caching | Public content only; preview explicitly labeled when unconfigured |
 | Server route handlers | Input validation, same-origin POST checks, verified session/admin checks, storage verification | Service credentials remain in server-only modules |
 | Supabase Auth | Accounts, verified email, session/code exchange | Identity verified with provider user checks; not merely a client session flag |
 | PostgreSQL functions/RLS | Ownership, staff roles, state machine, money, allocation transactions, outbox | Authoritative persistence and business integrity |
@@ -20,7 +20,7 @@ The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabas
 
 ## Main flows
 
-Public pages call the [catalog loader](../src/lib/data.ts). Missing URL/key selects preview listings. With configured Supabase, published offerings and public settings are queried; a failed query produces an unavailable state. Server rendering is dynamic so admin content changes can appear on later requests. Content, images, room mappings, and poster rates are owner-verification tasks, not inferred facts.
+Public pages call the [catalog loader](../src/lib/data.ts). Missing URL/key selects preview listings. With configured Supabase, published offerings and public settings are queried; a failed query produces an unavailable state. HTML remains dynamic for fresh script nonces. Public catalog/settings data is cached for 30 seconds, and relevant admin saves immediately expire its cache tag. Quotes and holds always read authoritative database values. Content, images, room mappings, and poster rates are owner-verification tasks, not inferred facts.
 
 Guest booking follows quote → transactionally allocated 30-minute hold → external QR payment → direct original-file upload → server file inspection → pending review → staff verification → confirmation. A quote is informational. A hold can fail even after an available quote because the database rechecks under locks. See [API contracts](API.md) and [state transitions](DATABASE.md).
 
@@ -44,10 +44,10 @@ Settings are publicly readable business content. Keep credentials in environment
 
 ## Limits and known gaps
 
-- Guest history and the legacy configuration/email/audit bundle cap at 500 rows. Staff reservations use 100-row pages and range fetching; dashboard SQL aggregates all matching bookings and payment entries.
+- Guest history uses 50-row pages; email/activity/blackouts and staff reservations use 100-row pages. Calendar blackouts are loaded for the visible range. Core configuration reads retain the provider row limit; the anonymous batch search supports at most 100 published offerings.
 - Manual reservations have no attached guest account, even when an email matches an existing user.
 - Draft database prices can be null and manual ownership is nullable; shared UI types do not express every SQL possibility.
-- Dispatcher error status mapping depends on message text; there are no stable typed error codes.
+- Typed HTTP errors and database business errors have stable response codes; unexpected provider details are suppressed. A small exact list of local validation messages retains compatibility.
 - Uploaded proof pending review/correction has no automatic timeout. Staff must resolve it.
 - No provider bounce/delivery webhook, automated refunds, gateway, SMS, or channel synchronization exists.
 - Live Auth, signed receipt transport, independent capacity contention, deployment and owner inbox delivery passed a fictional check; general guest mail, retention, restore and remaining failure paths are unverified. See TESTING for the precise evidence and limits.
@@ -68,7 +68,7 @@ Payment options remain public site settings and are copied into booking snapshot
 
 [ADR 0007](decisions/0007-payment-ledger-and-settings.md) defines migration 005. Browser selection is proof metadata, while staff verification creates authoritative ledger entries under booking locks. Staff uploads share the private receipt boundary; finalized evidence alone never changes collections. Refund totals are cached on bookings through a trusted insertion trigger so owner reads can show net balance without exposing internal ledger references. Scoped settings merges serialize on the existing settings row. No gateway or new runtime dependency is added.
 
-catalog is wrapped in React cache for reuse within one server-render request (layout, metadata and page). This is not cross-request availability caching. Public data remains dynamic; private API/auth responses explicitly use private, no-store. Partial CSP restricts base URLs, objects, framing and form destinations; it does not claim nonce-based script XSS protection. Server-only credential imports remain enforced.
+Catalog uses React request deduplication plus Next data caching for public content only (30-second revalidation and save invalidation). Root rendering waits on connection() so HTML nonces remain per response without disabling the data cache. Private API/auth responses stay private/no-store. Proxy supplies script nonces and a production script policy; inline styles remain permitted for appearance settings. Server-only credential imports remain enforced.
 
 Financial finalization failures retain receipt objects to avoid deleting evidence committed by another retry. Invalid-byte cleanup checks for registered metadata and fails safely if that lookup is unavailable. Eventual cancelled-booking cleanup catches registered staff/guest prefixes; unregistered leftovers on retained bookings need operator retention reconciliation.
 
@@ -79,3 +79,11 @@ Financial finalization failures retain receipt objects to avoid deleting evidenc
 The browser stores one versioned booking draft for up to 24 hours under ynh-booking-draft-v1; an opaque draft ID and local offering path travel through authentication. Name/phone remain in local storage, never in return URLs; passwords, tokens and payment proof are never saved in the draft. Storage failure is shown, expired/malformed drafts are removed when read, and successful hold/logout clears it. A draft is convenience state: every resumed quote and hold is validated and priced by the server, and holds are created only after confirmation.
 
 Admin alerts are explicit per-event/per-recipient outbox jobs created in the same transaction as final booking/proof/payment changes. Provider failures do not roll back those changes. Recipients are snapshotted at event time; later role changes affect future events. No realtime subscription or delivery webhook is added.
+
+## Audit hardening boundaries (migration 007)
+
+[ADR 0010](decisions/0010-audit-hardening.md) defines peak concurrent allocation, per-guest database quotas, Supabase atomic HTTP counters and service-only quoting. HMAC-derived email/IP/user keys and a bounded private hold-event history are never public settings. HTTP counters use fixed windows starting with the first request; the ten-hold allowance uses a rolling hour. All deployments must share the same HMAC secret. Only Netlify ingress metadata is accepted for anonymous IP identity; generic forwarded headers are ignored. Missing limiter configuration/storage fails closed. Direct Supabase Auth and authenticated reads still require provider-side protections: these application counters govern application HTTP routes, and guest hold quotas govern direct booking RPCs.
+
+Jobs claim at most five emails per batch, up to four batches per run, and two cleanup jobs. Lease tokens guard completion/release; a stale final email attempt becomes visibly failed. Provider 429 responses persist a shared cooldown. Outbox idempotency keys remain stable; delivery acceptance is not inbox delivery. Public catalog caching may serve an earlier public value during revalidation/provider failure; every financial/availability decision remains uncached. Arbitrary external image hosts keep direct delivery; only shipped images and the configured Supabase public marketing path enter the optimizer.
+
+Client session reads check HTTP status before using configured/user fields. Rate-limit or service failures produce an account retry state, a staff load error or a booking-form message; they are not treated as missing configuration or a signed-out identity. Paginated staff activity retains internal refund notes.

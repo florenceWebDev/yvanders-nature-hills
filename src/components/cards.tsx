@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import {MarketingImage as Image} from '@/components/marketing-image';
 import Link from'next/link';
 import{Users,Sun,TreePine}from'lucide-react';
 import type{Offering}from'@/lib/types';
