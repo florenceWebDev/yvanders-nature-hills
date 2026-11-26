@@ -180,3 +180,10 @@ Initial feature CI verified on [PR #4](https://github.com/florenceWebDev/yvander
 - Pass: 20 local client static assets contained zero exact matches for the two locally configured privileged values; values were neither logged nor written to audit evidence. Invalid-byte cleanup regression checks registered metadata/lookup failure, and financial finalization errors now preserve objects. Unregistered retained objects require later booking cleanup/operator retention reconciliation.
 
 - Pass: final configuration-free build reports configured:false; all 12 smoke routes and no-service guards pass. The four new admin operations return 400 with a configuration error; connected anonymous checks above returned 401. No protected call succeeded in either mode.
+
+## Requested live release precheck — 26 November 2026
+
+- Pass: PR #10 promoted from draft; implementation commit 28ff7e0 has passing Application, Documentation and Netlify preview checks.
+- Pass: read-only Supabase SQL reports accommodations=10, bookings=0, payment_entries=0, receipts=0, payment_ready=true, migration 005 absent. No guest/financial data was copied into repository evidence.
+- Blocked: automatic approval review rejected the proposed restricted same-database backup and temporary hold pause as additional production mutations/service interruption requiring explicit approval. Verified the editor still contains only the precheck query; the rejected transaction was not executed. Migration, merge and live deployment were not performed.
+- Observed: provider dashboard reports no backups. Proposed in-database snapshot is a migration recovery aid, not an independent backup or verified restore.

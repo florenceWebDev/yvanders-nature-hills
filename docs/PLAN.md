@@ -1,3 +1,9 @@
+# Live release precheck — 26 November 2026
+
+Owner requested release to live. PR #10 is ready for review (no longer draft), with Application, Documentation and Netlify preview checks green on implementation commit 28ff7e0. Supabase precheck observed ten accommodations, zero bookings, zero payment entries, zero receipts, payment_ready=true and migration 005 absent. This supersedes the older one-booking checkpoint; no existing records were changed.
+
+Supabase reports no provider backup. Proposed a restricted same-database snapshot of affected application tables/function definitions plus a temporary pause of new holds for the coordinated migration/deploy. Automatic approval review rejected that transaction because these additional production mutations and interruption need explicit approval. The transaction was not executed; no snapshot, pause, migration, merge or deployment occurred. Await owner approval for that exact preparation, then apply 005, merge PR #10, verify the published app and restore prior hold readiness. A same-database snapshot is not an independent disaster-recovery backup.
+
 # Payment tracking, settings split and audit — 26 November 2026
 
 Implemented locally on codex/payments-settings-audit: separate Website/Payment Settings, guest choice before QR display, payment-method proof metadata, staff online payment proof uploads, individual payment entries, net balances/refunds, method reporting and separate Finished stay action. Migration 005 is prepared and has not been applied to production. Existing live records/configuration were not mutated during the audit.
