@@ -1,6 +1,6 @@
 # Audit hardening release gate — 26 November 2026
 
-Migration 007 and its matching application are prepared on codex/audit-hardening, not deployed. Follow the [coordinated release packet](OPERATIONS.md#release-migration-007-audit-hardening). Required before production: final PR Application/Documentation checks; isolated independent PostgreSQL contention and provider/browser acceptance; RATE_LIMIT_HMAC_SECRET in Functions scope; verified trusted ingress metadata; independent backup/restore; captured pause/grant/scheduler state. Production access, sender/SMTP and historical restore gaps are not waived by local tests.
+Migration 007 and its matching application are prepared on codex/audit-hardening, not deployed. Follow the [coordinated release packet](OPERATIONS.md#release-migration-007-audit-hardening). Required before production: final PR Application/Documentation checks; isolated independent PostgreSQL contention and provider/browser acceptance; RATE_LIMIT_HMAC_SECRET in Functions scope; verified trusted ingress metadata; independent backup/restore; captured pause/grant/scheduler state. Independent PostgreSQL races and the application-data/receipt restore rehearsal now pass, together with connected localhost staging workflows and pagination; see [Testing](TESTING.md). Hosted ingress/cache/rendered acceptance and production configuration/transition remain incomplete. Auth recovery and sender/SMTP are separate limits.
 
 # Homepage mobile search live — 26 November 2026
 
@@ -8,7 +8,7 @@ Migration 007 and its matching application are prepared on codex/audit-hardening
 
 # Current release process
 
-Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest recorded application includes homepage release e61ac97 and documentation main 5078468, with migrations 001–006 applied. Deployment tooling improvements are prepared on a feature branch; this work does not apply SQL or publish production. General email/SMTP, isolated integration and independent restore acceptance remain outstanding as recorded in TESTING.
+Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest observed live main revision is 4f42e9c, including PR #15 deployment tooling and the homepage mobile release, with migrations 001–006 applied. PR #16 remains draft pending hosted acceptance and the coordinated transition. Application-only independent restore and connected staging evidence are recorded in TESTING; general email/SMTP and full Auth recovery remain separate limits.
 
 ## Historical rollout evidence
 

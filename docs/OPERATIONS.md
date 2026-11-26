@@ -183,6 +183,12 @@ After compatible UI/API checks, authenticated hold/payment/review grants, previo
 3. Obtain a verified independent backup including database definitions/roles/grants and business rows, and separately protected private receipt objects; rehearse restoration to an independent project and reconcile counts/financial sums. A same-database snapshot is insufficient. Keep backups and outputs private. Capture pre-release booking/payment/receipt counts, totals, relevant function definitions/ACLs, all guest-hold execution grants, scheduler active state and currently published application commit.
 4. Add the new HMAC secret to production Functions scope through the existing secret manager; do not print or commit it. Existing service, Auth, storage, email and cron secrets remain. A later deploy is required for secret changes. The new app requires schema 007; the old worker must not run against the new lease implementation during transition. Old account clients expect an array; new account clients expect a paginated envelope and must reload. Old anonymous direct quote calls lose permission after migration.
 
+### Passwordless application recovery rehearsal
+
+For this release, the owner approved an application-only read-only SQL Editor export into a restricted local folder outside the repository. It includes the 13 public application tables, deployed function definitions, constraints/indexes, policies, triggers and grants, with private receipt files exported separately. Auth accounts, passwords, sessions, Auth secrets and Storage catalog records are excluded. Do not reset production credentials to obtain a dump. The PostgreSQL client installation alone is not evidence that pg_dump ran.
+
+Restoration on the separate staging project uses a private schema outside the API exposure list, disabled Auth identifier stubs for foreign keys, and a private receipt bucket. Reconcile exact business rows, financial sums, function/trigger counts, permissions and receipt hashes. This rehearsal passed; it does not test full Auth/project recovery. Keep the restored real records separate from fictional application fixtures and outbox workers. Before the production transition, compare current state with the backup and refresh the approved backup if business records changed. Preserve original grants and scheduler state independently.
+
 ### Read-only precheck
 
 Execute as the trusted database operator and keep result details private. Do not select cron commands, guest rows, email bodies, storage paths or Vault values.
