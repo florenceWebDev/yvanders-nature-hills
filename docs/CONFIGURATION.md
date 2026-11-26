@@ -75,7 +75,7 @@ Strong random server-only scheduler secret, also configured in the scheduler's A
 
 ## Connect staging
 
-1. Create a fresh isolated Supabase project and apply [001_booking.sql](../supabase/migrations/001_booking.sql), then [002_administration.sql](../supabase/migrations/002_administration.sql), in order. Verify RLS/functions and storage buckets. Existing databases require additive migrations instead.
+1. Create a fresh isolated Supabase project and apply [001_booking.sql](../supabase/migrations/001_booking.sql), then [002_administration.sql](../supabase/migrations/002_administration.sql), [003_payment_options.sql](../supabase/migrations/003_payment_options.sql), and [004_appearance_deletion.sql](../supabase/migrations/004_appearance_deletion.sql), in order. Verify RLS/functions and storage buckets. Existing databases require additive migrations instead.
 2. Set local URL/anon/service keys. Configure Supabase Auth site origin and allowlisted `/auth/callback` URL. Keep email confirmation enabled; use provider-approved SMTP for reliable Auth verification/reset mail.
 3. Register and verify the intended staff account. An authorized database administrator explicitly inserts its user ID into `public.admins`; never make this a public endpoint. Use the example in the project [README](../README.md).
 4. Optionally run `npx tsx --env-file=.env.local scripts/seed.ts`. It creates missing unpublished drafts by slug; it does not overwrite existing offerings or grant roles. Camping/day-use rates remain unset. Verify room/photo mappings and the Camp Hut resource relationship before publishing.
@@ -84,3 +84,7 @@ Strong random server-only scheduler secret, also configured in the scheduler's A
 7. Complete the [testing acceptance matrix](TESTING.md) and [release gate](RELEASE.md) before real transactions.
 
 Restart the local server after environment changes; redeploy when production configuration requires it. Never infer successful provider setup merely because environment values are present.
+
+## Appearance/deletion release requirement
+
+Apply migration 004 after 003 before deploying this application. Branding, marketing images, palette and contact email use public site settings; they require no new environment values. Keep the existing cron secret and service-role storage access configured for durable receipt cleanup. Email sender/ADMIN_EMAIL configuration remains separate from public contact email.

@@ -1,3 +1,13 @@
+# Appearance and permanent deletion — 26 November 2026
+
+- Pass: npm test, 38 tests. PGlite executes migrations 001–004, validates appearance writes and private helpers, owner/nonowner/anonymous deletion, ineligible states, financial/dependency erasure, capacity reuse and active email leases. Storage-worker tests use mocks for delayed uploads, cleanup completion and failed-storage retry; these are not real Supabase storage tests.
+- Pass: npm run build (final production build, including TypeScript) and npm run typecheck.
+- Pass: npm run docs:test, 14 tests; npm run docs:check, including changed-path impacts, local links and API/environment inventories.
+- Pass: local configuration-free HTTP smoke routes, session, scheduler credential rejection, same-origin denial and protected APIs. Local preview explicitly overrides Supabase URL/key so it cannot read or mutate live guest records.
+- Pass: Chrome desktop at its normal viewport and responsive 390×844 inspection of administrator alignment/stacking, daily table empty state, next-day navigation, existing month view, appearance editor/image previews and contrast feedback. Measured mobile page width remains within the viewport. Header color regression observed during inspection was fixed and rechecked.
+- Blocked for this local milestone: live migration 004, real upload/save/reload with a staff session, logo replacement persistence in the deployed header/footer, real guest/admin destructive flows, independent PostgreSQL deletion/upload/review contention, more-than-100-row daily browser pagination, and actual receipt cleanup through the signed-upload grace window. These require isolated staging; production was not altered.
+- Not run: failure-path browser checks across multiple browser engines, restore from backup and production deployment. Do not interpret preview UI or PGlite serialization as proof of live concurrency or storage permissions.
+
 # Verification update — 26 November 2026
 
 ## System-check removal

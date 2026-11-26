@@ -24,3 +24,7 @@ See IMPLEMENTATION-BRIEF.md for settled rules. Poster facts are draft content, n
 ## Approved administration expansion
 
 All admins may promote/remove existing verified accounts, with a last-admin safeguard. Reporting separates transaction-date collections/refunds from arrival-date confirmed booking value, with weekly/monthly/quarterly/yearly filtering. Full promo controls include complimentary reservations awaiting staff approval without payment proof. Booking calendars must use Philippines time and complete range data. Preserve the nature design while making active navigation and homepage text clearly visible.
+
+## Approved appearance and reservation controls
+
+Admins can replace marketing photos and accommodation galleries with recommended image dimensions, change logo, all main palette roles and contact email. Reservations has a daily table of every stay overlapping a selected Philippines day, in addition to calendar/history views. Guests can permanently delete their active awaiting-payment holds. Admins can permanently delete cancelled reservations, including receipts, financial entries and booking-specific audit history; historical reports change as explicitly selected. Delivered emails and provider backups are outside application deletion.

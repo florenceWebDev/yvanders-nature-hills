@@ -23,3 +23,11 @@ test('legacy payment snapshots render without overriding an explicit empty confi
  assert.deepEqual(paymentOptions({...legacy,payment_options:[]}),[]);
  assert.deepEqual(paymentOptions({}),[]);
 });
+
+
+test('appearance input accepts legacy settings and rejects CSS and image injection',()=>{
+ const settings={tagline:'Nature',intro:'',contact:'',email:'',address:'',payment_options:[],payment_ready:false,cancellation_policy:''};
+ assert.equal(settingsSchema.safeParse(settings).success,true);
+ assert.equal(settingsSchema.safeParse({...settings,palette:{forest:'#123456'},logo:{src:'/images/cabana.jpg',alt:'Camp'},gallery:[]}).success,true);
+ for(const patch of [{palette:{forest:'red;display:none'}},{palette:{invalid:'#123456'}},{images:{hero:{src:'javascript:alert(1)',alt:'Camp'}}},{gallery:[{src:'/images/hills.jpg',alt:''}]}])assert.equal(settingsSchema.safeParse({...settings,...patch}).success,false);
+});

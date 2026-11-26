@@ -173,3 +173,21 @@ Body {id?,code,enabled,kind,value,max_discount,min_subtotal,offering_ids,booking
 <!-- endpoint: POST /api/admin/refund -->
 ### POST /api/admin/refund
 Body {booking,amount,day,reference,request}; returns {id}. amount is positive centavos, day is a nonfuture Philippines date, reference is 3–2000 characters, request is a retry UUID. Records a completed external refund; does not move funds or cancel the booking. Cannot exceed verified payment/opening entries minus earlier refunds. Identical retries do not add another refund; reusing a UUID with different refund details is rejected. Gross paid is retained; refunds and net collections are reported separately.
+
+## Appearance and deletion additions
+
+The existing POST /api/admin/content accepts optional logo ({src,alt}), palette (named six-digit hex colors), images (named page slots with {src,alt}), and gallery (up to 20 ordered {src,alt} items). Legacy settings need no appearance fields. HTTP and a database trigger validate image paths/descriptions, slot names and color roles. Missing roles/images use the original defaults; an explicitly empty gallery stays empty. Public contact email remains the existing email field and does not configure transactional email.
+
+<!-- endpoint: POST /api/bookings/delete -->
+### POST /api/bookings/delete
+
+Same-origin verified owner. Body: {booking: UUID}. Returns {ok:true} after the transaction. Only an unexpired awaiting_payment booking with no receipt or recorded payment may be erased. Ownership and status are rechecked under a row lock in delete_unpaid_booking; unauthorized IDs return Booking not found. Other states fail without changes. Inventory and reserved promo usage are released immediately. Repeating a completed deletion returns Booking not found; reload the list after an uncertain response.
+
+<!-- endpoint: POST /api/admin/bookings/delete -->
+### POST /api/admin/bookings/delete
+
+Same-origin verified admin. Body: {booking: UUID}; returns {ok:true}. delete_cancelled_booking rechecks membership and permits only cancelled reservations. Permanently removes booking, receipts metadata, payment/refund entries, promo redemptions, booking-specific audit entries and email jobs. Historical reports change. An actively sending email lease blocks deletion with a retry message. Receipt files are queued for asynchronous cleanup; success means database deletion committed, not storage deletion completed.
+
+Daily list reuses GET /api/admin/bookings with from=selected date, until=next date, page and existing filters. It includes all overlapping stays using half-open Philippines-day boundaries and 100-row pages.
+
+GET /api/jobs now processes receipt cleanup before checking email configuration. Normal responses add cleaned and cleanupFailed (job counts, not file counts). If email is unconfigured it returns HTTP 200 with those counts and an email explanation; cleanup still runs. Queue-claim failures return 503. No new environment values are required.

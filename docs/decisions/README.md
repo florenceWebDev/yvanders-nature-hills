@@ -11,6 +11,8 @@ Create the next numbered file, describe the actual decision and tradeoff, and li
 - [0004 — Connected Netlify services](0004-connected-netlify-services.md)
 - [0005 — Configurable payment options](0005-configurable-payment-options.md)
 
+- [0006 — Appearance settings and permanent deletion](0006-appearance-and-permanent-deletion.md)
+
 ## New-record template
 
 ```text

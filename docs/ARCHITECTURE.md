@@ -59,3 +59,7 @@ Keep the relevant [handbook reference](README.md), changelog, tests, and current
 ## Multiple QR payments and fixture removal
 
 Payment options remain public site settings and are copied into booking snapshots; administration changes affect future holds. Shared normalization renders legacy single-QR snapshots, while new writes use an ordered array of up to three options. HTTP and database validation enforce completeness, uniqueness, count and readiness. No payment gateway or automatic transfer verification is added. [ADR 0005](decisions/0005-configurable-payment-options.md) records migration and cleanup decisions.
+
+## Appearance and deletion boundary
+
+[ADR 0006](decisions/0006-appearance-and-permanent-deletion.md) records the new behavior. Public settings provide optional appearance fields rendered through server-loaded settings and CSS custom properties; no credentials move into settings. Private SQL helpers enforce deletion status/ownership and atomically queue durable file cleanup. The existing scheduler calls the storage cleanup worker before email processing, independently of mail configuration. No new runtime dependency or environment variable is introduced. Migration 004 is required before the application release.
