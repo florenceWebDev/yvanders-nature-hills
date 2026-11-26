@@ -1,3 +1,24 @@
+# Booking experience production rollout — 26 November 2026
+
+- Pass: owner explicitly approved the restricted snapshot and brief pause. Created release_backup_006_20261126 with affected application records, function definitions/grants and previous readiness/scheduler state. Every copied table has RLS; client schema access is denied. This is a same-instance recovery aid, not independently verified disaster recovery.
+- Pass: initial direct cron.job update was denied; the transaction rolled back fully (snapshot absent, readiness/scheduler still true). Retried with permitted cron.alter_job and confirmed snapshot/pause succeeded. Hold, payment and review RPC access was paused during transition.
+- Pass: loaded the exact migration from reviewed commit ffff686, compared the complete selected editor contents with that source plus a final hold-grant pause, and applied transactionally. Existing booking, two payment entries and receipt compare exactly with the snapshot. New migration columns exist; private queue helper denies client execution and public quote remains granted.
+- Pass: PR #13 Application/Documentation checks green, PR merged as c6a911d, Netlify shows matching production commit Live. Used the already signed-in alternate Chrome hosting profile.
+- Pass: deployed /, /stays, /account, /admin and /api/session returned 200. Anonymous /api/bookings and /api/admin/bookings?order=newest returned 401. A production quote returned 200 with arrival/departure at 09:15 Philippines and exactly 48 hours across two days, with schedule_policy=arrival_24h. This read-only quote creates no hold.
+- Pass: authenticated staff Reservations defaults to New bookings · latest first and loads one reservation. The same admin’s personal /api/bookings returns zero rows; no other owner’s reservation appears there. No record details or session identifiers are copied into this evidence.
+- Pass: visible deployed arrival/time controls and late-arrival policy; saved fixed-origin callback query pattern alongside the two existing redirect URLs. This verifies configuration, not an actual verification/reset email round trip.
+- Pass: restored previous readiness/scheduler settings and authenticated hold/payment/review grants; counts remain one booking, two payment entries, one receipt. Scheduler HTTP 200 at 16:49 Philippines time, timed_out=false and processed/sent/cleaned/cleanupFailed=0.
+- Blocked/Not run: general guest/admin inbox delivery and branded Auth sender (owned verified domain/SMTP unavailable), full isolated browser auth-draft round trip, independent-connection contention and independent backup/restore. No live booking/payment/proof was created or deleted as a deployment fixture.
+
+Earlier checkpoints below are historical and superseded where this rollout supplies newer evidence.
+
+# Deployment precheck — 26 November 2026
+
+- Pass: PR #13 mergeable; GitHub Application and Documentation checks successful on ffff686.
+- Pass: read-only Supabase precheck found one booking, two payment entries, one receipt, ten offerings, no pending email jobs, readiness/scheduler enabled and migration 006 absent. No guest details or signed URLs copied into evidence.
+- Blocked: Netlify OAuth email-read grant rejected by automatic approval review pending explicit authorization. Supabase reports no provider backups; independent backup/restore is unverified.
+- Not run: snapshot/pause, migration 006, merge and deployment. Production remains unchanged.
+
 # Booking experience checks — 26 November 2026
 
 - Pass: migration 006 applied locally after 001–005 in PGlite; existing booking timestamps/snapshots preserved. Every offering uses selected whole-minute arrival time and 24-hour days with correct price bases; missing/invalid time, duration, overlap boundaries, blackouts and Finished allocations checked.
