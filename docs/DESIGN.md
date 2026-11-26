@@ -57,3 +57,11 @@ Reservations now opens in New bookings, a latest-created-first table across arri
 Every offering uses arrival/departure dates plus a whole-minute Philippines arrival-time field. Search also carries that time through listing cards. The quote shows both exact endpoints; the late-arrival policy appears before confirmation and on new guest reservations. The editor explains guest-selected 24-hour days instead of configuring fixed arrival/slot times for new bookings. Existing reservation timestamps remain displayed as recorded.
 
 Anonymous guests can check price and availability and choose Sign in & continue. The same selection returns after authentication, is requoted, and requires confirmation. A changed price, unavailable dates, expired draft, or storage failure produces a visible message. Personal Your reservations is always owner-only, including staff accounts; managing all reservations is a separate staff workspace.
+
+## Audit optimization and limits
+
+The existing DM Sans and Libre Caslon Display typography is self-hosted with next/font/local and bundled licenses. Marketing/detail/gallery/account images use responsive delivery for shipped images and the configured Supabase public marketing bucket; arbitrary external HTTPS images retain direct rendering. Hero remains eager/high priority. Small-screen body/search spacing reserves room around the hosting badge; hosted behavior still needs rendered acceptance.
+
+Availability search sends one request for all published offerings. Guest history has 50-row pages; Email & activity and blackout management use 100-row pages loaded only when needed. Major dashboard/settings/reservation/admin tools load as separate client chunks. Guest page requests cancel superseded loads, and staff calendar rejects incomplete or changed booking/blackout batches.
+
+Rate-limit messages remain visible in the existing status/error areas and expose retry guidance; controls become available again after failure. Three unresolved unpaid reservations are allowed, including unverified proof/correction states; normal existing booking/payment status copy and staff manual-booking behavior are preserved. No invented metrics or provider-delivery success are displayed.

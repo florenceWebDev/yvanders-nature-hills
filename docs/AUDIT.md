@@ -1,3 +1,9 @@
+# Audit hardening implementation — 26 November 2026
+
+The code on codex/audit-hardening addresses the latest audit. The false-sold-out defect has an isolated database regression: capacity two with one allocation on each adjacent day now permits a third allocation spanning both days, and a real concurrent peak rejects it. Database guest quotas and private rate counters close direct hold bypass; anonymous quotes now use service-only wrappers. Worker leases/cooldowns, grouped reports, supporting indexes, pagination and delivery optimizations are included.
+
+This is local implementation evidence, not a deployed security certification. See [Testing](TESTING.md) for exact checks, [ADR 0010](decisions/0010-audit-hardening.md) for tradeoffs and [Operations](OPERATIONS.md#release-migration-007-audit-hardening) for release prerequisites. Production latency, hosted CSP/badge compatibility, provider IP trust, authenticated integration, independent connection races and restore remain unverified for this revision. No production mutation or load test was performed.
+
 # Deployed audit follow-up — 26 November 2026
 
 The fixes below are now deployed through PR #10 at Published main 327cdc4 with migration 005. Postdeploy checks observe the limited CSP and explicit private/no-store API headers. Public/account/admin pages return 200; unauthenticated financial/settings writes return 401. Fourteen client JavaScript assets (784,379 decoded bytes across routes) had no privileged credential-pattern matches; no probed JSON source maps were accessible. HTTP samples remain individual unthrottled measurements, not Core Web Vitals or proof of every secret's absence. See [Testing](TESTING.md) for full rollout evidence and remaining isolated-service checks. The baseline/local-only language below describes the pre-release audit.

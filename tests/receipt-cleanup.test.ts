@@ -4,14 +4,14 @@ import type {SupabaseClient} from '@supabase/supabase-js';
 import {cleanDeletedReceipts} from '../src/lib/receipt-cleanup';
 
 function fixture({past=false,fail=false}={}){
- const job={id:'cleanup-job',prefix:'fictional-owner/fictional-booking',finish_after:new Date(Date.now()+(past?-1:1)*3600000).toISOString(),attempts:1};
+ const job={lease_token:'fictional-lease',id:'cleanup-job',prefix:'fictional-owner/fictional-booking',finish_after:new Date(Date.now()+(past?-1:1)*3600000).toISOString(),attempts:1};
  let files=['receipt.png'];let deleted=false;let update:Record<string,unknown>={};
  const client={rpc:async()=>({data:[job],error:null}),storage:{from:()=>({
   list:async()=>({data:files.map(name=>({id:name,name})),error:fail?{message:'Unavailable'}:null}),
   remove:async(paths:string[])=>{assert.ok(paths.every(path=>path.startsWith(job.prefix+'/')));files=[];return{error:null};},
  })},from:(table:string)=>{assert.equal(table,'receipt_cleanup_jobs');return{
-  delete:()=>({eq:async()=>{deleted=true;return{error:null};}}),
-  update:(value:Record<string,unknown>)=>({eq:async()=>{update=value;return{error:null};}}),
+  delete:()=>{const q={eq:()=>q,then:(resolve:Function)=>{deleted=true;return Promise.resolve(resolve({error:null}));}};return q;},
+  update:(value:Record<string,unknown>)=>{const q={eq:()=>q,then:(resolve:Function)=>{update=value;return Promise.resolve(resolve({error:null}));}};return q;},
  };}} as unknown as SupabaseClient;
  return{client,job,get files(){return files;},set files(value:string[]){files=value;},get deleted(){return deleted;},get update(){return update;}};
 }

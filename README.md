@@ -4,6 +4,8 @@ A campsite promotion and booking app built with Next.js/TypeScript, Supabase Aut
 
 **Current status:** [the live Netlify website](https://yvanders-nature-hills.netlify.app/) includes PR #13 (application release c6a911d) with migration 006 applied. Personal booking history is owner-only even for admins; staff Reservations opens newest-first. Every offering accepts arrival time and whole 24-hour booking days, selections continue through sign-in, and explicit admin booking/proof/payment alert jobs replace blanket BCC. Existing booking/payment/receipt records were preserved and bookings/scheduling restored after the approved pause. General email delivery and branded Auth sender still require an owned verified domain/SMTP; see [Testing](docs/TESTING.md) and [current handoff](docs/PLAN.md).
 
+**Prepared source update:** the audit-hardening branch requires migration 007 and a server-only RATE_LIMIT_HMAC_SECRET before deployment. It corrects peak occupancy, enforces guest quotas/shared limits, hardens workers, and optimizes public/admin delivery. This source update has not changed the live app. See [release packet](docs/OPERATIONS.md#release-migration-007-audit-hardening).
+
 ## Start locally
 
 Use Node 22 LTS or newer, npm, and Git:
@@ -56,7 +58,7 @@ Application validation: `npm test`. Generate Next.js types through dev/build bef
 
 ## Connect real booking services
 
-Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql, 004_appearance_deletion.sql, 005_payments_settings.sql and 006_booking_experience.sql; an existing 005 database needs only the coordinated 006 release, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
+Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql, 004_appearance_deletion.sql, 005_payments_settings.sql 006_booking_experience.sql and 007_audit_hardening.sql; an existing 006 database needs the coordinated 007 release, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
 
 ```sql
 insert into public.admins(user_id)

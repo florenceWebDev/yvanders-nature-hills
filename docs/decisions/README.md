@@ -37,3 +37,5 @@ What has been demonstrated and what remains unverified.
 
 - [0008 — Booking continuity and admin alerts](0008-booking-continuity-and-alerts.md)
 - [0009 — Efficient assisted and owner-operated deployment](0009-efficient-deployment.md)
+
+- [0010 — Audit hardening and shared abuse protection](0010-audit-hardening.md)

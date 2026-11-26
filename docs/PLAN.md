@@ -1,3 +1,11 @@
+# Website audit hardening — implementation checkpoint, 26 November 2026
+
+Working branch: codex/audit-hardening. Implements the approved audit plan with migration 007: peak occupancy, guest quotas, shared API limits, service-only quotes and one-request search, worker leases/recovery/cooldowns, grouped reporting, pagination, public-data caching, nonce CSP, trusted image optimization and local fonts. No production schema, configuration or records have been changed.
+
+Local verification passes 71 application tests, production build/TypeScript, eight deployment and fourteen documentation regressions, documentation checks, localhost smoke/CSP inspection, and desktop/mobile admin/public previews. See [Testing](TESTING.md) for final observed outcomes and [Operations](OPERATIONS.md#release-migration-007-audit-hardening) for the migration/configuration release packet. The architecture choice is recorded in [ADR 0010](decisions/0010-audit-hardening.md).
+
+Next incomplete task: publish/check the feature PR, then complete isolated service release gates before production. This branch inherits the two existing deployment-tooling commits from PR #15; main has not merged those commits yet. Keep that dependency explicit and do not merge either release implicitly. Before any production release, complete isolated independent-connection contention, trusted ingress/header and authenticated storage/browser acceptance, and an independent restore rehearsal. The initial browser-accessible preview approval-review usage limit resolved after its reset time; an authorized retry passed browser and smoke checks. Do not treat earlier production checks as validation of this revision.
+
 # Efficient deployment implementation — 26 November 2026
 
 Prepared in [PR #15](https://github.com/florenceWebDev/yvanders-nature-hills/pull/15) on codex/efficient-deployment: [owner/assisted deployment handbook](DEPLOYMENT.md), PR release packets, read-only release check, conservative Netlify documentation-only build skipping, superseded-PR CI cancellation and deployment regressions in Application CI. [ADR 0009](decisions/0009-efficient-deployment.md) records the decision. No new credentials, application API/schema changes, production configuration mutations or merge/deployment are included.

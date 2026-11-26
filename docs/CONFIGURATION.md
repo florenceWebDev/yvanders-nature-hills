@@ -106,3 +106,19 @@ Prepared dashboard templates: [confirmation](../supabase/templates/confirmation.
 Add the exact production callback pattern https://yvanders-nature-hills.netlify.app/auth/callback?** to Supabase’s redirect allowlist to permit encoded booking returns and reset=1. Keep the origin/path fixed; do not use an unrestricted host wildcard. Add only corresponding exact local/staging origins when needed. Keep the legacy callback/reset entries during transition.
 
 No owned domain is available yet. Custom sender activation and unrestricted guest delivery remain Blocked; these HTML files are prepared assets, not applied provider configuration. See the [official SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp) and [template guide](https://supabase.com/docs/guides/auth/auth-email-templates).
+
+## Audit hardening configuration (not yet deployed)
+
+<!-- env: RATE_LIMIT_HMAC_SECRET -->
+### RATE_LIMIT_HMAC_SECRET
+
+Server-only random secret of at least 32 characters, shared by every application instance in one environment. Generate/store through the host secret mechanism, never site settings, source or logs. Counters use HMAC-SHA256 of scoped user/IP/email identities. Missing/short secret returns 503 for protected HTTP routes. Rotation starts new counter keys; old keys expire normally, so coordinate rotation and avoid using it to evade limits. Staging must use its own secret and database.
+
+<!-- env: SITE_ID -->
+### SITE_ID
+
+Read-only provider-supplied Netlify runtime site UUID. NETLIFY is build-only metadata and is deliberately not used for runtime trust. Anonymous limits trust only a syntactically valid x-nf-client-connection-ip header there, ignoring X-Forwarded-For. Leave unset for local development; nonproduction localhost uses a shared local-development identity. Production on another host fails closed until a verified ingress adapter is implemented. A 007 release must verify actual adapter/header delivery and spoof resistance on an isolated hosted environment before production. Do not manually set a site UUID to make another host pass. The runtime guarantee is documented in [Netlify function environment variables](https://docs.netlify.com/build/functions/environment-variables/).
+
+Migration 007 and the HMAC secret must be ready before publishing this application. The existing Supabase service credential is now also required for anonymous quotes and all configured session/limit operations. Private abuse tables grant no client table access. The worker uses the existing cron secret, conservative shared one-send/second pacing and provider-directed cooldowns; no Redis subscription or new email credential is needed.
+
+Fonts are vendored from the official Google Fonts repository under src/app/fonts with both SIL Open Font License texts. next/font/local serves them from the app; builds no longer fetch Google fonts. Image remotePatterns permits only HTTPS public marketing objects on the configured Supabase hostname. Other owner HTTPS images remain direct browser images.

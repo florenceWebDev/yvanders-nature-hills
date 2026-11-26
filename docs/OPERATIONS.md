@@ -44,7 +44,7 @@ This is public demo hosting only. [ADR 0003](decisions/0003-temporary-netlify-pr
 
 On the current Netlify deployment, Supabase pg_cron/pg_net schedules `/api/jobs` as described above. The historical [Vercel manifest](../vercel.json) has no effect on Netlify. A future hosting move requires explicit scheduler configuration. No browser or user account should trigger this endpoint with a secret in its URL.
 
-The handler requires `Authorization: Bearer <CRON_SECRET>`, email key/from, and the service client. It calls `claim_email_jobs()`, which expires unpaid holds and claims at most 20 due jobs under row locks with SKIP LOCKED. Concurrent workers should not claim the same current lease. Sending leases older than five minutes can be reclaimed.
+The handler requires `Authorization: Bearer <CRON_SECRET>`, email key/from, and the service client. It calls `claim_email_jobs()`, which expires unpaid holds and claims at most five due jobs under row locks with SKIP LOCKED. Concurrent workers should not claim the same current lease. Sending leases older than five minutes can be reclaimed.
 
 Jobs move `queued/failed → sending → sent` or `failed`. Attempts increment at claim, with at most eight automatic attempts. Failure delay is `min(1 hour, 30 seconds × 2^attempts)`; starting from attempt one this is 60 seconds. Each send has a 12-second timeout; the handler declares a 300-second duration limit, subject to hosting support. Stable job UUIDs are passed as provider idempotency keys. Do not claim exactly-once delivery across arbitrary outages or provider retention windows.
 
@@ -171,3 +171,71 @@ On 26 November 2026 the owner explicitly approved the same-database snapshot and
 Direct updates to cron.job are denied in this project. The initial preparation transaction rolled back completely; cron.alter_job(jobid,active:=false) then paused the named worker successfully. The reviewed 006 migration was applied with an additional final revoke retaining the hold pause. The owner’s existing signed-in alternate Chrome profile supplied Netlify access; PR #13 merged to c6a911d and the matching production deploy became Live.
 
 After compatible UI/API checks, authenticated hold/payment/review grants, previous readiness and cron active state were restored. Exact original booking/payment/receipt rows remain unchanged. The fixed-origin callback query pattern was added without removing the previous entries. The resumed scheduler returned HTTP 200 with zero queued work at 16:49 Philippines time. No live test reservation or payment was inserted. See TESTING for the boundary between deployed behavior and unresolved mail, isolated auth/storage/concurrency and recovery acceptance.
+
+## Release migration 007 audit hardening
+
+**Prepared packet only. Do not merge to main or run production SQL until the isolated checks and independent backup/restore gate pass.** Main automatically publishes. Baseline is migrations 001–006 with booking-experience application c6a911d plus any subsequent documentation/tooling changes; verify the actual published application revision and schema before release. New source is codex/audit-hardening. No new payment provider, DNS or paid service is required.
+
+### Prerequisites and compatibility
+
+1. On an isolated Supabase project, apply 001–007 in order, provision a distinct RATE_LIMIT_HMAC_SECRET of at least 32 random characters through Netlify Functions secrets, and deploy this branch with that isolated project's existing credentials. Verify reserved SITE_ID and ingress x-nf-client-connection-ip behavior without logging values; do not set a fake trust flag. Confirm forged forwarded/IP headers cannot choose their own limiter identity.
+2. Complete independent-connection last-unit, per-guest quota and shared-counter races; inspect PostgreSQL EXPLAIN (ANALYZE, BUFFERS) on fictional representative report/overlap/queue datasets. Verify signed uploads/receipt ownership, staff/manual workflows, every pagination surface beyond 500 rows, CSP hydration/appearance/custom images/hosting badge at desktop/mobile, and cache invalidation/expiry with live re-quotes. Do not use production records as fixtures.
+3. Obtain a verified independent backup including database definitions/roles/grants and business rows, and separately protected private receipt objects; rehearse restoration to an independent project and reconcile counts/financial sums. A same-database snapshot is insufficient. Keep backups and outputs private. Capture pre-release booking/payment/receipt counts, totals, relevant function definitions/ACLs, all guest-hold execution grants, scheduler active state and currently published application commit.
+4. Add the new HMAC secret to production Functions scope through the existing secret manager; do not print or commit it. Existing service, Auth, storage, email and cron secrets remain. A later deploy is required for secret changes. The new app requires schema 007; the old worker must not run against the new lease implementation during transition. Old account clients expect an array; new account clients expect a paginated envelope and must reload. Old anonymous direct quote calls lose permission after migration.
+
+### Read-only precheck
+
+Execute as the trusted database operator and keep result details private. Do not select cron commands, guest rows, email bodies, storage paths or Vault values.
+
+```sql
+select to_regclass('public.hold_creation_events') is null as migration_007_absent,
+       exists(select 1 from information_schema.columns where table_schema='public' and table_name='email_jobs' and column_name='audience') as migration_006_present;
+select count(*) bookings,coalesce(sum(total),0) booking_value,coalesce(sum(paid),0) gross_paid,coalesce(sum(refunded),0) refunded from public.bookings;
+select count(*) payment_entries,coalesce(sum(amount) filter(where kind='payment'),0) payments,coalesce(sum(amount) filter(where kind='refund'),0) refunds from public.payment_entries;
+select count(*) receipts from public.receipts;
+select jobid,active from cron.job where jobname='ynh-email-outbox';
+select has_function_privilege('authenticated','public.create_hold(uuid,date,date,text,integer,integer,text,text,uuid,text,text,time)','EXECUTE') hold_enabled;
+select count(*) active_mail_leases from public.email_jobs where status='sending' and locked_at>now()-interval '5 minutes';
+```
+
+Expect 007 absent, 006 present, exactly one known scheduler job and the previously approved baseline. Stop for unexpected state. Back up the complete function/grant definitions privately before proceeding. Source migrations do not prove actual deployed definitions.
+
+### Ordered transition
+
+1. With release authorization and backup gate satisfied, pause guest/staff hold creation and the known scheduler. Capture whether both were enabled first. Staff must finish active operations; other business workflows keep their original permissions.
+
+```sql
+begin;
+revoke execute on function public.create_hold(uuid,date,date,text,integer,integer,text,text,uuid,text,text,time) from authenticated;
+do $$declare target bigint; n integer; begin
+ select count(*),min(jobid) into n,target from cron.job where jobname='ynh-email-outbox';
+ if n<>1 then raise exception 'Expected one scheduler job'; end if;
+ perform cron.alter_job(target,active:=false);
+end $$;
+commit;
+```
+
+2. Drain all in-flight old application/worker requests. The previous worker permits 300 seconds; wait for its observed completion or the provider's maximum execution window and verify zero active mail leases. Do not use a fixed sleep as proof. If a worker crashed, wait for its lease to expire and verify no process can still send. Confirm the hold grant is false.
+3. Execute the complete reviewed [007_audit_hardening.sql](../supabase/migrations/007_audit_hardening.sql) once. Its transaction has a five-second lock timeout and 120-second statement timeout; any failure rolls the whole migration back. It captures the hold pause and preserves it. Do not rerun after a successful commit. No booking/payment/receipt rows are rewritten or deleted; only the private recent-hold history is seeded.
+4. Verify both lease columns and private tables exist, guest table access/private helper execution are denied, public/authenticated booking_quote execution is denied, service-only wrappers are callable only by service_role, and create_hold remains paused. Reconcile the saved counts/totals and verify existing snapshots/financial/proof rows against the private independent baseline. Stop on mismatch.
+5. Merge only after the exact PR revision passes Application and Documentation checks; verify Netlify publishes that commit with the Functions HMAC secret. Old quote clients may see temporary service errors during this coordinated window. Run the read-only release check and affected rendered/authenticated checks before restoring booking access. No real payment/proof should be created as a release probe.
+6. Restore only the previously enabled guest-hold and scheduler states. If either was previously disabled, leave it disabled. For an originally enabled state, execute the corresponding statement below after all checks pass:
+
+```sql
+grant execute on function public.create_hold(uuid,date,date,text,integer,integer,text,text,uuid,text,text,time) to authenticated;
+do $$declare target bigint; n integer; begin
+ select count(*),min(jobid) into n,target from cron.job where jobname='ynh-email-outbox';
+ if n<>1 then raise exception 'Expected one scheduler job'; end if;
+ perform cron.alter_job(target,active:=true);
+end $$;
+```
+
+Refresh staff/guest pages, verify the next authenticated worker response and record the matching revision/context. Inspect safe health counts for oldest queued work, exhausted mail and cleanup failures. General guest email remains blocked until the existing owned-sender/SMTP prerequisites pass.
+
+### Recovery and ongoing operation
+
+Before migration commit, a SQL error restores the old schema. Resume old application/grants/scheduler only after checking its old definitions and captured state. If migration committed but application publication/checks fail, keep holds/scheduler paused; publish a compatible 007 forward fix. **Do not run the old worker or restore the old full application against 007**: old workers do not guard lease tokens and old anonymous quoting lacks access. A full rollback must restore the reviewed pre-release function definitions/ACLs while paused and publish the matching previous application; preserve any new booking/payment/proof records instead of restoring an old data snapshot over them. Private abuse/lease columns can remain additive only after compatibility review.
+
+After repair, exhausted failed email jobs may be explicitly retried in staff Email & activity; this clears the old lease and resets attempts. A provider cooldown still applies globally. Do not rotate HMAC keys or reset counters to bypass genuine abuse limits. Counter/event retention is bounded per scheduled run (1000 of each), so monitor backlog if abusive traffic exceeds cleanup throughput. Storage cleanup claims two jobs/run and scans up to ten batches of 100 objects per job within its budget. Preserve registered evidence and the signed-upload grace window.
+
+Local preview smoke now expects 503/NOT_CONFIGURED for unavailable services. HTTP public samples and local serialized tests are not throughput, restore, delivery or independent lock-scheduling evidence.

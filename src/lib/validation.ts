@@ -6,7 +6,7 @@ export function sameOrigin(origin:string|null,host:string|null,protocol:string){
  if(!origin||!host)return false;
  try{const url=new URL(origin);return (protocol==='http:'||protocol==='https:')&&url.protocol===protocol&&url.origin===origin&&url.host===host;}catch{return false;}
 }
-const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const date=z.iso.date();
 const time=z.string().regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/);
 export const searchSchema=z.object({offering:z.uuid(),arrival:date,departure:date,arrival_time:z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),slot:z.string().max(80).default(''),guests:z.number().int().min(1).max(10000),units:z.number().int().min(1).max(1000),promo:z.string().trim().max(40).optional(),manual_email:z.email().optional()});
 export const holdSchema=searchSchema.extend({name:z.string().trim().min(2).max(120),phone:z.string().trim().min(6).max(40),request:z.uuid(),manual_email:z.email().optional()});

@@ -1,3 +1,7 @@
+# Audit hardening release gate — 26 November 2026
+
+Migration 007 and its matching application are prepared on codex/audit-hardening, not deployed. Follow the [coordinated release packet](OPERATIONS.md#release-migration-007-audit-hardening). Required before production: final PR Application/Documentation checks; isolated independent PostgreSQL contention and provider/browser acceptance; RATE_LIMIT_HMAC_SECRET in Functions scope; verified trusted ingress metadata; independent backup/restore; captured pause/grant/scheduler state. Production access, sender/SMTP and historical restore gaps are not waived by local tests.
+
 # Current release process
 
 Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest recorded application release is c6a911d with migrations 001–006 applied. Deployment tooling improvements are prepared on a feature branch; this work does not apply SQL or publish production. General email/SMTP, isolated integration and independent restore acceptance remain outstanding as recorded in TESTING.
