@@ -4,6 +4,14 @@ Start with [configuration](CONFIGURATION.md), [database rules](DATABASE.md), and
 
 ## Deployment runbook
 
+Use the [deployment handbook](DEPLOYMENT.md) for current routine releases, assisted deployment, the owner checklist, and guided database/configuration packets. Keep the migration-specific recovery details below; dated rollout sections describe historical operations and must not be rerun against the installed schema. Netlify is the selected live host; earlier Vercel/setup candidates are historical.
+
+The new `npm run release:check` is the read-only production HTTP gate (17 anonymous GET checks, four concurrent requests, 15-second request/body timeouts, nonzero exit on failure). It requires configured services, checks pages/session/anonymous denials/404, and prints statuses/timings without response bodies. It cannot establish deployment identity, authenticated ownership/storage, worker processing, or inbox delivery. Confirm the hosted commit and affected interactions separately. `scripts/smoke.mjs` remains the configuration-free preview check; `scripts/public-audit.mjs` remains an optional broader observation tool.
+
+Netlify's dependency-free `scripts/netlify-ignore.mjs` compares platform-provided `CACHED_COMMIT_REF`/`COMMIT_REF` and skips only allowlisted Markdown-only changes, with both paths considered for renames. Uncertain history, assets, SQL, configuration, tooling, empty comparisons and same-commit rebuilds continue. Build metadata is not a new runtime environment contract. Explicitly rebuild after relevant provider environment changes; cached build history does not prove successful publication. Preserve existing production/preview credential isolation.
+
+Application CI additionally runs `npm run deployment:test`. Both workflows cancel superseded runs for the same PR; main and manual runs have unique groups and remain independent. No required job has a path filter. Reuse passing checks only for the same revision/context. Hosting builds remain necessary for adapter execution; no production pipeline or migration is triggered by local tooling tests.
+
 ### Connected Netlify services
 
 The owner retained Netlify for the connected application. The preview-only instructions below are historical; live now has service settings. Build from protected main with Node 22 and the automatic Next.js adapter. Initial schema installation used SQL Editor to apply exact migrations 001 then 002. This does not establish CLI migration-history entries; do not rerun initial migrations against the installed schema. Use additive migrations and independent backups.
@@ -24,17 +32,17 @@ The sending-only Resend key is a Netlify secret. Default Resend sender and Supab
 
 This is public demo hosting only. [ADR 0003](decisions/0003-temporary-netlify-preview.md) preserves the separate permanent-hosting decision. A final custom domain can be connected later or pointed at another host. `vercel.json` has no scheduling effect on Netlify; real booking deployment on another host requires an explicitly configured authenticated scheduler and the full release acceptance matrix.
 
-### Live booking release
+### Initial real-booking acceptance
 
-1. Merge the reviewed feature branch through the protected-main workflow in [CONTRIBUTING](../CONTRIBUTING.md). Record the commit and test evidence.
-2. Use isolated staging first. Apply reviewed additive migrations and configure auth callbacks, storage, server environment, sender DNS, and scheduler. Do not rerun the initial migration on an existing database.
-3. Run `npm ci`, documentation checks, appropriate tests, and `npm run build`. Deploy the Next.js application to the selected Vercel project; no production project is currently configured. Confirm the actual origin and HTTPS.
+1. Prepare the reviewed feature PR and release packet through [CONTRIBUTING](../CONTRIBUTING.md). Record the intended revision and test evidence before merging.
+2. Use isolated staging first. Rehearse reviewed additive migrations and configure auth callbacks, storage, server environment, sender DNS, and scheduler. Do not rerun initial migrations on an existing database.
+3. Run appropriate application/documentation checks and build. Follow the packet's compatibility order for production database/configuration steps, merge and Netlify deployment. Confirm the actual published commit, origin and HTTPS before continuing.
 4. Exercise registration/verification, availability, competing requests, hold expiry, an original receipt upload, admin decision, and actual guest/staff email on the deployed version. Check guest-to-guest denial and private receipt access directly.
 5. Verify backups/restore, support contact, current business policies, QR recipient, prices, capacities, and schedule. Only then enable real bookings. Record observed results in TESTING and RELEASE.
 
 ## Scheduled work and email
 
-The [Vercel manifest](../vercel.json) requests a minute schedule for `/api/jobs`. Confirm the hosting plan supports this; otherwise use an external scheduler with the same authenticated request. No browser or user account should trigger this endpoint with a secret in its URL.
+On the current Netlify deployment, Supabase pg_cron/pg_net schedules `/api/jobs` as described above. The historical [Vercel manifest](../vercel.json) has no effect on Netlify. A future hosting move requires explicit scheduler configuration. No browser or user account should trigger this endpoint with a secret in its URL.
 
 The handler requires `Authorization: Bearer <CRON_SECRET>`, email key/from, and the service client. It calls `claim_email_jobs()`, which expires unpaid holds and claims at most 20 due jobs under row locks with SKIP LOCKED. Concurrent workers should not claim the same current lease. Sending leases older than five minutes can be reclaimed.
 

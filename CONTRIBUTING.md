@@ -22,6 +22,8 @@ After merging, switch to main and pull with `--ff-only`. Stop a local server bef
 
 ## Documentation impact matrix
 
+Every PR must complete the release packet in the template: documentation-only, routine application, or database/configuration. Use the [deployment handbook](docs/DEPLOYMENT.md) for assisted or manual deployment. A migration/configuration PR must include exact compatibility/recovery steps and prerequisites before merge, because main automatically publishes. Application validation now includes `npm run deployment:test`; both CI workflows cancel superseded PR runs while keeping main/manual runs independent. Required check names and branch protections are unchanged.
+
 The checker considers both old and new paths for renames and deleted code. It requires at least one changed, existing, nonempty reference from each affected row below. A deleted or unchanged document does not count. This deliberately errs toward recording an impact for internal refactors too; update the codebase map or explain the technical change where appropriate rather than adding unrelated text.
 
 | Changed area | Required reference update (at least one listed) |

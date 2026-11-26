@@ -1,3 +1,11 @@
+# Efficient deployment implementation — 26 November 2026
+
+Prepared on codex/efficient-deployment: [owner/assisted deployment handbook](DEPLOYMENT.md), PR release packets, read-only release check, conservative Netlify documentation-only build skipping, superseded-PR CI cancellation and deployment regressions in Application CI. [ADR 0009](decisions/0009-efficient-deployment.md) records the decision. No new credentials, application API/schema changes, production configuration mutations or merge/deployment are included.
+
+Local verification: deployment regressions (8), application tests (56), documentation regressions (14), production build including TypeScript, syntax/whitespace checks and documentation coverage passed as recorded in [Testing](TESTING.md). The anonymous read-only production check passed 17/17 in 5,329 ms against the existing live app, with zero browser operations. This is not a measured deployment-time or AI-credit saving.
+
+Next incomplete task: verify the feature PR's GitHub checks and Netlify preview, then release through the routine handbook when requested. Hosted docs-only skips and cancellation need actual future events. Existing production remains on the booking experience release below; sender/SMTP, isolated integration/contention and independent restore acceptance remain outstanding. Earlier sections are dated historical checkpoints, superseded only by later observed evidence.
+
 # Booking experience deployed — 26 November 2026
 
 [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d; Netlify shows that commit Live on the production app. Migration 006 is applied. The owner explicitly approved the restricted same-database recovery snapshot and temporary booking/worker pause after the precheck below. Snapshot schema release_backup_006_20261126 has RLS on every copied table and no client/schema access; it is not an independent backup.

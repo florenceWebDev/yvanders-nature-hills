@@ -29,6 +29,8 @@
 
 ## Completion and handoff
 
+- For deployment requests, follow docs/DEPLOYMENT.md for assisted/manual releases and release-specific database/configuration packets. Prefer available connectors/scripts for status and HTTP checks; use browser inspection for affected rendered behavior and dashboard-only operations. Reuse passing evidence only for the same revision/context. Preserve authorization boundaries, required checks and honest live-service limits.
+
 - Complete the agreed milestone through its acceptance checks rather than stopping after generating code.
 - Update affected setup/design/architecture docs and PLAN when behavior or decisions change.
 - Summarize working behavior, verification evidence, limitations, and the next incomplete task.

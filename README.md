@@ -23,6 +23,8 @@ For a production-build preview, run `npm run build`, then `npm start`. Use the d
 
 ## Developer documentation
 
+For an update, start with the [deployment handbook](docs/DEPLOYMENT.md): ask Codex to deploy a reviewed PR, or follow the owner merge-and-verify checklist. Database/configuration releases have a separate guided procedure. `npm.cmd run release:check` checks the live public surface without credentials; it does not create bookings or payments.
+
 Netlify hosts the Next.js application with Node 22. See the [connected-service runbook](docs/OPERATIONS.md#connected-netlify-services) for settings, scheduling and rollback. A custom domain remains deferred; account and booking emails currently have provider restrictions described in [Configuration](docs/CONFIGURATION.md#current-owner-setup).
 
 Begin with the [handbook index](docs/README.md). New developers should read [Development](docs/DEVELOPMENT.md), [Architecture](docs/ARCHITECTURE.md), and [current handoff](docs/PLAN.md).

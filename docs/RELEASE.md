@@ -1,3 +1,11 @@
+# Current release process
+
+Use the [deployment handbook](DEPLOYMENT.md) for routine assisted/manual releases and guided database/configuration packets. The latest recorded application release is c6a911d with migrations 001–006 applied. Deployment tooling improvements are prepared on a feature branch; this work does not apply SQL or publish production. General email/SMTP, isolated integration and independent restore acceptance remain outstanding as recorded in TESTING.
+
+## Historical rollout evidence
+
+The dated sections below preserve observed checkpoints. Later deployed evidence supersedes earlier pending/setup language; neither initial Vercel candidates nor already-applied migration instructions are the current routine procedure.
+
 # Booking experience live — 26 November 2026
 
 [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d and Netlify shows the matching production deploy Live. Migration 006 is applied after the explicitly approved restricted recovery snapshot/pause; prior booking/payment/review/scheduler access is restored. Existing booking/payment/receipt rows are unchanged. Live staff/newest-first review, owner-only personal history, selected-time quotes, public routes and the scheduled worker passed their observed checks; see [Testing](TESTING.md).

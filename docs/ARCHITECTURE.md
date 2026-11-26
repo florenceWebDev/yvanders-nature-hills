@@ -4,9 +4,9 @@ Current service deployment follows [ADR 0004](decisions/0004-connected-netlify-s
 
 ## Current system
 
-Temporary client review uses Netlify with the existing configuration-free preview path; see [ADR 0003](decisions/0003-temporary-netlify-preview.md). The original Vercel target below is a production candidate, not a completed deployment or final hosting commitment. Netlify's automatic Next.js adapter retains dynamic rendering and server routes; no application API or database contract changes are needed.
+Netlify is the selected connected host, superseding the original Vercel candidate and the temporary preview-only restriction in [ADR 0003](decisions/0003-temporary-netlify-preview.md). Its automatic Next.js adapter retains dynamic rendering and server routes. Configuration-free preview remains available locally and in nonproduction contexts without live service credentials.
 
-The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabase PostgreSQL/Auth/Storage, and a Resend booking-email adapter. Vercel is the intended hosting destination; live hosting and provider configuration have not been completed. See the [accepted baseline decision](decisions/0001-application-baseline.md).
+The app uses Next.js App Router, React, TypeScript, semantic CSS tokens, Supabase PostgreSQL/Auth/Storage, and a Resend booking-email adapter. [ADR 0004](decisions/0004-connected-netlify-services.md) records connected hosting; [ADR 0009](decisions/0009-efficient-deployment.md) records assisted/manual deployment and verification. No runtime API or database contract changes accompany the deployment tooling.
 
 | Boundary | Responsibility | Trust |
 | --- | --- | --- |
