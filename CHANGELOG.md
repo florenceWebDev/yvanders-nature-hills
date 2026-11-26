@@ -10,6 +10,12 @@ Record application, configuration, database, and tooling changes under Unrelease
 
 ## Unreleased
 
+### Appearance and booking management
+
+- Added editable site logo, marketing images/gallery, full semantic palette, image-size guidance and scoped preview; retained contact email settings.
+- Aligned administrator creation controls and added the Philippines-time daily reservation table.
+- Added owner deletion of active unpaid holds and admin permanent deletion of cancelled reservations, including financial entries. Migration 004 adds guarded database deletion and durable receipt-file cleanup with retries.
+
 ### Connected booking services
 
 - Connected Netlify to the permanent Supabase project, applied migrations 001/002, configured exact Auth redirects, seeded ten unpublished accommodation drafts and bootstrapped the verified owner as staff.
