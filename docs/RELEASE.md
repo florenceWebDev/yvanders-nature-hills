@@ -1,3 +1,9 @@
+# Deployed payment/settings release — 26 November 2026
+
+[PR #10](https://github.com/florenceWebDev/yvanders-nature-hills/pull/10) merged as 327cdc4 after successful Application, Documentation and Netlify preview checks. Netlify reports Published for the production commit. Migration 005 was applied first, using the owner-approved restricted snapshot and temporary hold pause; holds are enabled again. Ten accommodations (three published) and zero existing bookings/financial entries were preserved. The existing QR gained its GCash classification without changing its destination/details.
+
+Live admin/settings/reporting and public HTTP/permission checks passed, plus rollback-only financial/state SQL. [Testing](TESTING.md) distinguishes these from real receipt transport and independent concurrency. The same-database snapshot is not independent disaster recovery; provider backup/restore, sender/SMTP and remaining isolated live-service checks remain incomplete. Earlier pending-deployment sections are retained as historical checkpoints.
+
 # Release and recovery
 
 ## Current deployment — 26 November 2026

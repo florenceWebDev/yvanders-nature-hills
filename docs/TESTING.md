@@ -1,3 +1,18 @@
+# Production payment rollout — 26 November 2026
+
+- Pass: owner approved the restricted snapshot and temporary hold pause. Created release_backup_005_20261126 copies of affected application tables and function definitions, with table RLS and revoked schema/table access for anon/authenticated/service_role. Verified authenticated schema access=false and all copied tables RLS=true. This is not an independent provider backup.
+- Pass: exact migration 005 contents were compared against the full SQL editor selection before execution. Migration completed successfully. Verified method/refund/completion fields, authenticated payment RPC grant, anonymous payment denial and client denial of private legacy review/proof helpers.
+- Pass: rollback-only production SQL checked two-method payment recording, exact retry deduplication, proof linkage metadata, finish, refund reopening, section-save isolation and nonadmin denial. The transaction rolled back; bookings, ledger entries and receipts remained zero. No actual storage bytes or transfers were involved, so this does not establish real upload transport.
+- Pass: PR #10 latest head 2eb74e4 had successful Application/Documentation/Netlify preview checks, merged as 327cdc4. Netlify explicitly reports Published for that production commit (29-second deploy).
+- Pass: existing live staff session loads separate Website Settings and Payment Settings. Payment settings save persisted the existing QR option's GCash method and restored prior payment_ready=true; QR label/image/recipient/instructions and all website settings match the pre-release snapshot. No destination/payment account changed.
+- Pass: live daily reservation table loads its Payment / balance column and Finished filter; dashboard loads Collections by payment method with the correct empty state. Final counts: accommodations=10, published=3, bookings=0, payment_entries=0, receipts=0. Earlier one-booking evidence reflects an older owner state.
+- Pass: latest scheduled worker response is HTTP 200 at 12:15 Philippines time. No manual scheduler trigger or test mail was sent.
+- Pass: public audit after deployment returns 200 for 11 public/account/admin pages and session, 401 for protected booking/admin reads and all four new unauthenticated admin writes. API responses are private/no-store; limited CSP is present. Fourteen client assets (784,379 decoded bytes across routes) yielded zero privileged credential-pattern matches and no successful probed JSON source maps. No credential values or real payment/guest data were logged.
+- Pass: live 828px optimized hero returns HTTP 200 as image/webp, 122,788 bytes versus the 833,933-byte original. Release-evidence docs:test (14) and docs:check pass.
+- Not run: actual staff receipt upload/storage read-link expiry, independent-connection financial/settings/deletion contention and postrelease general guest email. Owned sender/Auth SMTP and independent backup/restore limits remain open as previously documented. No new release claims replace those limits.
+
+Earlier pending-release sections below are historical and superseded where the rollout above provides evidence.
+
 # Individual payments, settings and audit — 26 November 2026
 
 ## Application and database checks
