@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-26 — Payment tracking release
+
+- Deployed PR #10 with migration 005; Website Settings and Payment Settings now save independently.
+- Guests choose a payment option before its QR appears. Admins record individual cash/GCash/bank/Other payments, upload online-payment proof and view private proof links on bookings and ledger entries.
+- Net balances reflect refunds; fully paid arrived stays can be marked Finished. Reporting includes payment methods and completed arrival value.
+- Added proof-link ownership/idempotency, protected finalization retries and registered staff-upload cleanup prefixes. Existing amounts, snapshots and QR destinations are preserved.
+- Added request-scoped catalog reuse, responsive bundled images, limited CSP, explicit private API caching and corrected unverified default FAQ wording.
+- The owner-approved restricted same-database snapshot was created before migration; booking holds were restored after live verification. This snapshot is not an independent backup.
+- Application/documentation checks, rollback-only live SQL and public/admin/worker checks passed. Actual staff upload transport, independent concurrency, general guest mail and independent restore checks remain documented limitations.
+
+
 ## 2026-11-26
 
 - Added up to three separately configurable, ordered admin payment QRs with complete previews and responsive guest cards. Existing snapshots retain their instructions.
