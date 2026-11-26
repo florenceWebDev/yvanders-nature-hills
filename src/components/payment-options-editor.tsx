@@ -8,6 +8,7 @@ export function PaymentOptionsEditor({options,onChange,disabled,onBusy,onError}:
  return <fieldset disabled={disabled} className="payment-editor"><legend>Payment options ({options.length}/3)</legend>
  {options.map((option,index)=><section className="payment-editor-card" key={option.id}>
  <h3>Payment option {index+1}</h3>
+ <label>Payment method<select required value={option.method||''} onChange={e=>update(option.id,{method:e.target.value as PaymentOption['method']})}><option value="">Choose method</option><option value="gcash">GCash</option><option value="bank">Bank transfer</option><option value="other">Other online payment</option></select></label>
  <label>Payment label<input value={option.label} maxLength={100} required onChange={e=>update(option.id,{label:e.target.value})}/></label>
  {option.qr_url&&<img className="payment-qr" src={option.qr_url} alt={(option.label||'Payment option')+' QR preview'}/>}
  <label>{option.qr_url?'Replace QR image':'Upload QR image'}<input type="file" accept="image/jpeg,image/png,image/webp" required={!option.qr_url} onChange={async e=>{

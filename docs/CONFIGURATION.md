@@ -88,3 +88,7 @@ Restart the local server after environment changes; redeploy when production con
 ## Appearance/deletion release requirement
 
 Apply migration 004 after 003 before deploying this application. Branding, marketing images, palette and contact email use public site settings; they require no new environment values. Keep the existing cron secret and service-role storage access configured for durable receipt cleanup. Email sender/ADMIN_EMAIL configuration remains separate from public contact email.
+
+## Payment/settings audit configuration
+
+Migration 005 adds no environment variable, bucket or credential. Configure the method on each QR option in Payment Settings when next saving that section. Existing snapshots retain legacy options and remain readable. Bundled images use the existing Next image optimizer; remote owner URLs remain unoptimized, so no wildcard remote-image allowlist is introduced. next.config.ts adds a limited CSP and explicit private/no-store for API/auth routes. This CSP does not restrict scripts or Google Fonts.

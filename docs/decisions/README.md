@@ -32,3 +32,5 @@ Meaningful alternatives considered, benefits, costs, and operational effects.
 ## Verification and follow-up
 What has been demonstrated and what remains unverified.
 ```
+
+- [0007 — Individual payment ledger and settings isolation](0007-payment-ledger-and-settings.md)

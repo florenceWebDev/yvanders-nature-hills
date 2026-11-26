@@ -18,7 +18,7 @@ before(async()=>{
  grant usage on schema public,auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
- for(const name of ['001_booking.sql','002_administration.sql','003_payment_options.sql','004_appearance_deletion.sql'])try{
+ for(const name of ['001_booking.sql','002_administration.sql','003_payment_options.sql','004_appearance_deletion.sql','005_payments_settings.sql'])try{
   if(name==='002_administration.sql')await db.exec(`insert into resources(id,name,capacity) values('20000000-0000-4000-8000-000000000099','Legacy pool',1);insert into offerings(id,name,slug,kind,resource_id,max_guests,price,price_basis,schedule) values('30000000-0000-4000-8000-000000000099','Legacy','legacy','room','20000000-0000-4000-8000-000000000099',2,10000,'night','overnight');insert into bookings(id,guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,paid,request_id,snapshot,status) values('40000000-0000-4000-8000-000000000099','legacy@example.test','Legacy','123456','30000000-0000-4000-8000-000000000099','20000000-0000-4000-8000-000000000099','Legacy',now()+interval '1 day',now()+interval '2 days',1,1,1,10000,5000,5000,gen_random_uuid(),'{}','confirmed');`);
   if(name==='003_payment_options.sql')await db.exec(`update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/legacy-qr.png","payment_recipient":"Legacy camp","payment_instructions":"Original instructions"}'::jsonb where key='settings'`);
   await db.exec((await readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto;',''));
@@ -93,14 +93,14 @@ test('fixed discounts cap at zero, optional max discount limits savings, decline
 });
 test('payment deltas, retry safety, refunds and period totals reconcile',async()=>{
  const offering=await room();await identity(staff);const b=(await sql<{id:string}>("select * from create_hold($1,$2,$3,'',2,1,'Manual Guest','09123456789',$4,'manual@example.test')",[offering,day,end,crypto.randomUUID()]))[0];
- const today=campDate(),request=crypto.randomUUID();await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);await sql("select review_booking($1,'balance','Transfer',10000,'',$2,$3)",[b.id,today,request]);
- await sql("select review_booking($1,'balance','Balance',20000,'',$2,$3)",[b.id,today,crypto.randomUUID()]);
+ const today=campDate(),request=crypto.randomUUID();await sql("select record_payment($1,10000,'cash',$2,'Transfer',$3)",[b.id,today,request]);await sql("select record_payment($1,10000,'cash',$2,'Transfer',$3)",[b.id,today,request]);
+ await sql("select record_payment($1,10000,'cash',$2,'Balance',$3)",[b.id,today,crypto.randomUUID()]);
  const refundRequest=crypto.randomUUID();await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);await sql('select record_refund($1,5000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]);
  await assert.rejects(sql('select record_refund($1,6000,$2,\'REFUND-1\',$3)',[b.id,today,refundRequest]),/retry differs/);
  await assert.rejects(sql('select record_refund($1,16000,$2,\'REFUND-2\',$3)',[b.id,today,crypto.randomUUID()]),/exceeds/);
  const payments=await sql<{kind:string;amount:number}>('select kind,amount from payment_entries where booking_id=$1',[b.id]);assert.equal(payments.length,3);assert.equal(payments.filter(p=>p.kind==='payment').reduce((n,p)=>n+p.amount,0),20000);
  const report=(await sql<{r:{collections:number;refunds:number;bookings:number}}>('select admin_report($1,$2,$3) r',[today,addDays(today,1),offering]))[0].r;assert.equal(report.collections,20000);assert.equal(report.refunds,5000);assert.equal(report.bookings,1);
- const arrivals=(await sql<{r:{booking_value:number;outstanding:number}}>('select admin_report($1,$2,$3) r',[day,end,offering]))[0].r;assert.equal(arrivals.booking_value,20000);assert.equal(arrivals.outstanding,0);
+ const arrivals=(await sql<{r:{booking_value:number;outstanding:number}}>('select admin_report($1,$2,$3) r',[day,end,offering]))[0].r;assert.equal(arrivals.booking_value,20000);assert.equal(arrivals.outstanding,5000);
 });
 test('reports include more than 500 rows and exclude undated opening balances from periods',async()=>{
  const offering=await room();await db.exec('reset role');await db.query(`insert into bookings(guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,request_id,snapshot,status)
@@ -169,7 +169,7 @@ test('cancelled permanent deletion erases financial history, receipts, promo usa
  const offering=await room();const code='ERASETEST';await promo(code);await identity(guest);const b=await hold(offering,code);
  const receipt=crypto.randomUUID(),path=guest+'/'+b.id+'/'+receipt+'.png';await db.exec('reset role');await sql("insert into storage.objects(bucket_id,name) values('receipts',$1)",[path]);
  await identity('','service_role');await sql('select submit_receipt($1,$2,$3,$4,$5)',[b.id,path,'FICTIONAL-PAYMENT',receipt,guest]);
- await identity(staff);await sql("select review_booking($1,'confirm','Verified',$2,'',$3,$4)",[b.id,b.deposit,campDate(),crypto.randomUUID()]);
+ await identity(staff);await sql("select record_payment($1,$2,'gcash',$3,'Verified',$4,true,$5)",[b.id,b.deposit,campDate(),crypto.randomUUID(),receipt]);
  await sql('select record_refund($1,$2,$3,$4,$5)',[b.id,100,campDate(),'Fictional refund',crypto.randomUUID()]);
  await assert.rejects(sql('select delete_cancelled_booking($1)',[b.id]),/Only cancelled/);
  await sql("select review_booking($1,'cancel','Guest request',null,'',null,null)",[b.id]);
@@ -203,4 +203,79 @@ test('daily overlap includes ongoing overnight stays and excludes exact departur
  assert.equal(overlapsDay('2027-02-01T09:00:00+08:00','2027-02-01T17:00:00+08:00',selected),true);
  assert.equal(overlapsDay('2027-01-31T14:00:00+08:00','2027-02-01T00:00:00+08:00',selected),false);
  assert.equal(overlapsDay('2027-02-02T00:00:00+08:00','2027-02-02T17:00:00+08:00',selected),false);
+});
+
+async function proofFor(booking:string,actor=staff){
+ await db.exec('reset role');const id=crypto.randomUUID(),path=`${actor}/${booking}/${id}.png`;
+ await sql('insert into storage.objects(bucket_id,name) values(\'receipts\',$1)',[path]);
+ await identity('', 'service_role');const r=(await sql<{id:string}>('select * from register_payment_proof($1,$2,$3,$4)',[booking,path,id,actor]))[0];await identity(staff);return r.id;
+}
+async function manualBooking(){const offering=await room();await identity(staff);const b=(await sql<{id:string;total:number;deposit:number}>("select * from create_hold($1,$2,$3,'',2,1,'Manual Guest','09123456789',$4,'manual@example.test')",[offering,day,end,crypto.randomUUID()]))[0];return{...b,offering};}
+
+test('GCash deposit plus cash balance preserves two methods, proof, retries and completion history',async()=>{
+ const b=await manualBooking(),receipt=await proofFor(b.id),request=crypto.randomUUID();
+ await sql('select record_payment($1,$2,\'gcash\',$3,\'GCASH-123\',$4,false,$5)',[b.id,b.deposit,campDate(),request,receipt]);
+ await sql('select record_payment($1,$2,\'gcash\',$3,\'GCASH-123\',$4,false,$5)',[b.id,b.deposit,campDate(),request,receipt]);
+ await assert.rejects(sql('select record_payment($1,$2,\'bank\',$3,\'GCASH-123\',$4,false,$5)',[b.id,b.deposit,campDate(),request,receipt]),/retry differs/);
+ const remaining=b.total-b.deposit;
+ await assert.rejects(sql('select record_payment($1,$2,\'gcash\',$3,\'GCASH-456\',$4,false,$5)',[b.id,remaining,campDate(),crypto.randomUUID(),receipt]),/unlinked payment proof/);
+ await assert.rejects(sql('select finish_booking($1)',[b.id]),/arrived, fully paid/);
+ await sql('select record_payment($1,$2,\'cash\',$3,\'Arrival cash\',$4)',[b.id,remaining,campDate(),crypto.randomUUID()]);
+ await assert.rejects(sql('select record_payment($1,1,\'cash\',$2,\'\',$3)',[b.id,campDate(),crypto.randomUUID()]),/exceeds/);
+ await db.exec('reset role');await sql("update bookings set starts_at=now()-interval '1 hour' where id=$1",[b.id]);await identity(staff);
+ const finished=(await sql<{status:string;finished_at:string}>('select * from finish_booking($1)',[b.id]))[0];assert.equal(finished.status,'finished');assert.ok(finished.finished_at);
+ await sql('select finish_booking($1)',[b.id]);
+ assert.equal((await sql<{n:number}>("select count(*)::int n from audit_events where record_id=$1 and action='booking_finished'",[b.id]))[0].n,1);
+ const entries=await sql<{method:string;amount:number;actor:string}>('select method,amount,actor from payment_entries where booking_id=$1 order by created_at',[b.id]);assert.deepEqual(entries.map(e=>e.method),['gcash','cash']);assert.ok(entries.every(e=>e.actor===staff));
+ const linked=(await sql<{payment_entry_id:string}>('select payment_entry_id from receipts where id=$1',[receipt]))[0];assert.ok(linked.payment_entry_id);
+ const report=(await sql<{r:{methods:{method:string;collections:number}[];booking_value:number}}>('select admin_report($1,$2,$3) r',[campDate(),addDays(campDate(),1),b.offering]))[0].r;assert.equal(report.booking_value,b.total);assert.equal(report.methods.reduce((n,m)=>n+m.collections,0),b.total);await identity(guest);await assert.rejects(hold(b.offering),/available/);await identity(staff);
+ await sql('select record_refund($1,100,$2,\'Refunded cash\',$3,\'cash\')',[b.id,campDate(),crypto.randomUUID()]);
+ const refunded=(await sql<{paid:number;refunded:number;status:string}>('select paid,refunded,status from bookings where id=$1',[b.id]))[0];assert.equal(refunded.paid-refunded.refunded,b.total-100);assert.equal(refunded.status,'finished');
+ await sql('select record_payment($1,100,\'cash\',$2,\'Repaid\',$3)',[b.id,campDate(),crypto.randomUUID()]);
+});
+
+test('online balance requires booking-specific proof and admin operations deny guests',async()=>{
+ const a=await manualBooking(),b=await manualBooking(),receipt=await proofFor(a.id);
+ await assert.rejects(sql('select record_payment($1,100,\'gcash\',$2,\'ONLINE-1\',$3)',[a.id,campDate(),crypto.randomUUID()]),/proof/);
+ await assert.rejects(sql('select record_payment($1,100,\'bank\',$2,\'ONLINE-2\',$3,false,$4)',[b.id,campDate(),crypto.randomUUID(),receipt]),/proof/);
+ await assert.rejects(sql('select record_payment($1,100,\'cash\',$2,\'\',$3,false,$4)',[a.id,campDate(),crypto.randomUUID(),receipt]),/Cash payments/);
+ await assert.rejects(sql("select review_booking($1,'balance','Bypass',100)",[a.id]),/Record payment/);
+ await identity(guest);
+ for(const query of ["select record_payment($1,100,'cash',current_date,'',gen_random_uuid())","select finish_booking($1)","select save_settings_section('website','{}')"])await assert.rejects(sql(query,query.includes('$1')?[a.id]:[]),/Admin access/);
+ await assert.rejects(sql('select register_payment_proof($1,\'path\',gen_random_uuid(),$2)',[a.id,guest]),/permission denied/);
+ assert.equal((await sql('select * from receipts where booking_id=$1',[a.id])).length,0);
+ await identity(staff);await sql("select review_booking($1,'cancel','Cancelled by guest')",[a.id]);await assert.rejects(sql('select record_payment($1,100,\'cash\',$2,\'\',$3)',[a.id,campDate(),crypto.randomUUID()]),/cannot receive/);
+});
+
+test('website and payment section saves merge without overwriting and reject cross-section fields',async()=>{
+ await identity(staff);const initial=(await sql<{value:Record<string,unknown>}>("select value from site_content where key='settings'"))[0].value;
+ const options=[{id:crypto.randomUUID(),label:'GCash',method:'gcash',qr_url:'/images/qr.png',recipient:'Fictional campsite',instructions:''}];
+ await sql("select save_settings_section('payment',$1)",[{payment_options:options,payment_ready:true}]);
+ await sql("select save_settings_section('website',$1)",[{tagline:'A verified campsite tagline'}]);
+ const saved=(await sql<{value:{tagline:string;payment_options:unknown[]}}>("select value from site_content where key='settings'"))[0].value;assert.deepEqual(saved.payment_options,options);assert.equal(saved.tagline,'A verified campsite tagline');
+ await assert.rejects(sql("select save_settings_section('website',$1)",[{payment_ready:false}]),/does not belong/);
+ await assert.rejects(sql("select save_settings_section('payment',$1)",[{payment_options:[{...options[0],method:'invalid'}]}]),/Choose the method/);
+ await sql('select save_content($1)',[initial]);
+});
+
+test('guest payment selection is snapshotted and proof confirmation records that payment',async()=>{
+ const offering=await room();await identity(staff);const option={id:crypto.randomUUID(),label:'GCash',method:'gcash',qr_url:'/images/qr.png',recipient:'Fictional campsite',instructions:''};
+ await sql("select save_settings_section('payment',$1)",[{payment_options:[option],payment_ready:true}]);
+ await identity(guest);const b=await hold(offering);await db.exec('reset role');const receipt=crypto.randomUUID(),path=`${guest}/${b.id}/${receipt}.png`;await sql("insert into storage.objects(bucket_id,name) values('receipts',$1)",[path]);
+ await identity('', 'service_role');await assert.rejects(sql('select submit_selected_receipt($1,$2,\'TX-123\',$3,$4,$5)',[b.id,path,receipt,second,option.id]),/Booking not found/);
+ await assert.rejects(sql('select submit_selected_receipt($1,$2,\'TX-123\',$3,$4,$5)',[b.id,path,receipt,guest,crypto.randomUUID()]),/Choose a payment option/);
+ await sql('select submit_selected_receipt($1,$2,\'TX-123\',$3,$4,$5)',[b.id,path,receipt,guest,option.id]);
+ await identity(guest);const visible=(await sql<{method:string;payment_option_id:string}>('select method,payment_option_id from receipts where id=$1',[receipt]))[0];assert.equal(visible.method,'gcash');assert.equal(visible.payment_option_id,option.id);
+ await identity(staff);await sql("select save_settings_section('payment',$1)",[{payment_options:[],payment_ready:false}]);
+ await sql('select record_payment($1,$2,\'gcash\',$3,\'TX-123\',$4,true,$5)',[b.id,b.deposit,campDate(),crypto.randomUUID(),receipt]);
+ assert.equal((await sql<{status:string}>('select status from bookings where id=$1',[b.id]))[0].status,'confirmed');
+});
+
+test('staff arrival payment proof and prepared upload prefixes survive retry and deletion races',async()=>{
+ const b=await manualBooking();await identity('', 'service_role');await sql('select prepare_payment_proof($1,$2)',[b.id,staff]);await identity(staff);
+ const proof=await proofFor(b.id);await sql('select record_payment($1,$2,\'bank\',$3,\'ARRIVAL-ONLINE\',$4,false,$5)',[b.id,b.total,campDate(),crypto.randomUUID(),proof]);
+ assert.equal((await sql<{paid:number}>('select paid from bookings where id=$1',[b.id]))[0].paid,b.total);
+ await sql("select review_booking($1,'cancel','Guest cancellation')",[b.id]);await sql('select delete_cancelled_booking($1)',[b.id]);
+ await identity('', 'service_role');assert.equal((await sql('select * from receipt_cleanup_jobs where prefix=$1',[`${staff}/${b.id}`])).length,1);
+ await assert.rejects(sql('select register_payment_proof($1,$2,$3,$4)',[b.id,`${staff}/${b.id}/late.png`,crypto.randomUUID(),staff]),/Booking not found/);
 });

@@ -28,3 +28,7 @@ All admins may promote/remove existing verified accounts, with a last-admin safe
 ## Approved appearance and reservation controls
 
 Admins can replace marketing photos and accommodation galleries with recommended image dimensions, change logo, all main palette roles and contact email. Reservations has a daily table of every stay overlapping a selected Philippines day, in addition to calendar/history views. Guests can permanently delete their active awaiting-payment holds. Admins can permanently delete cancelled reservations, including receipts, financial entries and booking-specific audit history; historical reports change as explicitly selected. Delivered emails and provider backups are outside application deletion.
+
+## Approved individual payment tracking
+
+Separate Website Settings and Payment Settings. Guests choose the snapshotted payment option before its QR appears; retain that selection with proof. Admins verify a deposit, record later cash/GCash/bank/Other payments individually, and upload proof for online arrival payments. Proofs must remain viewable on the booking. Track gross receipts, refunds, net receipts and remaining balance per booking/method. Fully paid is independent of a staff-finished stay after checkout; completion requires arrival and zero balance. Refunds reopen balances. Preserve existing records and the nature design while auditing/fixing confirmed security, speed, content, UX and code-quality issues. No payment gateway or automated transfer is included.

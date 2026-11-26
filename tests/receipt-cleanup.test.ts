@@ -25,3 +25,13 @@ test('cleanup finishes only after the upload grace window and an empty scan',asy
 test('storage failure preserves the cleanup job and schedules a retry',async()=>{
  const f=fixture({fail:true});assert.deepEqual(await cleanDeletedReceipts(f.client),{cleaned:0,cleanupFailed:1});assert.equal(f.deleted,false);assert.equal(f.update.locked_at,null);assert.ok(Date.parse(f.update.available_at as string)>Date.now());assert.deepEqual(f.files,['receipt.png']);
 });
+
+import {discardUnregisteredProof} from '../src/lib/proof-cleanup';
+test('invalid-upload cleanup preserves registered proof and lookup failures fail safely',async()=>{
+ for(const state of ['registered','lookup-error','unregistered']){
+  let removed=false;
+  const client={from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:state==='registered'?{id:'receipt'}:null,error:state==='lookup-error'?{message:'Unavailable'}:null})})})}),storage:{from:()=>({remove:async()=>{removed=true;return{error:null};}})}} as unknown as SupabaseClient;
+  assert.equal(await discardUnregisteredProof(client,'fictional/proof.png'),state==='unregistered');
+  assert.equal(removed,state==='unregistered');
+ }
+});

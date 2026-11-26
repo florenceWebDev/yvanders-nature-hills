@@ -37,3 +37,15 @@ Palette roles cover public and staff backgrounds, text, borders, buttons and sta
 Reservations opens in Daily list: date picker, previous/today/next, existing filters and 100-row pagination. It shows all overlapping stays in Philippines time, including arrival/departure, guest, status, total and Review. Other calendars, agenda and the full history table remain available. Administrator creation aligns the button with the input, with helper text in its own row and mobile stacking.
 
 Permanent delete requires a separate explicit confirmation naming the booking. Guest controls appear only for an active awaiting-payment hold. Admin controls appear only on cancelled reservations, and explain financial-history erasure and changing reports. Server state remains authoritative; stale UI errors do not silently delete another state.
+
+## Separate settings and booking payment records
+
+Website Settings and Payment Settings are separate navigation items, forms and save actions. Website contains appearance/contact/FAQ/policy; Payment contains QR options and readiness. Every newly saved QR option is classified as GCash, Bank transfer or Other online payment; deposit percentages remain in accommodation configuration. Legacy options display an empty method selector until staff classify them.
+
+Guests choose an option before seeing its single QR card. No QR appears before selection; changing selection replaces the displayed QR and instructions. Upload submits the selected option with proof. The selected method is a guest declaration; staff verify actual funds before confirming.
+
+Booking review shows reservation status and payment status separately, with total/gross/refunds/net/remaining. Record payment asks for the individual amount (with a remaining-balance shortcut), method, received date, reference and acknowledgment. Online methods require existing unlinked proof or a new staff upload; cash needs no screenshot. History shows each entry's method/date/actor and linked proof; all booking proofs are also listed separately, including unverified uploads. Guests can open their booking proofs through the same private receipt action.
+
+Finished is a separate manual checkout action available after arrival with zero balance. A refund may reopen payment status without erasing completion. Reservation tables show payment status/remaining; dashboard adds per-method collections/refunds/net. Errors remain visible and controls become usable again after failure.
+
+The homepage hero, welcome image and accommodation cards use responsive optimization for bundled images. HTTPS owner images retain direct rendering to preserve existing arbitrary image-host support. Hero loads eagerly at high priority. Existing photographic styling and overlays are retained. Default FAQ copy no longer asserts an unverified food/pet policy.

@@ -63,3 +63,11 @@ Payment options remain public site settings and are copied into booking snapshot
 ## Appearance and deletion boundary
 
 [ADR 0006](decisions/0006-appearance-and-permanent-deletion.md) records the new behavior. Public settings provide optional appearance fields rendered through server-loaded settings and CSS custom properties; no credentials move into settings. Private SQL helpers enforce deletion status/ownership and atomically queue durable file cleanup. The existing scheduler calls the storage cleanup worker before email processing, independently of mail configuration. No new runtime dependency or environment variable is introduced. Migration 004 is required before the application release.
+
+## Payment recording and settings isolation
+
+[ADR 0007](decisions/0007-payment-ledger-and-settings.md) defines migration 005. Browser selection is proof metadata, while staff verification creates authoritative ledger entries under booking locks. Staff uploads share the private receipt boundary; finalized evidence alone never changes collections. Refund totals are cached on bookings through a trusted insertion trigger so owner reads can show net balance without exposing internal ledger references. Scoped settings merges serialize on the existing settings row. No gateway or new runtime dependency is added.
+
+catalog is wrapped in React cache for reuse within one server-render request (layout, metadata and page). This is not cross-request availability caching. Public data remains dynamic; private API/auth responses explicitly use private, no-store. Partial CSP restricts base URLs, objects, framing and form destinations; it does not claim nonce-based script XSS protection. Server-only credential imports remain enforced.
+
+Financial finalization failures retain receipt objects to avoid deleting evidence committed by another retry. Invalid-byte cleanup checks for registered metadata and fails safely if that lookup is unavailable. Eventual cancelled-booking cleanup catches registered staff/guest prefixes; unregistered leftovers on retained bookings need operator retention reconciliation.

@@ -1,3 +1,18 @@
+# Live release precheck — 26 November 2026
+
+Owner requested release to live. PR #10 is ready for review (no longer draft), with Application, Documentation and Netlify preview checks green on implementation commit 28ff7e0. Supabase precheck observed ten accommodations, zero bookings, zero payment entries, zero receipts, payment_ready=true and migration 005 absent. This supersedes the older one-booking checkpoint; no existing records were changed.
+
+Supabase reports no provider backup. Proposed a restricted same-database snapshot of affected application tables/function definitions plus a temporary pause of new holds for the coordinated migration/deploy. Automatic approval review rejected that transaction because these additional production mutations and interruption need explicit approval. The transaction was not executed; no snapshot, pause, migration, merge or deployment occurred. Await owner approval for that exact preparation, then apply 005, merge PR #10, verify the published app and restore prior hold readiness. A same-database snapshot is not an independent disaster-recovery backup.
+
+# Payment tracking, settings split and audit — 26 November 2026
+
+Implemented locally on codex/payments-settings-audit: separate Website/Payment Settings, guest choice before QR display, payment-method proof metadata, staff online payment proof uploads, individual payment entries, net balances/refunds, method reporting and separate Finished stay action. Migration 005 is prepared and has not been applied to production. Existing live records/configuration were not mutated during the audit.
+
+Local verification: 48 application tests, 14 documentation tests, production build, TypeScript, documentation inventories and local smoke passed. Production audit found no privileged credential matches in inspected public assets; actual new service upload/concurrency checks remain pending.
+
+Read [ADR 0007](decisions/0007-payment-ledger-and-settings.md), [Audit](AUDIT.md), [Testing](TESTING.md) and the [005 release procedure](OPERATIONS.md#release-migration-005-and-payment-recovery). Next incomplete task: review/merge the feature PR, rehearse on isolated services, then coordinate migration 005 and deployment. Do not use production guest payments as test fixtures. Earlier checkpoints below describe the deployed 004 baseline.
+
+
 # Appearance and booking management — 26 November 2026
 
 Deployed: administrator button alignment, editable marketing images/logo/gallery/full palette with size guidance, existing contact email, daily overlapping-stays table, owner active-unpaid deletion and admin cancelled permanent deletion including financial entries. [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) merged with passing Application, Documentation and Netlify preview checks. Netlify published main `51c4b84`; migration 004 was applied through SQL Editor before the merge.

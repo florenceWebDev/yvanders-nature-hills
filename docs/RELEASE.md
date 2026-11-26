@@ -41,3 +41,7 @@ These live checks remain pending until provider credentials are configured; loca
 ## Appearance and booking-management release procedure
 
 Migration 004 and the matching application are deployed as recorded above. For future environments: Apply 004 after 003 before release. Verify owner/status deletion boundaries, daily pagination and actual delayed receipt cleanup on isolated staging. Permanent cancelled deletion erases financial entries and changes historical reports. Keep cleanup processing alive during rollback; previous application code cannot restore erased records. See ADR 0006 and Operations.
+
+## Pending release: migration 005
+
+Payment/settings/audit changes are implemented locally and prepared for the protected feature PR. Production remains on migration 004; no live ledger, booking, QR or configuration was changed by this work. Apply 005 and matching application as a coordinated release using [Operations](OPERATIONS.md#release-migration-005-and-payment-recovery). Legacy financial review is intentionally closed after migration, so pause holds/staff review during the brief transition. Live upload/link expiry, independent contention and postdeploy provider checks remain pending. Existing general guest SMTP/sender and restore limits are not resolved by this feature.

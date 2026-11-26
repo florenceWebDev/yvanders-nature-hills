@@ -31,3 +31,20 @@ test('appearance input accepts legacy settings and rejects CSS and image injecti
  assert.equal(settingsSchema.safeParse({...settings,palette:{forest:'#123456'},logo:{src:'/images/cabana.jpg',alt:'Camp'},gallery:[]}).success,true);
  for(const patch of [{palette:{forest:'red;display:none'}},{palette:{invalid:'#123456'}},{images:{hero:{src:'javascript:alert(1)',alt:'Camp'}}},{gallery:[{src:'/images/hills.jpg',alt:''}]}])assert.equal(settingsSchema.safeParse({...settings,...patch}).success,false);
 });
+
+import {paymentSummary} from '../src/lib/payments';
+import {recordPaymentSchema,paymentSettingsSchema,websiteSettingsSchema} from '../src/lib/validation';
+test('net payment summary reopens refunds and keeps complimentary status explicit',()=>{
+ assert.equal(paymentSummary({total:10000,paid:5000}).balance,5000);
+ assert.equal(paymentSummary({total:10000,paid:10000}).label,'Fully paid');
+ assert.equal(paymentSummary({total:10000,paid:10000,refunded:2000}).balance,2000);
+ assert.equal(paymentSummary({total:0,paid:0}).label,'No payment required');
+});
+test('online payments require proof and settings sections reject unrelated fields',()=>{
+ const value={booking:crypto.randomUUID(),amount:100,method:'cash',day:'2026-11-26',reference:'',request:crypto.randomUUID()};
+ assert.ok(recordPaymentSchema.safeParse(value).success);
+ assert.equal(recordPaymentSchema.safeParse({...value,method:'gcash',reference:'PAY-123'}).success,false);
+ assert.ok(recordPaymentSchema.safeParse({...value,method:'gcash',reference:'PAY-123',receipt:crypto.randomUUID()}).success);
+ assert.equal(paymentSettingsSchema.safeParse({payment_options:[],payment_ready:false,tagline:'Wrong section'}).success,false);
+ assert.equal(websiteSettingsSchema.safeParse({payment_ready:false}).success,false);
+});

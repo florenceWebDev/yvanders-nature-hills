@@ -89,3 +89,9 @@ Use the protected detail endpoint to review a reservation and its receipts/payme
 ## Appearance and deletion modules
 
 src/lib/appearance.ts defines original palette, marketing slots and legacy fallback helpers. AppearanceEditor owns only unsaved appearance state; ContentEditor persists it with existing content/payment fields. Root layout provides saved CSS tokens and logo settings; page loaders consume named images/gallery. DeleteBooking provides shared confirmation/error UI; database functions remain authoritative. src/lib/receipt-cleanup.ts processes durable cleanup independently of email; tests mock transport and do not establish real storage behavior. The preview smoke script includes both deletion endpoints and requires they fail closed without services.
+
+## Payment/settings components and public audit
+
+settings-editor separates website and payment forms; payment-options provides the guest choice and selected QR. admin-review uses individual record-payment, proof upload, nonfinancial review, refund and finish operations. lib/payments centralizes net balance labels and method names. uploads uses the same explicit kind for both preparation and completion; tests guard staff proof uploads from accidentally entering the guest flow. Read migration 005 before changing money/state behavior. The temporary fictional visual QA route used during development is removed from shipped source.
+
+The public-audit script is read-only and prints redacted counts, not secret values. It does not authenticate, enumerate guest records or mutate production. Keep audits against private build output limited to counts/paths when credential values could be present.

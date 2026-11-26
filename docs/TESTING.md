@@ -1,3 +1,28 @@
+# Individual payments, settings and audit — 26 November 2026
+
+## Application and database checks
+
+- Pass: npm test, 48 tests. Administration tests apply migrations 001–005, preserve legacy entries and exercise GCash deposit/cash balance, staff online full payment with linked proof, identical/changed retries, wrong-booking proof rejection, guest authorization, refund reopening, finished history/reporting/capacity, scoped settings merges and prepared-upload deletion cleanup. Baseline database tests intentionally retain 001–002 coverage; storage-worker and signed-upload transport tests use mocks.
+- Pass: browser fixture inspection in Chrome desktop and 390×844. Zero QR cards before selection, one correct card after choosing GCash or bank. Separate Website/Payment forms and save actions; online proof controls appear, cash needs none; partial balance prevents completion. Failed payment save shows configured-service error and re-enables retry. No horizontal overflow in the inspected guest/settings mobile states. Temporary fixture had fictional data, no live service access, and was removed.
+- Pass: optimized homepage hero loaded with responsive srcset; desktop composition retained. Production build/typecheck and final smoke results are recorded in the final checkpoint below.
+- Pass: npm run docs:test, 14 checker tests. Final docs:check passed after references were completed.
+
+## Security check
+
+- Pass: read-only production pages/assets and anonymous protected-read checks summarized in [Audit](AUDIT.md). No privileged credential pattern matches in the inspected public responses, no successfully probed JSON source maps, and no known production dependency vulnerabilities from npm audit --omit=dev --json.
+- Pass: isolated SQL guest denial of record_payment/finish/settings, denied service-only proof RPC access and no cross-owner receipt metadata. Actual new RPCs have not been installed in production.
+
+## Performance check
+
+- Pass: production HTTP baseline collected; request-scoped catalog reuse and responsive bundled image fixes implemented. This is not a measured production Core Web Vitals improvement. Postdeploy comparison, throttled browser metrics and prolonged load testing: Not run.
+
+## Remaining service/release acceptance
+
+- Not run: production migration 005 or deployment; existing guest financial records/configuration were preserved.
+- Not run: real staff upload, actual private proof URL expiry, independent concurrent payment/refund/settings/deletion connections, and new confirmation email delivery on isolated live providers. PGlite serializes statements and mocked transport does not establish these outcomes.
+- Blocked for general release as previously documented: owned verified sender/Auth SMTP and backup/restore acceptance remain outstanding. No claim of security certification or complete accessibility conformance.
+
+
 # Production appearance/deletion rollout — 26 November 2026
 
 - Pass: [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) merged with passing Application, Documentation and Netlify preview checks. Netlify published main `51c4b84`; migration 004 was applied through SQL Editor before the merge.
@@ -145,3 +170,20 @@ The gate enforces changed references/changelog and mechanical consistency; it ca
 Application validation now runs in GitHub Actions on Node 22 (tests and production build), separately from the required Documentation check (fourteen checker regressions, inventories, links and change-impact). CI results must be verified on the feature PR before merging.
 
 Initial feature CI verified on [PR #4](https://github.com/florenceWebDev/yvanders-nature-hills/pull/4): [Application run 45557063633](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45557063633) passed tests/build on Node 22 and [Documentation run 45557063445](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45557063445) passed. Refund retry coverage also rejects changed details under an already-used request UUID; subsequent PR commits must pass again before merging.
+
+## Final validation checkpoint
+
+- Pass: npm run build and npm run typecheck; the final build uses the same Next CLI with public/service configuration explicitly empty for safe configuration-free smoke testing. Temporary QA route is absent. A stale generated dev validator from that removed fixture was cleared from build output before the successful build.
+- Pass: npm run docs:test (14) and npm run docs:check (links, endpoint/environment inventories and impacts).
+- Pass: 12 local production-build routes, titles, missing page, scheduler credential denial and cross-origin mutation rejection. Connected anonymous checks returned 401 for admin/bookings and each new admin mutation; no authenticated production write was attempted. API/auth cache headers are private, no-store and the limited CSP is present.
+- Pass: local optimized 828px hero response 200, 133,234 bytes versus original 833,933 bytes (84% reduction for that asset).
+- Pass: 20 local client static assets contained zero exact matches for the two locally configured privileged values; values were neither logged nor written to audit evidence. Invalid-byte cleanup regression checks registered metadata/lookup failure, and financial finalization errors now preserve objects. Unregistered retained objects require later booking cleanup/operator retention reconciliation.
+
+- Pass: final configuration-free build reports configured:false; all 12 smoke routes and no-service guards pass. The four new admin operations return 400 with a configuration error; connected anonymous checks above returned 401. No protected call succeeded in either mode.
+
+## Requested live release precheck — 26 November 2026
+
+- Pass: PR #10 promoted from draft; implementation commit 28ff7e0 has passing Application, Documentation and Netlify preview checks.
+- Pass: read-only Supabase SQL reports accommodations=10, bookings=0, payment_entries=0, receipts=0, payment_ready=true, migration 005 absent. No guest/financial data was copied into repository evidence.
+- Blocked: automatic approval review rejected the proposed restricted same-database backup and temporary hold pause as additional production mutations/service interruption requiring explicit approval. Verified the editor still contains only the precheck query; the rejected transaction was not executed. Migration, merge and live deployment were not performed.
+- Observed: provider dashboard reports no backups. Proposed in-database snapshot is a migration recovery aid, not an independent backup or verified restore.
