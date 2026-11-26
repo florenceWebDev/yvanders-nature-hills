@@ -1,7 +1,7 @@
 # 0008 — Guest arrival times, booking continuation and staff alerts
 
 Date: 2026-11-26
-Status: Accepted for implementation; production rollout pending
+Status: Accepted; deployed through PR #13 on 26 November 2026
 
 ## Context
 
@@ -25,4 +25,4 @@ An unreviewed inbox would require shared read/acknowledgment state; the owner ch
 
 ## Verification and follow-up
 
-PGlite tests cover migration preservation, pricing, overlap boundaries and transactional event fan-out/retries. Actual handler tests use isolated adapters for ownership, authentication returns and worker failures. Record rendered checks and final commands in [Testing](../TESTING.md). Rehearse migration/rollback and independent contention on isolated services before production. No live booking or payment is a test fixture.
+PGlite tests cover migration preservation, pricing, overlap boundaries and transactional event fan-out/retries. Actual handler tests use isolated adapters for ownership, authentication returns and worker failures. Production migration, preservation, staff/personal visibility, selected-time quotes, callbacks and resumed worker evidence are in [Testing](../TESTING.md). Rehearse migration/rollback and independent contention on isolated services before production. No live booking or payment is a test fixture.

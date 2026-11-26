@@ -1,3 +1,9 @@
+# Booking experience live — 26 November 2026
+
+[PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d and Netlify shows the matching production deploy Live. Migration 006 is applied after the explicitly approved restricted recovery snapshot/pause; prior booking/payment/review/scheduler access is restored. Existing booking/payment/receipt rows are unchanged. Live staff/newest-first review, owner-only personal history, selected-time quotes, public routes and the scheduled worker passed their observed checks; see [Testing](TESTING.md).
+
+The same-database snapshot is not independent disaster recovery. General recipient delivery, branded Auth SMTP, isolated full auth-draft flows, independent contention and restore acceptance remain incomplete. No owned sender domain was purchased/configured. Earlier pending-release sections below describe pre-release checkpoints.
+
 # Pending booking experience release — 26 November 2026
 
 Migration 006 and matching application changes are implemented on the feature branch; production application/database have not been changed. Release requires the coordinated [006 runbook](OPERATIONS.md#release-migration-006-and-booking-recovery), isolated integration/recovery checks and green PR checks. Existing booked schedules remain unchanged. Sender-domain/SMTP activation remains blocked until the owner has an owned verified domain.

@@ -1,3 +1,19 @@
+# Booking experience deployed — 26 November 2026
+
+[PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d; Netlify shows that commit Live on the production app. Migration 006 is applied. The owner explicitly approved the restricted same-database recovery snapshot and temporary booking/worker pause after the precheck below. Snapshot schema release_backup_006_20261126 has RLS on every copied table and no client/schema access; it is not an independent backup.
+
+Verified: exact booking/payment/receipt rows unchanged from the snapshot (one booking, two payment entries, one receipt); public routes return 200 and anonymous personal/staff APIs return 401; a live selected-09:15 quote spans exactly 48 hours for two days. The authenticated admin’s personal API returns zero bookings while staff New bookings lists the existing reservation, confirming personal isolation with retained staff visibility. Newest-first staff view and the arrival policy render live. Supabase now retains the two existing callbacks plus the fixed-origin /auth/callback?** return pattern.
+
+Booking readiness, hold/payment/review RPC grants and the scheduler were restored. The scheduled worker returned HTTP 200 at 16:49 Philippines time with processed/sent/cleaned/cleanupFailed all zero. No real booking/payment/proof was created as a release test.
+
+Next incomplete tasks: owned verified sender domain, Resend general-recipient and Auth SMTP/inbox acceptance; full browser signup/recovery/draft continuation on isolated services; independent contention and backup/restore rehearsal. Existing sender restrictions mean deploying alerts does not prove every admin receives them. Earlier precheck/implementation sections below are historical and superseded by this rollout.
+
+# Deployment precheck — 26 November 2026
+
+Owner requested deployment of PR #13. Application and Documentation checks are green on ffff686. Restored the Supabase session and ran a read-only SQL precheck: one booking, two payment entries, one receipt, ten offerings, zero pending email jobs; payment readiness and the minute scheduler are enabled, migration 006 is absent. Supabase displays no provider backups. No database pause, snapshot, migration, merge or production deploy has occurred.
+
+Netlify login requests read-only GitHub email access. Automatic approval review rejected that OAuth grant because its recipient/scope were not specifically approved. Await that exact authorization and the decision to use a restricted same-database recovery snapshot/brief booking-worker pause despite no independent backup, then resume coordinated release. Do not treat the snapshot as disaster recovery.
+
 # Booking experience implementation — 26 November 2026
 
 Implemented in [draft PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) on codex/booking-alerts-arrival-continuity: owner-only personal history for every account; newest-created staff reservations; guest-selected arrival time with 1–60 whole 24-hour days for all offerings; authentication draft restoration/requote; and explicit per-admin booking/proof/verified-payment alerts. Migration 006 and branded confirmation/recovery HTML are prepared. Existing reservation snapshots are preserved. See [ADR 0008](decisions/0008-booking-continuity-and-alerts.md).

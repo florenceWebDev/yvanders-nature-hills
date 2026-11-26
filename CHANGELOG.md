@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased — Booking experience
+## 2026-11-26 — Booking experience
 
 - Isolate personal reservation history for admins and guests; retain staff-wide reservation management.
 - Add latest-created reservations, guest-selected 24-hour booking days for every offering, and clear late-arrival notes.
 - Preserve booking selection through authentication and refresh the quote before confirmation.
 - Queue deduplicated admin booking/proof/verified-payment alerts; replace blanket BCC with staff review links.
-- Add migration 006 and prepared branded Auth templates; production migration and owned-domain SMTP activation remain pending.
+- Applied migration 006 and published PR #13 as c6a911d after the approved restricted snapshot/pause; restored prior booking/scheduler access and preserved existing records. Prepared branded Auth templates; owned-domain SMTP activation and general email-delivery acceptance remain pending.
 
 ## 2026-11-26 — Payment tracking release
 
