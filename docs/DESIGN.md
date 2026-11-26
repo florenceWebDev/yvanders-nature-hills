@@ -60,7 +60,7 @@ Anonymous guests can check price and availability and choose Sign in & continue.
 
 ## Audit optimization and limits
 
-The existing DM Sans and Libre Caslon Display typography is self-hosted with next/font/local and bundled licenses. Marketing/detail/gallery/account images use responsive delivery for shipped images and the configured Supabase public marketing bucket; arbitrary external HTTPS images retain direct rendering. Hero remains eager/high priority. Small-screen body/search spacing reserves room around the hosting badge; hosted behavior still needs rendered acceptance.
+The existing DM Sans and Libre Caslon Display typography is self-hosted with next/font/local and bundled licenses. Marketing/detail/gallery/account images use responsive delivery for shipped images and the configured Supabase public marketing bucket; arbitrary external HTTPS images retain direct rendering. Hero remains eager/high priority. Small-screen body/search spacing reserves room around the hosting badge. Hosted desktop and 320/390/650px search layouts passed. Nonce CSP blocks Netlify’s injected badge/toolbar scripts as documented by the provider; application hydration and images remain functional. Do not add unsafe-inline to script policy merely to restore this optional overlay.
 
 Availability search sends one request for all published offerings. Guest history has 50-row pages; Email & activity and blackout management use 100-row pages loaded only when needed. Major dashboard/settings/reservation/admin tools load as separate client chunks. Guest page requests cancel superseded loads, and staff calendar rejects incomplete or changed booking/blackout batches.
 

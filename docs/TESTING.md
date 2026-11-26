@@ -1,3 +1,15 @@
+# Hosted isolated acceptance — 27 November 2026
+
+- Pass on application revision 8a6358c: final Application 45894315097 and Documentation 45894315172; one explicit Netlify same-commit rebuild after preview environment configuration. The earlier documentation-only build was correctly skipped and was not counted as the configured build.
+- Pass: existing signed-in Chrome profile rendered the protected preview; fictional staff authentication, owner-only personal history and populated staff dashboard hydrated with nonce CSP.
+- Pass: hosted four manual holds beyond the guest unresolved quota; signed PNG prepare/PUT/registration and signed read; cash confirmation and persisted fictional refund note; all four staff pagination surfaces beyond 500 rows. No production guest/payment/proof fixtures were used. Guest pagination and cross-owner denial have separate connected-service evidence below.
+- Pass: hosted session requests returned 200 with normal and forged forwarded/Netlify-IP headers. The isolated database contained zero counters for all three forged identities. CSP present without unsafe-eval; desktop document had no horizontal overflow. Admin settings save persisted and its public marker appeared; a subsequent direct staging-only change appeared after cache expiry/revalidation.
+- Pass: rendered homepage search at 320, 390 and 650px, with dates together, time/guests together, readable controls and full-row action. Desktop retained its single-row form. Temporary device emulation was reset.
+- Pass: temporarily revoking only staging service_role limiter execution produced hosted /api/session HTTP 503. The original grant was immediately restored and verified. No production permission was changed for the test.
+- Observed limitation: CSP blocks Netlify-injected cdp/hud scripts and the hosting badge/toolbar. [Netlify documents this strict-CSP behavior](https://docs.netlify.com/manage/projects/powered-by-netlify-badge/). Application hydration, login, settings and workflows passed; unsafe-inline was not added to scripts to enable optional provider UI.
+- Configuration observed: preview public URL targets isolated staging while Live app public URL remains production; secret values masked. Distinct production HMAC value saved in the existing secret entry with Functions scope included. Email remains deliberately disabled in staging; real SMTP/general-recipient delivery is not claimed.
+- Production pause/drain/migration/merge/publication remain pending at this pre-transition checkpoint. Their final observed results belong in the existing PR #16 release record.
+
 # Independent recovery and connected staging — 27 November 2026
 
 - Pass: documentation regression suite (14), documentation links/API/environment inventories and whitespace checks after recording this rehearsal. Application source is unchanged from a1b9558, whose production build and application checks passed at the prior checkpoint.
