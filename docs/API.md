@@ -191,3 +191,27 @@ Same-origin verified admin. Body: {booking: UUID}; returns {ok:true}. delete_can
 Daily list reuses GET /api/admin/bookings with from=selected date, until=next date, page and existing filters. It includes all overlapping stays using half-open Philippines-day boundaries and 100-row pages.
 
 GET /api/jobs now processes receipt cleanup before checking email configuration. Normal responses add cleaned and cleanupFailed (job counts, not file counts). If email is unconfigured it returns HTTP 200 with those counts and an email explanation; cleanup still runs. Queue-claim failures return 503. No new environment values are required.
+
+## Individual payments and separate settings (migration 005)
+
+<!-- endpoint: POST /api/admin/payment -->
+### POST /api/admin/payment
+Same-origin verified admin. Body: {booking,amount,method,day,reference,request,confirm?,receipt?}. Amount is positive integer centavos; method is cash/gcash/bank/other; day is a nonfuture Philippines date; request is an idempotency UUID. confirm defaults false and combines initial payment verification with booking confirmation. receipt is required for electronic payments and must be an unlinked proof on this booking; cash sends null. Electronic references / Other details require 3–2000 characters. Cash notes are optional. Returns the updated booking, including gross paid and refunded. Reusing an identical request is safe; differing financial details are rejected. Amount cannot exceed the net remaining balance. Finished bookings accept only settlement of a reopened balance; other closed states reject payments.
+
+<!-- endpoint: POST /api/admin/finish -->
+### POST /api/admin/finish
+Same-origin verified admin. Body {booking}; returns updated booking. Requires confirmed, arrived and fully paid; early checkout is allowed. Repeating a successful finish returns the existing finished booking. Does not create money or send another confirmation.
+
+<!-- endpoint: POST /api/admin/settings/website -->
+### POST /api/admin/settings/website
+Same-origin verified admin. Accepts the existing website fields (appearance, tagline, intro, contact, email, address, cancellation_policy, faq), excluding payment_options/payment_ready. Returns {ok:true}. Strict HTTP validation and a database allowlist prevent cross-section fields. The locked database merge preserves payment settings.
+
+<!-- endpoint: POST /api/admin/settings/payment -->
+### POST /api/admin/settings/payment
+Same-origin verified admin. Body {payment_options,payment_ready}; each option additionally requires method gcash/bank/other. Existing count/uniqueness/image/recipient/readiness validation applies. Enabling holds retains the server-service configuration check. Returns {ok:true}; preserves website fields. Legacy full /api/admin/content remains supported, but the new UI uses scoped operations.
+
+POST /api/admin/review no longer accepts financial confirmation or balance updates for paid bookings; use /api/admin/payment. Complimentary approval and other reservation decisions remain supported. POST /api/admin/refund additionally accepts method (cash/gcash/bank/other, default cash for HTTP compatibility); refunds reopen payment balance, preserving gross paid and completion status. GET /api/admin/dashboard adds methods [{method,collections,refunds}] and includes finished arrival value/net outstanding. GET /api/admin/booking returns payment entry method/actor and linked receipt metadata; guest booking reads include refunded and completion fields but do not expose the private ledger.
+
+POST /api/upload/prepare and /api/upload/complete additionally support kind payment-proof: verified staff only, booking required, stored in private receipts. Preparation registers the cleanup prefix; completion verifies original bytes and returns the registered receipt row. It does not record funds. Guest receipt completion now also requires option: an ID from that booking's snapshotted payment options. Guest-selected method is derived in SQL; the admin still verifies actual receipt of funds. Existing file type/size/signature, scoped path and ownership checks remain. GET /api/receipt continues issuing 60-second links only for the owner/admin, including staff-uploaded proofs. Do not log signed URLs.
+
+Receipt finalization errors preserve the private object rather than deleting potentially committed evidence on a retry. Unregistered leftovers remain under the booking prefix for its eventual deletion cleanup; failed metadata lookup also prevents invalid-byte cleanup. No automatic orphan-retention SLA is claimed.

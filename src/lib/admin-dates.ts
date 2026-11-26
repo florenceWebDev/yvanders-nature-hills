@@ -9,4 +9,4 @@ export function periodRange(period:Period,anchor:string,offset=0){
  return{from:start.toISOString().slice(0,10),until:end.toISOString().slice(0,10)};
 }
 export function overlapsDay(start:string,end:string,day:string){return new Date(start).getTime()<new Date(`${addDays(day,1)}T00:00:00+08:00`).getTime()&&new Date(end).getTime()>new Date(`${day}T00:00:00+08:00`).getTime();}
-export const bookingStatuses=['awaiting_payment','pending_review','correction_requested','confirmed','expired','declined','cancelled'] as const;
+export const bookingStatuses=['awaiting_payment','pending_review','correction_requested','confirmed','finished','expired','declined','cancelled'] as const;

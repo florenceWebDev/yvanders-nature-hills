@@ -4,6 +4,8 @@ A campsite promotion and booking app built with Next.js/TypeScript, Supabase Aut
 
 **Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) runs the deployed appearance and booking-management changes from PR #8 with migration 004 applied. Admins can edit images, logo, palette and contact email, use the daily reservation table, and permanently delete cancelled reservations. Guests can delete active awaiting-payment bookings. The deployment preserved ten accommodations (three published), one booking and enabled payments. Local/CI checks and live route/admin/permission/scheduler checks passed; destructive live flows, real receipt cleanup and remaining service/recovery checks are documented in [Testing](docs/TESTING.md). See [current handoff](docs/PLAN.md).
 
+Pending feature branch: individual payments with methods and private proof links, separate Website/Payment Settings and Finished stays require migration 005 and coordinated deployment; they are not live yet. See [current handoff](docs/PLAN.md).
+
 ## Start locally
 
 Use Node 22 LTS or newer, npm, and Git:
@@ -54,7 +56,7 @@ Application validation: `npm test`. Generate Next.js types through dev/build bef
 
 ## Connect real booking services
 
-Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql and 004_appearance_deletion.sql; an existing 003 database needs only 004, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
+Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql, 004_appearance_deletion.sql and 005_payments_settings.sql; an existing 004 database needs only 005, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
 
 ```sql
 insert into public.admins(user_id)
@@ -62,6 +64,6 @@ select id from auth.users where email = 'YOUR_VERIFIED_STAFF_EMAIL'
 on conflict do nothing;
 ```
 
-Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and each payment QR/recipient before publishing. Configure up to three ordered payment options in Admin → Website & payment. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
+Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and each payment QR/recipient before publishing. Configure up to three ordered payment options in Admin → Payment Settings. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
 
 Keep `.env.local`, service keys, auth codes, real guest details, private receipts, and signed URLs out of this public repository. The [example environment](.env.example) contains variable names and placeholders only. No software license has been selected. [Screenshots](docs/screenshots/homepage.jpg) illustrate the local design, not live-service verification.
