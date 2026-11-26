@@ -2,7 +2,7 @@
 
 A campsite promotion and booking app built with Next.js/TypeScript, Supabase Auth/PostgreSQL/Storage, and a Resend booking-email adapter. Public source: [florenceWebDev/yvanders-nature-hills](https://github.com/florenceWebDev/yvanders-nature-hills).
 
-**Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) uses the owner's permanent Supabase database. The fictional system-check listing and its three bookings/dependencies have been removed; ten real accommodation drafts remain unpublished and payments are disabled. Multi-QR administration is deployed through PR #6 and migration 003 is applied. Configure up to three real payment options in Admin → Website & payment, then enable payments; the owner will supply those details later. General guest email and verified business configuration remain incomplete. See [current handoff](docs/PLAN.md).
+**Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) runs the deployed appearance and booking-management changes from PR #8 with migration 004 applied. Admins can edit images, logo, palette and contact email, use the daily reservation table, and permanently delete cancelled reservations. Guests can delete active awaiting-payment bookings. The deployment preserved ten accommodations (three published), one booking and enabled payments. Local/CI checks and live route/admin/permission/scheduler checks passed; destructive live flows, real receipt cleanup and remaining service/recovery checks are documented in [Testing](docs/TESTING.md). See [current handoff](docs/PLAN.md).
 
 ## Start locally
 

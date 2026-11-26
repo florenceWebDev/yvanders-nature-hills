@@ -1,6 +1,10 @@
 # Release and recovery
 
-## Current change — 26 November 2026
+## Current deployment — 26 November 2026
+
+[PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) merged with passing Application, Documentation and Netlify preview checks. Netlify published main `51c4b84`; migration 004 was applied through SQL Editor before the merge. Live admin controls and public routes were checked; anonymous deletion is denied and the scheduled cleanup/email worker returns HTTP 200 with zero errors on an empty queue. Ten accommodations, three published entries, one booking and enabled payments were preserved. No production deletion or branding changes were used as tests. Actual destructive-flow/storage-cleanup/concurrency/restore acceptance remains as listed in TESTING.
+
+## Previous cleanup checkpoint — 26 November 2026
 
 The fictional fixture, three bookings and dependencies were permanently removed through the guarded operator script. Ten real drafts are preserved/unpublished; readiness is off. Multi-QR administration is implemented and locally checked; migration 003 is applied and production deployment is Published at main `11e37b5` through the owner-approved PR #6 merge. On new projects apply 003 after 002 before deploying the matching app; verify real images/recipients before enabling holds. General guest mail and prior unverified recovery/failure paths remain separate. Connected-status sections below are historical.
 
@@ -34,6 +38,6 @@ Apply migration 002 after 001 and validate opening balances before deploying the
 
 These live checks remain pending until provider credentials are configured; local fixtures do not replace them.
 
-## Pending appearance and booking-management release
+## Appearance and booking-management release procedure
 
-Migration 004 and the matching application are prepared locally, not deployed. Apply 004 after 003 before release. Verify owner/status deletion boundaries, daily pagination and actual delayed receipt cleanup on isolated staging. Permanent cancelled deletion erases financial entries and changes historical reports. Keep cleanup processing alive during rollback; previous application code cannot restore erased records. See ADR 0006 and Operations.
+Migration 004 and the matching application are deployed as recorded above. For future environments: Apply 004 after 003 before release. Verify owner/status deletion boundaries, daily pagination and actual delayed receipt cleanup on isolated staging. Permanent cancelled deletion erases financial entries and changes historical reports. Keep cleanup processing alive during rollback; previous application code cannot restore erased records. See ADR 0006 and Operations.

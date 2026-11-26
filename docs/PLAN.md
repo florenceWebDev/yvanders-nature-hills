@@ -1,10 +1,12 @@
 # Appearance and booking management — 26 November 2026
 
-Implemented on codex/admin-appearance-booking-management: administrator alignment, editable marketing imagery/logo/gallery/full palette with size guidance, existing contact email, default daily overlapping-stays table, owner active-unpaid deletion and admin cancelled permanent deletion including financial entries. Migration 004 adds trusted guards and durable private receipt cleanup. Production remains at the prior deployment; migration 004 has not been applied live.
+Deployed: administrator button alignment, editable marketing images/logo/gallery/full palette with size guidance, existing contact email, daily overlapping-stays table, owner active-unpaid deletion and admin cancelled permanent deletion including financial entries. [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) merged with passing Application, Documentation and Netlify preview checks. Netlify published main `51c4b84`; migration 004 was applied through SQL Editor before the merge.
 
-Local verification: 38 application tests and 14 documentation-checker tests pass; typecheck, documentation inventory/impact checks and preview HTTP checks pass. Desktop/mobile admin layouts were inspected. Final production build passes. [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) is open for review; hosted checks are pending.
+Verified on production: enabled appearance editor and image-size guidance in the existing staff session; administrator input/button bottom alignment; Daily list loads without error; public routes HTTP 200; session configured; both deletion endpoints reject anonymous requests with 401. The scheduler returned HTTP 200 with processed/sent/cleaned/cleanupFailed all zero at 09:38 Philippines time. Migration verification confirmed cleanup-table RLS, denied anonymous/client queue/private-helper privileges, expected RPC grants, and rejected invalid palette writes inside a rolled-back transaction.
 
-Next: review the feature PR, then perform isolated staging migration/real storage/concurrency checks before any owner-approved production release. See TESTING for observed evidence and ADR 0006 for the selected permanent-erasure tradeoff.
+Owner configuration has changed since the older cleanup checkpoint: ten accommodations exist, three are published, one booking exists and payments are enabled. These records and settings were preserved. No booking deletion or live branding change was performed during deployment verification.
+
+Next incomplete verification: isolated destructive booking flows, real uploaded-logo/image persistence, independent deletion/upload/review contention, daily browser pagination above 100 rows, and actual receipt removal through the signed-upload grace window. General guest email, recovery and restore limits remain separate. See TESTING and ADR 0006. Earlier sections below preserve historical checkpoints.
 
 # Current handoff — 26 November 2026
 
