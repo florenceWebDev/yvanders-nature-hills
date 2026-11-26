@@ -174,7 +174,7 @@ After compatible UI/API checks, authenticated hold/payment/review grants, previo
 
 ## Release migration 007 audit hardening
 
-**Prepared packet only. Do not merge to main or run production SQL until the isolated checks and independent backup/restore gate pass.** Main automatically publishes. Baseline is migrations 001–006 with booking-experience application c6a911d plus any subsequent documentation/tooling changes; verify the actual published application revision and schema before release. New source is codex/audit-hardening. No new payment provider, DNS or paid service is required.
+**Executed on 27 November 2026: migration 007 and matching main e447666 are live; original hold/scheduler states are restored. Do not rerun this migration.** The ordered packet below records the release procedure and remains a reference for compatible recovery; see [Testing](TESTING.md) for observed checks. Main automatically publishes. Baseline is migrations 001–006 with booking-experience application c6a911d plus any subsequent documentation/tooling changes; verify the actual published application revision and schema before release. New source is codex/audit-hardening. No new payment provider, DNS or paid service is required.
 
 ### Prerequisites and compatibility
 

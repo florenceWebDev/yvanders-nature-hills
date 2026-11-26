@@ -4,6 +4,8 @@ The application reads environment values from Next.js; local secrets belong in `
 
 ## Current owner setup
 
+As of 27 November 2026, migration 007 and audit application e447666 are live. The production HMAC secret is configured with Functions scope included, holds and the known scheduler are restored, and deploy previews use the separate isolated staging project. See [Testing](TESTING.md) and [Plan](PLAN.md) for observed release/restore evidence and sender/Auth recovery limits. Older dated rollout notes below are historical.
+
 Use the [deployment handbook](DEPLOYMENT.md) for updates. The build-ignore script reads Netlify-provided `CACHED_COMMIT_REF` and `COMMIT_REF`; these are build metadata, not new application secrets or `.env.example` entries. Missing metadata builds normally. There are no new application environment variables. Changes to hosting environment values require an explicit redeploy even when source changes are documentation-only.
 
 As of the booking experience rollout on 26 November 2026, migrations 001–006 are applied and Netlify serves the c6a911d application release. Booking readiness and scheduling are enabled. Auth redirects contain the two previous entries and https://yvanders-nature-hills.netlify.app/auth/callback?** for encoded booking returns and reset=1. Sender/SMTP restrictions below remain unresolved; prepared HTML has not been activated as a general-recipient sender. Older rollout counts in this section describe their dated checkpoints.

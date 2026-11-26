@@ -1,3 +1,13 @@
+# Production audit release — 27 November 2026
+
+- Pass: protected PR #16 final Application 45897024170 and Documentation 45897024078; merge main e447666; main Application 45898548143 and Documentation 45898548126; exact matching Netlify deployment 6b08a4dbc206fe690f2faee2 observed Live.
+- Pass: current production baseline matched all 13 restored application tables and deployed function definitions/ACLs. Captured hold and known scheduler were enabled; guarded pause confirmed both disabled. At 05:27:06 Philippines time, the full 300-second old execution window had elapsed and a fresh database check found zero active mail leases, with both states still paused.
+- Pass: complete SQL Editor selection matched the reviewed migration file exactly; migration 007 committed once. Dashboard RLS warning named the transaction-local temporary release-state table; exact SQL retained explicit RLS on both new permanent tables. Postchecks verified lease columns, private abuse tables/helpers, denied direct quotes, service-only wrappers and exact existing booking/payment/receipt rows.
+- Pass: published application HTTP check 17/17 in 4,695 ms; two responses had distinct CSP nonces, private/no-store HTML and no unsafe-eval; authoritative read-only batch availability returned 200. Existing production staff session rendered the dashboard and lazy Email & activity with pagination and no unavailable-state error.
+- Pass: original hold/scheduler states restored at 05:35:20 Philippines time. Authenticated production worker returned HTTP 200: processed/sent/deferred/cleaned/cleanupFailed all zero; health backlog/exhausted/cleanup-failure counts all zero. This verifies worker operation, not new email delivery.
+- Pass: resumed scheduler run at 05:39 Philippines time succeeded; its actual pg_net worker response was HTTP 200 with no timeout/error and zero backlog/exhausted/cleanup-failure health counts. Request headers/credentials and email bodies were not selected.
+- No real production booking/payment/proof fixture, password reset, sender/SMTP change or paid upgrade was performed. Earlier pending migration/deployment checkpoints below are superseded. Staging delivery remains disabled; general-recipient SMTP/inbox and full Auth recovery remain incomplete.
+
 # Hosted isolated acceptance — 27 November 2026
 
 - Pass on application revision 8a6358c: final Application 45894315097 and Documentation 45894315172; one explicit Netlify same-commit rebuild after preview environment configuration. The earlier documentation-only build was correctly skipped and was not counted as the configured build.
