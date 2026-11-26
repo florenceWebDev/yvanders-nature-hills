@@ -1,3 +1,9 @@
+# Homepage mobile booking search — 26 November 2026
+
+Working branch codex/mobile-booking-search is based on audit-hardening revision 9df1d96; that unrelated work remains intact. This change touches only homepage search label/mobile sizing and its design/changelog/testing/handoff documentation. GUESTS retains the original selector and defaults. At max-width:650px the form has two paired field rows and a full-width button; desktop layout and search navigation are unchanged. No API/database/configuration change is included.
+
+Local browser checks passed at 320px, 390px, the 650px breakpoint readout and 1280px desktop, including values/defaults and navigation. Production build/TypeScript, all 14 documentation regressions, coverage/inventory checks and whitespace checks passed. See [Testing](TESTING.md) for actual evidence and the viewport-boundary rounding note. Next incomplete task: review this UI-only change separately from the audit work; the feature PR uses codex/audit-hardening as its base to keep its diff scoped. Main-only hosted CI must run when that stacked PR is retargeted to main. The earlier audit/database release gates below are not waived or executed by this layout task.
+
 # Website audit hardening — implementation checkpoint, 26 November 2026
 
 Prepared in [draft PR #16](https://github.com/florenceWebDev/yvanders-nature-hills/pull/16), implementation commit a8b2cd5 on codex/audit-hardening. Implements the approved audit plan with migration 007: peak occupancy, guest quotas, shared API limits, service-only quotes and one-request search, worker leases/recovery/cooldowns, grouped reporting, pagination, public-data caching, nonce CSP, trusted image optimization and local fonts. No production schema, configuration or records have been changed.

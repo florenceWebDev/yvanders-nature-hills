@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-26 — Homepage mobile search
+
+- Rename YOUR PEOPLE to GUESTS without changing the selector, defaults or search URL.
+- Keep homepage dates together, Arrival Time and Guests together, and the search button on its own row at 650px and below. Constrain native input sizing and align wrapped labels at narrow widths.
+- Preserve desktop layout, other forms and the separate audit-hardening work; no API, database or configuration changes.
+
+
 ## 2026-11-26 — Audit hardening (prepared, not deployed)
 
 - Correct availability to use peak concurrent allocation; preserve half-open boundaries and transactional resource locks.
