@@ -1,3 +1,9 @@
+# Homepage layout release — 26 November 2026
+
+Owner requested live deployment of the homepage mobile search change. Branch codex/mobile-search-live starts from current main 768a0e9 and includes only the two UI files and four affected documentation files. Audit hardening PR #16, migration 007, and deployment tooling PR #15 are excluded. Original stacked PR #17 is preserved for traceability. No API/database/configuration changes or migrations are required.
+
+Next: pass main-targeted Application and Documentation CI and Netlify preview, inspect rendered homepage, merge through branch protection, then verify the matching published commit and live search navigation. Recovery is a protected revert of the UI patch; persisted records are unaffected.
+
 # Booking experience deployed — 26 November 2026
 
 [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d; Netlify shows that commit Live on the production app. Migration 006 is applied. The owner explicitly approved the restricted same-database recovery snapshot and temporary booking/worker pause after the precheck below. Snapshot schema release_backup_006_20261126 has RLS on every copied table and no client/schema access; it is not an independent backup.

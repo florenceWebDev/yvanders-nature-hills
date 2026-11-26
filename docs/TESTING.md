@@ -1,3 +1,8 @@
+# Homepage layout release — 26 November 2026
+
+- Pass (prior branch context): 320px, 390px, active 650px breakpoint and 1280px desktop layout/defaults/search navigation; original evidence remains in PR #17. Windows/IAB boundary rounding required the adjacent override for active max-width:650px.
+- Pass on isolated main-based release: npm run build (production compilation/TypeScript), npm run docs:test (14 tests), npm run docs:check (six affected files). Hosted preview, final CI and live verification remain pending; prior audit-branch checks do not establish this release.
+
 # Booking experience production rollout — 26 November 2026
 
 - Pass: owner explicitly approved the restricted snapshot and brief pause. Created release_backup_006_20261126 with affected application records, function definitions/grants and previous readiness/scheduler state. Every copied table has RLS; client schema access is denied. This is a same-instance recovery aid, not independently verified disaster recovery.
