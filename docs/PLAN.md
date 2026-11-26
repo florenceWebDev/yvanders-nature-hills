@@ -2,7 +2,7 @@
 
 Owner requested live deployment of the homepage mobile search change. Branch codex/mobile-search-live starts from current main 768a0e9 and includes only the two UI files and four affected documentation files. Audit hardening PR #16, migration 007, and deployment tooling PR #15 are excluded. Original stacked PR #17 is preserved for traceability. No API/database/configuration changes or migrations are required.
 
-Next: pass main-targeted Application and Documentation CI and Netlify preview, inspect rendered homepage, merge through branch protection, then verify the matching published commit and live search navigation. Recovery is a protected revert of the UI patch; persisted records are unaffected.
+Completed: PR #18 merged as e61ac97 with green PR/main Application and Documentation checks, successful Netlify preview and matching production deploy observed Live. Live 17/17 read-only HTTP checks, mobile/desktop layout/defaults and search navigation passed; see TESTING. Future browser work must inspect existing Chrome windows and tabs before opening a new session. Recovery is a protected revert of the UI patch; persisted records are unaffected. Next incomplete work is the separately scoped audit/service acceptance, not a blocker for this UI-only release.
 
 # Booking experience deployed — 26 November 2026
 

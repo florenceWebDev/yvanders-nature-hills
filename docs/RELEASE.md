@@ -1,3 +1,7 @@
+# Homepage mobile search live — 26 November 2026
+
+[PR #18](https://github.com/florenceWebDev/yvanders-nature-hills/pull/18) merged as e61ac97. Netlify deployment 6b084036550ff209a493ffd7 reports Live for the matching main commit. GUESTS and the paired mobile search rows are published. Required PR/main CI, hosted mobile preview, live responsive geometry/search navigation and 17/17 anonymous production checks passed; see [Testing](TESTING.md). No API, database, migration or environment changes. The separate audit PR #16/migration 007 and tooling PR #15 were excluded. Existing service/restore/SMTP limits below remain unchanged.
+
 # Booking experience live — 26 November 2026
 
 [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13) merged as c6a911d and Netlify shows the matching production deploy Live. Migration 006 is applied after the explicitly approved restricted recovery snapshot/pause; prior booking/payment/review/scheduler access is restored. Existing booking/payment/receipt rows are unchanged. Live staff/newest-first review, owner-only personal history, selected-time quotes, public routes and the scheduled worker passed their observed checks; see [Testing](TESTING.md).
