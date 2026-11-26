@@ -49,3 +49,11 @@ Booking review shows reservation status and payment status separately, with tota
 Finished is a separate manual checkout action available after arrival with zero balance. A refund may reopen payment status without erasing completion. Reservation tables show payment status/remaining; dashboard adds per-method collections/refunds/net. Errors remain visible and controls become usable again after failure.
 
 The homepage hero, welcome image and accommodation cards use responsive optimization for bundled images. HTTPS owner images retain direct rendering to preserve existing arbitrary image-host support. Hero loads eagerly at high priority. Existing photographic styling and overlays are retained. Default FAQ copy no longer asserts an unverified food/pet policy.
+
+## Arrival selection, continuation and new bookings
+
+Reservations now opens in New bookings, a latest-created-first table across arrival dates, with Booked on, existing filters, balances and Review. Daily/calendar/history remain selectable. Email links select the staff Reservations tab and open the named booking through the protected detail API.
+
+Every offering uses arrival/departure dates plus a whole-minute Philippines arrival-time field. Search also carries that time through listing cards. The quote shows both exact endpoints; the late-arrival policy appears before confirmation and on new guest reservations. The editor explains guest-selected 24-hour days instead of configuring fixed arrival/slot times for new bookings. Existing reservation timestamps remain displayed as recorded.
+
+Anonymous guests can check price and availability and choose Sign in & continue. The same selection returns after authentication, is requoted, and requires confirmation. A changed price, unavailable dates, expired draft, or storage failure produces a visible message. Personal Your reservations is always owner-only, including staff accounts; managing all reservations is a separate staff workspace.

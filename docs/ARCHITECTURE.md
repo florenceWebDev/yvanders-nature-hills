@@ -71,3 +71,11 @@ Payment options remain public site settings and are copied into booking snapshot
 catalog is wrapped in React cache for reuse within one server-render request (layout, metadata and page). This is not cross-request availability caching. Public data remains dynamic; private API/auth responses explicitly use private, no-store. Partial CSP restricts base URLs, objects, framing and form destinations; it does not claim nonce-based script XSS protection. Server-only credential imports remain enforced.
 
 Financial finalization failures retain receipt objects to avoid deleting evidence committed by another retry. Invalid-byte cleanup checks for registered metadata and fails safely if that lookup is unavailable. Eventual cancelled-booking cleanup catches registered staff/guest prefixes; unregistered leftovers on retained bookings need operator retention reconciliation.
+
+## Booking continuation and staff event mail
+
+[ADR 0008](decisions/0008-booking-continuity-and-alerts.md) records migration 006. Personal booking history explicitly filters the authenticated owner even when RLS grants staff-wide reads. Staff visibility remains in verified admin routes.
+
+The browser stores one versioned booking draft for up to 24 hours under ynh-booking-draft-v1; an opaque draft ID and local offering path travel through authentication. Name/phone remain in local storage, never in return URLs; passwords, tokens and payment proof are never saved in the draft. Storage failure is shown, expired/malformed drafts are removed when read, and successful hold/logout clears it. A draft is convenience state: every resumed quote and hold is validated and priced by the server, and holds are created only after confirmation.
+
+Admin alerts are explicit per-event/per-recipient outbox jobs created in the same transaction as final booking/proof/payment changes. Provider failures do not roll back those changes. Recipients are snapshotted at event time; later role changes affect future events. No realtime subscription or delivery webhook is added.

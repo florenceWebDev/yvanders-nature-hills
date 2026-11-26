@@ -59,3 +59,14 @@ body,.appearance-preview{--ink:var(--text)}body{background:var(--cream)}
 .hero,.hero-content>p,.hero-content>.eyebrow,.hero-bottom,.experience-banner,.experience-banner p,.experience-banner .eyebrow{color:#fff}.hero h1,.hero-content>p,.hero-content>.eyebrow,.hero-bottom,.experience-banner h2,.experience-banner p{text-shadow:0 2px 10px rgba(0,0,0,.5)}.desktop-nav a,.account-link,.footer-top>div>a:not(.button),.footer-top p,.footer-bottom{color:var(--button-text)}.button-outline:hover{color:var(--button-text)}
 
 .badge-finished{background:var(--success-bg);color:var(--success)}.ledger-row{border-bottom:1px solid var(--line);padding:14px 0}.ledger-row p{margin-bottom:8px}.ledger-reference{overflow-wrap:anywhere}fieldset{min-width:0}fieldset:disabled{opacity:.65}
+
+/* Arrival time is a full booking-search field. */
+@media(min-width:901px){.search-bar{grid-template-columns:repeat(4,minmax(0,1fr)) 170px;gap:14px;padding:24px 20px}.search-bar label{padding-right:12px}.listing-search{flex-wrap:wrap}.listing-search label{min-width:130px}}
+
+.detail-layout>*,.booking-panel,.booking-panel .field-row>*{min-width:0}.booking-panel input,.booking-panel select{min-width:0;max-width:100%}.booking-panel .field-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:480px){.booking-panel .field-row{grid-template-columns:1fr}}
+
+.listing-search>label,.listing-search input{min-width:0;max-width:100%}
+@media(max-width:600px){.listing-search{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media(max-width:480px){.listing-search{grid-template-columns:1fr}}

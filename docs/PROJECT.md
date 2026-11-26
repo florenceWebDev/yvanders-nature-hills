@@ -32,3 +32,9 @@ Admins can replace marketing photos and accommodation galleries with recommended
 ## Approved individual payment tracking
 
 Separate Website Settings and Payment Settings. Guests choose the snapshotted payment option before its QR appears; retain that selection with proof. Admins verify a deposit, record later cash/GCash/bank/Other payments individually, and upload proof for online arrival payments. Proofs must remain viewable on the booking. Track gross receipts, refunds, net receipts and remaining balance per booking/method. Fully paid is independent of a staff-finished stay after checkout; completion requires arrival and zero balance. Refunds reopen balances. Preserve existing records and the nature design while auditing/fixing confirmed security, speed, content, UX and code-quality issues. No payment gateway or automated transfer is included.
+
+## Approved booking experience changes
+
+All offerings use guest-selected arrival time and 1–60 whole 24-hour days; departure is at the same time even when guests arrive late. Existing reservations retain their agreed schedules. Personal account history includes only the authenticated owner’s bookings, including for admins; staff Reservations still manages all bookings.
+
+Staff Reservations defaults to newest-created bookings across arrival dates. Every verified current admin receives separate new-booking, unverified guest-proof and verified-payment alerts. Anonymous guests can see a quote, sign in/verify/recover access and continue their saved selection after fresh validation. Supabase remains the identity provider; Yvander’s-branded SMTP activation waits for an owned verified sender domain.
