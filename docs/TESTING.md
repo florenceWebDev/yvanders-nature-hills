@@ -1,3 +1,9 @@
+# Deployment tooling merge refresh — 26 November 2026
+
+- Pass: updated PR #15 against main 5078468, retaining the homepage source and release evidence. Resolved only competing documentation additions; no homepage/API/database change.
+- Pass: npm test (56), npm run deployment:test (8), npm run docs:test (14), npm run docs:check, production build/TypeScript and whitespace checks on the combined tree. Final refreshed PR CI/Netlify and postmerge HTTP checks remain pending until observed; their outcomes will be attached to PR #15 without another documentation-only PR.
+- Audit PR #16 remains gated by isolated independent PostgreSQL/provider acceptance and independent backup/restore. This tooling release requires no SQL, secrets, pause or recovery snapshot.
+
 # Homepage layout release — 26 November 2026
 
 - Pass (prior branch context): 320px, 390px, active 650px breakpoint and 1280px desktop layout/defaults/search navigation; original evidence remains in PR #17. Windows/IAB boundary rounding required the adjacent override for active max-width:650px.
@@ -8,6 +14,16 @@
 - Pass: existing read-only release-check.mjs from codex/efficient-deployment was loaded directly from Git for verification (tooling branch was not merged). All 17 anonymous HTTP/configured-service/permission checks passed in 5,073 ms. No cookies, provider secrets or response bodies were logged.
 - Pass: live IAB geometry at 320px, 390px, innerWidth 650 with max-width:650px active (649 override due Windows rounding), and 1280px: paired mobile rows/full-width action, unchanged single desktop row, no document overflow. Native live controls retain 14:00/2 guests. Filling 1–3 May 2027, 09:15, four guests navigated to the correct /stays query, both in the owner’s existing mobile simulator and a clean IAB view. The simulator’s injected viewport gave inconsistent overflow measurements, so it was not used as width/overflow evidence. No extension settings were changed; temporary viewport overrides were reset.
 - Not run: physical Safari/device matrix, real booking/payment mutations and unrelated audit-hardening acceptance. Audit #16/migration 007 and tooling #15 remain excluded.
+
+# Deployment tooling verification — 26 November 2026
+
+- Pass: `npm run deployment:test` — eight regressions covering anonymous GET-only success/CLI exit zero; protected 200 failures and body redaction; unconfigured/malformed sessions; invalid/preview HTML, redirects and soft 404s; disconnected sockets, header/body timeouts; safe origin handling; recognized docs versus runtime/assets/SQL/unknown paths; real Git docs/mixed/rename/deletion/nonancestor/missing-history comparisons; and actual Netlify skip/build exit semantics. Local HTTP/Git fixtures do not establish hosted Netlify behavior. An initial missing fixture directory was corrected before the passing rerun.
+- Pass: `npm test` — 56 application/database/handler tests; `npm run docs:test` — 14 documentation regressions; `npm run build` including TypeScript; `node --check` for both deployment scripts and their test module; `git diff --check`. Local runtime is Node 23.2.0 and emitted experimental module warnings; Node 22 hosting/CI results must be verified on the PR.
+- Pass: `npm run docs:check` after updating the testing reference; local links, API/environment inventories and change-impact coverage. The initial intermediate invocation correctly failed because this testing reference had not yet been updated.
+- Pass: the new `npm run release:check` against existing production returned 17/17 in 5,329 ms: eleven branded HTML pages, configured session, four anonymous protected-route denials and missing page 404. The sandbox's earlier HTTP attempt lacked network access; the authorized network-enabled read-only run succeeded. This checks the existing live app, not publication of this branch. No sessions, response bodies, credentials, booking/payment/proof changes or browser operations were used.
+- Pass: [PR #15](https://github.com/florenceWebDev/yvanders-nature-hills/pull/15) implementation commit 5eb0363 passed [Application validation on Node 22](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45789608559), including all deployment regressions and build. Run creation to completed update was 39 seconds; this includes scheduling and is not isolated build time. Netlify reported Deploy Preview ready for that revision. GitHub parsed both workflow definitions; Documentation was still queued at this evidence checkpoint. Any later documentation revision needs its own final check status.
+- Reviewed: workflow expressions preserve existing triggers, names and permissions, use PR-number concurrency for cancellation, and unique run IDs for main/manual runs. No application rendered layout changed; browser UI checks were not applicable to this tooling change.
+- Not run: production merge/deployment, database/configuration mutations, hosted documentation-only skip and actual superseded-run cancellation. These need subsequent hosted evidence; do not infer them from local Git fixtures. Independent backup/restore, SMTP/general inbox, isolated authenticated storage and contention limitations below are unchanged. AI billing and total release-time savings are unmeasured; 5,329 ms is one HTTP sample.
 
 # Booking experience production rollout — 26 November 2026
 

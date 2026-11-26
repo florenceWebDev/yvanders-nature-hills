@@ -10,6 +10,7 @@ Start with the project [README](../README.md), then follow this reading order. T
 | [Database](DATABASE.md) | How do records, booking states, permissions, and transactions work? | SQL, state transitions, allocations, or migrations change |
 | [Configuration](CONFIGURATION.md) | Which environment values and provider settings are needed? | Runtime configuration or account setup changes |
 | [Operations](OPERATIONS.md) | How do I deploy, troubleshoot, retry, and recover? | Hosting, scheduled jobs, recovery, or support procedures change |
+| [Deployment handbook](DEPLOYMENT.md) | How can Codex or the owner release efficiently? | Release tooling, manual steps, or verification changes |
 | [Testing](TESTING.md) | What is tested, what actually passed, and what is unverified? | Test procedures or observed results change |
 | [Design](DESIGN.md) | What visual patterns and accessibility conventions should I preserve? | User interface and interaction patterns change |
 | [Project brief](PROJECT.md) | Which business requirements and acceptance criteria are agreed? | Product scope or business rules change |

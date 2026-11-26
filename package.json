@@ -12,6 +12,8 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "release:check": "node scripts/release-check.mjs",
+    "deployment:test": "node --test tests/deployment.test.mjs",
     "docs:check": "node scripts/docs-check.mjs",
     "docs:test": "node --test tests/docs-check.test.mjs"
   },

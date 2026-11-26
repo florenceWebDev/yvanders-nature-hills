@@ -2,6 +2,19 @@
 
 Explain the concrete trigger, previous behavior, and the result of this change. For docs-only work, name the missing or inaccurate guidance corrected.
 
+## Release packet
+
+- Release type: documentation-only / routine application / database or configuration
+- Intended branch/commit and previous published commit:
+- Migration files/order and configuration changes (or none):
+- Owner actions and compatibility with existing database/stale clients:
+- Prechecks, backup/recovery prerequisites, pause/resume steps (or not needed):
+- Postdeploy HTTP check and affected screens/interactions:
+- Compatible rollback or forward-fix procedure:
+- Outstanding blockers (or none):
+
+For database/configuration releases, fill in exact reviewed steps before merge. Do not paste secrets, guest data, signed URLs, or private backup contents.
+
 ## Documentation impact
 
 - Canonical references updated:

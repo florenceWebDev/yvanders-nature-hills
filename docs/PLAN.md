@@ -1,8 +1,20 @@
+# Remaining merges — 26 November 2026
+
+Owner authorized the merge plan. PR #15 is updated against main 5078468; preserve the homepage release and all historical evidence. Validate the merged revision, merge through branch protection, confirm its Netlify publication and run release:check. PR #16 remains draft until independent PostgreSQL/provider acceptance and independent backup/restore pass, followed by its coordinated 007 transition. Missing prerequisites do not authorize bypassing them. Use existing Chrome windows/tabs before opening sessions; consolidate evidence in the existing PR and avoid redundant checks/builds.
+
 # Homepage layout release — 26 November 2026
 
 Owner requested live deployment of the homepage mobile search change. Branch codex/mobile-search-live starts from current main 768a0e9 and includes only the two UI files and four affected documentation files. Audit hardening PR #16, migration 007, and deployment tooling PR #15 are excluded. Original stacked PR #17 is preserved for traceability. No API/database/configuration changes or migrations are required.
 
 Completed: PR #18 merged as e61ac97 with green PR/main Application and Documentation checks, successful Netlify preview and matching production deploy observed Live. Live 17/17 read-only HTTP checks, mobile/desktop layout/defaults and search navigation passed; see TESTING. Future browser work must inspect existing Chrome windows and tabs before opening a new session. Recovery is a protected revert of the UI patch; persisted records are unaffected. Next incomplete work is the separately scoped audit/service acceptance, not a blocker for this UI-only release.
+
+# Efficient deployment implementation — 26 November 2026
+
+Prepared in [PR #15](https://github.com/florenceWebDev/yvanders-nature-hills/pull/15) on codex/efficient-deployment: [owner/assisted deployment handbook](DEPLOYMENT.md), PR release packets, read-only release check, conservative Netlify documentation-only build skipping, superseded-PR CI cancellation and deployment regressions in Application CI. [ADR 0009](decisions/0009-efficient-deployment.md) records the decision. No new credentials, application API/schema changes, production configuration mutations or merge/deployment are included.
+
+Local verification: deployment regressions (8), application tests (56), documentation regressions (14), production build including TypeScript, syntax/whitespace checks and documentation coverage passed as recorded in [Testing](TESTING.md). The anonymous read-only production check passed 17/17 in 5,329 ms against the existing live app, with zero browser operations. This is not a measured deployment-time or AI-credit saving.
+
+Implementation commit 5eb0363 passed GitHub Application validation on Node 22 and Netlify preview. Documentation remained queued at this checkpoint. Next incomplete task: verify all final-revision PR checks and the documentation-only handoff's hosting skip/cancellation behavior, then release through the routine handbook when requested. Existing production remains on the booking experience release below; sender/SMTP, isolated integration/contention and independent restore acceptance remain outstanding. Earlier sections are dated historical checkpoints, superseded only by later observed evidence.
 
 # Booking experience deployed — 26 November 2026
 

@@ -29,6 +29,7 @@ Read [PROJECT](PROJECT.md), [PLAN](PLAN.md), and the [handbook index](README.md)
 | `scripts/seed.ts` | Optional unpublished draft inventory; never promotes an admin |
 | `scripts/smoke.mjs` | HTTP checks against a running configuration-free preview |
 | `scripts/docs-check.mjs` | Documentation links, inventories, and change-impact checks |
+| `scripts/release-check.mjs`, `scripts/netlify-ignore.mjs` | Anonymous production gate and conservative Netlify documentation-only build skipping; see [Deployment](DEPLOYMENT.md) |
 | `tests/` | Application validation/database tests and documentation-check regression tests |
 | `public/images/` | Shipped campsite photos |
 | `assets/references/` | Original supplied assets and reference provenance |
@@ -46,6 +47,8 @@ Next.js route parameters are asynchronous in this app. The installed Next.js pac
 See [API](API.md) for HTTP contracts and [Database](DATABASE.md) for the full state machine. A screenshot is not payment verification, and the UI is not the authorization boundary.
 
 ## Common changes
+
+Deployment tooling regressions run with `npm run deployment:test`, also included in Application CI. They use local HTTP fixtures and temporary Git repositories, without production credentials or database access. Run alongside documentation checks when changing release scripts or workflows. The handbook covers owner and assisted release; initial setup and old rollout records are not the routine update checklist.
 
 ### Add an offering using existing capabilities
 

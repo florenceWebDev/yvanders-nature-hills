@@ -35,6 +35,10 @@ Record application, configuration, database, and tooling changes under Unrelease
 
 ## Unreleased
 
+- Add a credential-free production release check with explicit failures and bounded anonymous HTTP requests, plus deployment-tooling regressions in Application CI.
+- Skip Netlify builds for recognized documentation-only comparisons; build on uncertainty and cancel superseded PR checks without changing required gates.
+- Add an owner/assisted deployment handbook, PR release packets, migration/configuration guidance and recovery instructions; clarify historical Netlify/Vercel references. No application API, schema, secret or production configuration change is included.
+
 ### Appearance and booking management
 
 - Added editable site logo, marketing images/gallery, full semantic palette, image-size guidance and scoped preview; retained contact email settings.
