@@ -33,3 +33,7 @@ Apply migration 002 after 001 and validate opening balances before deploying the
 - More than 500 reservations remain reachable through list pages and the selected calendar range. Verify occupied dates, overnight slots, blackouts and mobile agenda against the actual database.
 
 These live checks remain pending until provider credentials are configured; local fixtures do not replace them.
+
+## Pending appearance and booking-management release
+
+Migration 004 and the matching application are prepared locally, not deployed. Apply 004 after 003 before release. Verify owner/status deletion boundaries, daily pagination and actual delayed receipt cleanup on isolated staging. Permanent cancelled deletion erases financial entries and changes historical reports. Keep cleanup processing alive during rollback; previous application code cannot restore erased records. See ADR 0006 and Operations.

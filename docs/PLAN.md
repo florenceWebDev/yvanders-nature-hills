@@ -1,3 +1,11 @@
+# Appearance and booking management — 26 November 2026
+
+Implemented on codex/admin-appearance-booking-management: administrator alignment, editable marketing imagery/logo/gallery/full palette with size guidance, existing contact email, default daily overlapping-stays table, owner active-unpaid deletion and admin cancelled permanent deletion including financial entries. Migration 004 adds trusted guards and durable private receipt cleanup. Production remains at the prior deployment; migration 004 has not been applied live.
+
+Local verification: 38 application tests and 14 documentation-checker tests pass; typecheck, documentation inventory/impact checks and preview HTTP checks pass. Desktop/mobile admin layouts were inspected. Final production build passes. [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) is open for review; hosted checks are pending.
+
+Next: review the feature PR, then perform isolated staging migration/real storage/concurrency checks before any owner-approved production release. See TESTING for observed evidence and ADR 0006 for the selected permanent-erasure tradeoff.
+
 # Current handoff — 26 November 2026
 
 ## System-check removal

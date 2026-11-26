@@ -18,7 +18,7 @@ before(async()=>{
  grant usage on schema public,auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
  create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
- for(const name of ['001_booking.sql','002_administration.sql','003_payment_options.sql'])try{
+ for(const name of ['001_booking.sql','002_administration.sql','003_payment_options.sql','004_appearance_deletion.sql'])try{
   if(name==='002_administration.sql')await db.exec(`insert into resources(id,name,capacity) values('20000000-0000-4000-8000-000000000099','Legacy pool',1);insert into offerings(id,name,slug,kind,resource_id,max_guests,price,price_basis,schedule) values('30000000-0000-4000-8000-000000000099','Legacy','legacy','room','20000000-0000-4000-8000-000000000099',2,10000,'night','overnight');insert into bookings(id,guest_email,guest_name,phone,offering_id,resource_id,offering_name,starts_at,ends_at,guests,units,allocation,total,deposit,paid,request_id,snapshot,status) values('40000000-0000-4000-8000-000000000099','legacy@example.test','Legacy','123456','30000000-0000-4000-8000-000000000099','20000000-0000-4000-8000-000000000099','Legacy',now()+interval '1 day',now()+interval '2 days',1,1,1,10000,5000,5000,gen_random_uuid(),'{}','confirmed');`);
   if(name==='003_payment_options.sql')await db.exec(`update site_content set value=value||'{"payment_ready":true,"qr_url":"/images/legacy-qr.png","payment_recipient":"Legacy camp","payment_instructions":"Original instructions"}'::jsonb where key='settings'`);
   await db.exec((await readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8')).replace('create extension if not exists pgcrypto;',''));
@@ -130,4 +130,77 @@ test('multi-QR settings enforce direct database validation and preserve booking 
  await identity(guest);await assert.rejects(hold(offering),/payment is not configured/);
  assert.deepEqual((await sql<{snapshot:unknown}>('select snapshot from bookings where id=$1',[booking.id]))[0].snapshot,snapshot);
  await identity(staff);await sql('select save_content($1)',[initial]);
+});
+
+
+test('appearance settings persist and database rejects malformed images and palettes',async()=>{
+ await identity(staff);
+ const settings=(await sql<{value:Record<string,unknown>}>("select value from site_content where key='settings'"))[0].value;
+ const appearance={...settings,logo:{src:'/images/cabana.jpg',alt:'Camp logo'},palette:{forest:'#123456'},images:{hero:{src:'/images/hills.jpg',alt:'Green hills'}},gallery:[]};
+ await sql('select save_content($1)',[appearance]);
+ assert.deepEqual((await sql<{value:Record<string,unknown>}>("select value from site_content where key='settings'"))[0].value.palette,{forest:'#123456'});
+ for(const patch of [{palette:{forest:'red'}},{palette:{bogus:'#123456'}},{images:{hero:{src:'javascript:bad',alt:'Bad'}}},{images:{unknown:{src:'/images/hills.jpg',alt:'Bad'}}},{logo:{src:'/images/hills.jpg',alt:''}},{gallery:Array(21).fill({src:'/images/hills.jpg',alt:'Hills'})}])await assert.rejects(sql('select save_content($1)',[{...appearance,...patch}]),/Invalid|up to 20/);
+ await identity(guest);await assert.rejects(sql('select save_content($1)',[appearance]),/Admin access/);
+ await assert.rejects(sql("select valid_site_image('{}')"),/permission denied/);
+});
+
+test('only the owner can erase an active unpaid hold and reuse its capacity',async()=>{
+ const offering=await room();await identity(guest);const b=await hold(offering);
+ await identity(second);await assert.rejects(sql('select delete_unpaid_booking($1)',[b.id]),/Booking not found/);
+ await identity('', 'anon');await assert.rejects(sql('select delete_unpaid_booking($1)',[b.id]),/permission denied/);
+ await identity(guest);await assert.rejects(sql('select erase_booking($1,true)',[b.id]),/permission denied/);
+ await sql('select delete_unpaid_booking($1)',[b.id]);assert.equal((await sql('select id from bookings where id=$1',[b.id])).length,0);
+ await assert.rejects(sql('select delete_unpaid_booking($1)',[b.id]),/Booking not found/);
+ const replacement=await hold(offering);assert.ok(replacement.id);
+ await db.exec('reset role');assert.equal((await sql('select * from audit_events where record_id=$1',[b.id])).length,0);
+ assert.equal((await sql('select * from receipt_cleanup_jobs where prefix=$1',[guest+'/'+b.id])).length,1);
+ await identity(guest);await assert.rejects(sql('select * from receipt_cleanup_jobs'),/permission denied/);await assert.rejects(sql('select claim_receipt_cleanup_jobs()'),/permission denied/);
+});
+
+test('guest deletion rejects expired, review, confirmed, correction, declined and cancelled states',async()=>{
+ for(const status of ['expired','pending_review','confirmed','correction_requested','declined','cancelled']){
+  const offering=await room();await identity(guest);const b=await hold(offering);await db.exec('reset role');await sql('update bookings set status=$1 where id=$2',[status,b.id]);await identity(guest);
+  await assert.rejects(sql('select delete_unpaid_booking($1)',[b.id]),/Only an active/);
+ }
+ const offering=await room();await identity(guest);const b=await hold(offering);await db.exec('reset role');await sql("update bookings set expires_at=now()-interval '1 second' where id=$1",[b.id]);await identity(guest);await assert.rejects(sql('select delete_unpaid_booking($1)',[b.id]),/Only an active/);
+});
+
+test('cancelled permanent deletion erases financial history, receipts, promo usage and email jobs',async()=>{
+ const offering=await room();const code='ERASETEST';await promo(code);await identity(guest);const b=await hold(offering,code);
+ const receipt=crypto.randomUUID(),path=guest+'/'+b.id+'/'+receipt+'.png';await db.exec('reset role');await sql("insert into storage.objects(bucket_id,name) values('receipts',$1)",[path]);
+ await identity('','service_role');await sql('select submit_receipt($1,$2,$3,$4,$5)',[b.id,path,'FICTIONAL-PAYMENT',receipt,guest]);
+ await identity(staff);await sql("select review_booking($1,'confirm','Verified',$2,'',$3,$4)",[b.id,b.deposit,campDate(),crypto.randomUUID()]);
+ await sql('select record_refund($1,$2,$3,$4,$5)',[b.id,100,campDate(),'Fictional refund',crypto.randomUUID()]);
+ await assert.rejects(sql('select delete_cancelled_booking($1)',[b.id]),/Only cancelled/);
+ await sql("select review_booking($1,'cancel','Guest request',null,'',null,null)",[b.id]);
+ await identity(guest);await assert.rejects(sql('select delete_cancelled_booking($1)',[b.id]),/Admin access/);
+ await identity(staff);
+ const from=campDate(),until=addDays(from,1);
+ const before=(await sql<{r:{collections:number;refunds:number}}>('select admin_report($1,$2,$3) r',[from,until,offering]))[0].r;
+ await sql('select delete_cancelled_booking($1)',[b.id]);
+ for(const table of ['bookings','receipts','email_jobs','payment_entries','promo_redemptions'])assert.equal((await sql('select * from '+table+' where '+(table==='bookings'?'id':'booking_id')+'=$1',[b.id])).length,0);
+ const after=(await sql<{r:{collections:number;refunds:number}}>('select admin_report($1,$2,$3) r',[from,until,offering]))[0].r;
+ assert.ok(before.collections>after.collections);assert.ok(before.refunds>after.refunds);
+ await db.exec('reset role');assert.equal((await sql('select * from audit_events where record_id=$1',[b.id])).length,0);
+ // File removal is external; SQL retains a retry job rather than pretending to erase storage.
+ assert.equal((await sql('select * from storage.objects where name=$1',[path])).length,1);
+ await identity('','service_role');const jobs=await sql('select * from claim_receipt_cleanup_jobs()');assert.ok(jobs.length>0);assert.equal((await sql('select * from claim_receipt_cleanup_jobs()')).length,0);
+});
+
+test('deletion waits for active email leases and succeeds after the lease expires',async()=>{
+ const offering=await room();await identity(guest);const b=await hold(offering);await identity(staff);await sql("select review_booking($1,'cancel','Guest request',null,'',null,null)",[b.id]);
+ await db.exec('reset role');await sql("update email_jobs set status='sending',locked_at=now() where booking_id=$1",[b.id]);await identity(staff);
+ await assert.rejects(sql('select delete_cancelled_booking($1)',[b.id]),/email is being sent/);
+ assert.equal((await sql('select id from bookings where id=$1',[b.id])).length,1);
+ await db.exec('reset role');await sql("update email_jobs set locked_at=now()-interval '6 minutes' where booking_id=$1",[b.id]);await identity(staff);await sql('select delete_cancelled_booking($1)',[b.id]);
+ await identity('','service_role');await assert.rejects(sql('select submit_receipt($1,$2,$3,$4,$5)',[b.id,guest+'/'+b.id+'/late.png','LATE',crypto.randomUUID(),guest]),/Booking not found/);
+});
+
+
+test('daily overlap includes ongoing overnight stays and excludes exact departure and next-day arrivals',()=>{
+ const selected='2027-02-01';
+ assert.equal(overlapsDay('2027-01-31T14:00:00+08:00','2027-02-02T12:00:00+08:00',selected),true);
+ assert.equal(overlapsDay('2027-02-01T09:00:00+08:00','2027-02-01T17:00:00+08:00',selected),true);
+ assert.equal(overlapsDay('2027-01-31T14:00:00+08:00','2027-02-01T00:00:00+08:00',selected),false);
+ assert.equal(overlapsDay('2027-02-02T00:00:00+08:00','2027-02-02T17:00:00+08:00',selected),false);
 });
