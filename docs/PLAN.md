@@ -1,3 +1,9 @@
+# Audit release refresh — 26 November 2026
+
+PR #15 merged as 4f42e9c after refreshed Application, Documentation and Netlify preview passed. PR #16 now incorporates that main revision, preserving the published GUESTS/mobile search layout and release evidence. Production remains on migrations 001–006; do not merge #16 or apply 007 until its isolated-service and independent backup/restore gates pass.
+
+Owner authorized necessary free staging/private local backup preparation. A separate free Supabase staging project is healthy; migrations 001–007 applied there successfully, and a PostgreSQL connection passed with the provider CA and hostname verification enabled. Credentials and PostgreSQL client tooling are stored in a current-user-only folder outside the repository. Production has not been paused, migrated or reconfigured. Refreshed local checks pass 72 application tests, eight deployment regressions, fourteen docs regressions and production build/TypeScript. Independent contention/provider acceptance and a verified production backup restored to an independent project remain incomplete. Production database credentials needed by dump/restore are not available in the workspace; do not reset that password or weaken the release gates. Stop further setup expansion and leave PR #16 draft until these prerequisites are resolved.
+
 # Website audit hardening — implementation checkpoint, 26 November 2026
 
 Prepared in [draft PR #16](https://github.com/florenceWebDev/yvanders-nature-hills/pull/16), implementation commit a8b2cd5 on codex/audit-hardening. Implements the approved audit plan with migration 007: peak occupancy, guest quotas, shared API limits, service-only quotes and one-request search, worker leases/recovery/cooldowns, grouped reporting, pagination, public-data caching, nonce CSP, trusted image optimization and local fonts. No production schema, configuration or records have been changed.
@@ -5,6 +11,16 @@ Prepared in [draft PR #16](https://github.com/florenceWebDev/yvanders-nature-hil
 Local verification passes 72 application tests, production build/TypeScript, eight deployment and fourteen documentation regressions, documentation checks, localhost smoke/CSP inspection, and desktop/mobile admin/public previews. See [Testing](TESTING.md) for final observed outcomes and [Operations](OPERATIONS.md#release-migration-007-audit-hardening) for the migration/configuration release packet. The architecture choice is recorded in [ADR 0010](decisions/0010-audit-hardening.md).
 
 Next incomplete task: verify final-revision PR checks and complete isolated service release gates before any requested production release. This branch inherits the two existing deployment-tooling commits from PR #15; main has not merged those commits yet. Keep that dependency explicit and do not merge either release implicitly. Before any production release, complete isolated independent-connection contention, trusted ingress/header and authenticated storage/browser acceptance, and an independent restore rehearsal. The initial browser-accessible preview approval-review usage limit resolved after its reset time; an authorized retry passed browser and smoke checks. Do not treat earlier production checks as validation of this revision.
+
+# Remaining merges — 26 November 2026
+
+Owner authorized the merge plan. PR #15 is updated against main 5078468; preserve the homepage release and all historical evidence. Validate the merged revision, merge through branch protection, confirm its Netlify publication and run release:check. PR #16 remains draft until independent PostgreSQL/provider acceptance and independent backup/restore pass, followed by its coordinated 007 transition. Missing prerequisites do not authorize bypassing them. Use existing Chrome windows/tabs before opening sessions; consolidate evidence in the existing PR and avoid redundant checks/builds.
+
+# Homepage layout release — 26 November 2026
+
+Owner requested live deployment of the homepage mobile search change. Branch codex/mobile-search-live starts from current main 768a0e9 and includes only the two UI files and four affected documentation files. Audit hardening PR #16, migration 007, and deployment tooling PR #15 are excluded. Original stacked PR #17 is preserved for traceability. No API/database/configuration changes or migrations are required.
+
+Completed: PR #18 merged as e61ac97 with green PR/main Application and Documentation checks, successful Netlify preview and matching production deploy observed Live. Live 17/17 read-only HTTP checks, mobile/desktop layout/defaults and search navigation passed; see TESTING. Future browser work must inspect existing Chrome windows and tabs before opening a new session. Recovery is a protected revert of the UI patch; persisted records are unaffected. Next incomplete work is the separately scoped audit/service acceptance, not a blocker for this UI-only release.
 
 # Efficient deployment implementation — 26 November 2026
 

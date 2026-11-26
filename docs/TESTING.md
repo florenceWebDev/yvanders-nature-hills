@@ -1,3 +1,11 @@
+# Audit refresh and staging checkpoint — 26 November 2026
+
+- Pass: merged main 4f42e9c into the audit branch, resolved documentation additions without losing homepage GUESTS/two-row mobile rules. No audit source changes were needed for the merge.
+- Pass: refreshed npm test (72), deployment:test (8), docs:test (14), docs:check, production build/TypeScript and whitespace.
+- Pass: owner-authorized free staging project provisioned; migrations 001–007 applied in order to the verified empty staging database. Verified TLS connection uses the CA linked by the authenticated Supabase dashboard; the initial missing-CA error was fixed without disabling certificate validation. No production SQL or settings changes.
+- Pass: deployment tooling PR #15 merged at 4f42e9c; matching Netlify main deploy observed Live, main Application/Documentation passed, release:check passed 17/17 in 5,123 ms. Final hosted outcomes are attached to PR #15 without another evidence PR.
+- Blocked/Not run: independent PostgreSQL contention/EXPLAIN and connected provider acceptance; independent production backup and restoration, including receipt objects. Production database credentials are unavailable for dump/restore; no password reset, production pause or migration was attempted. Staging migration success does not prove these gates. Private staging credentials/tooling remain outside source.
+
 # Website audit hardening — 26 November 2026 (local implementation)
 
 - Pass: application suite grew from 56 to 72 tests. New coverage exercises migration 007, the reproduced disjoint-reservation false-sold-out case and real peak rejection, shared pools/blackouts/expiry, three unresolved reservations, ten rolling-hour creations, identical retries, deletion-resistant history, manual exemptions, private table/function permissions and revoked direct quote calls.
@@ -12,6 +20,23 @@
 - Pass: [draft PR #16](https://github.com/florenceWebDev/yvanders-nature-hills/pull/16), implementation a8b2cd5, passed [Application validation on Node 22](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45833135038) and [Documentation](https://github.com/florenceWebDev/yvanders-nature-hills/actions/runs/45833134939). Netlify marked its deploy preview successful. The preview redirects to Netlify Team protection (invited-account sign-in), so no hosted rendered/CSP acceptance is claimed from that build status. This checkpoint changes documentation only; final-revision checks remain a release requirement.
 - Resolved environment blocker: the first sandbox preview timed out; automatic approval review could not initially launch an unsandboxed preview due to an account usage limit (not a safety decision). After its reported reset time, the authorized retry worked and the browser/smoke checks above passed.
 - Blocked/Not run: independent PostgreSQL connection races and production-scale EXPLAIN plans (no local PostgreSQL/psql/Docker or isolated provider database supplied); hosted ingress-header spoof resistance, cache TTL/save invalidation on connected services, nonce CSP with the Netlify-injected badge, authenticated signed uploads/guest/staff workflows, general recipient email/SMTP, independent backup/restore, and production migration/deployment. No real booking/payment/receipt was created or modified. Earlier production audit samples validate the previous application only; no before/after Core Web Vitals or load-test improvement is claimed.
+
+# Deployment tooling merge refresh — 26 November 2026
+
+- Pass: updated PR #15 against main 5078468, retaining the homepage source and release evidence. Resolved only competing documentation additions; no homepage/API/database change.
+- Pass: npm test (56), npm run deployment:test (8), npm run docs:test (14), npm run docs:check, production build/TypeScript and whitespace checks on the combined tree. Final refreshed PR CI/Netlify and postmerge HTTP checks remain pending until observed; their outcomes will be attached to PR #15 without another documentation-only PR.
+- Audit PR #16 remains gated by isolated independent PostgreSQL/provider acceptance and independent backup/restore. This tooling release requires no SQL, secrets, pause or recovery snapshot.
+
+# Homepage layout release — 26 November 2026
+
+- Pass (prior branch context): 320px, 390px, active 650px breakpoint and 1280px desktop layout/defaults/search navigation; original evidence remains in PR #17. Windows/IAB boundary rounding required the adjacent override for active max-width:650px.
+- Pass on isolated main-based release: npm run build (production compilation/TypeScript), npm run docs:test (14 tests), npm run docs:check (six affected files). Final PR Application 45836202250, Documentation 45836202246 and Netlify preview passed at e7fea5c. Main e61ac97 passed Application 45838045177 and Documentation 45838045126.
+
+- Pass: protected PR #18 mobile preview inspected in the owner’s already authenticated Chrome/Netlify window. Existing browser inventory did not expose those tabs; native computer-use inspection found them. No new login, permission or security change was needed. Check existing browser windows/tabs first on future releases.
+- Pass: PR #18 merged as e61ac97afbe83e51135e668c88c778a27e982084; Netlify deployment 6b084036550ff209a493ffd7 observed Live for main@e61ac97. This supersedes earlier pending-release wording. No SQL, configuration or business-record writes.
+- Pass: existing read-only release-check.mjs from codex/efficient-deployment was loaded directly from Git for verification (tooling branch was not merged). All 17 anonymous HTTP/configured-service/permission checks passed in 5,073 ms. No cookies, provider secrets or response bodies were logged.
+- Pass: live IAB geometry at 320px, 390px, innerWidth 650 with max-width:650px active (649 override due Windows rounding), and 1280px: paired mobile rows/full-width action, unchanged single desktop row, no document overflow. Native live controls retain 14:00/2 guests. Filling 1–3 May 2027, 09:15, four guests navigated to the correct /stays query, both in the owner’s existing mobile simulator and a clean IAB view. The simulator’s injected viewport gave inconsistent overflow measurements, so it was not used as width/overflow evidence. No extension settings were changed; temporary viewport overrides were reset.
+- Not run: physical Safari/device matrix, real booking/payment mutations and unrelated audit-hardening acceptance. Audit #16/migration 007 and tooling #15 remain excluded.
 
 # Deployment tooling verification — 26 November 2026
 

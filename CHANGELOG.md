@@ -11,6 +11,11 @@
 - Cache public catalog data for 30 seconds with save invalidation, batch availability searches, load admin sections on demand, optimize trusted marketing images and self-host the existing fonts with their licenses.
 - Requires migration 007, RATE_LIMIT_HMAC_SECRET, trusted Netlify IP metadata and coordinated worker deployment. Existing business records are preserved. Production migration/deployment, independent PostgreSQL contention, provider integration and restore acceptance remain separate release gates.
 
+## 2026-11-26 — Homepage mobile search
+
+- Rename YOUR PEOPLE to GUESTS without changing the selector, defaults or search URL.
+- Keep homepage dates together, Arrival Time and Guests together, and the search button on its own row at 650px and below. Constrain native input sizing and align wrapped labels at narrow widths.
+- Preserve desktop layout, other forms and the separate audit-hardening work; no API, database or configuration changes.
 
 ## 2026-11-26 — Booking experience
 
