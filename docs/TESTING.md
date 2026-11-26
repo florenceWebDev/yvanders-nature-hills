@@ -9,6 +9,8 @@
 - Blocked: real SMTP/inbox delivery and unrestricted guest/admin recipients; owned sender domain unavailable.
 - Not run: production migration/deployment, real payment/proof creation, independent-connection contention and isolated recovery rehearsal. Local rendering reads published catalog only; no live booking/payment was created.
 
+- Pass: GitHub Application and Documentation workflows on implementation commit c69ecf7 in [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13). The PR remains draft for coordinated release and pending isolated integration acceptance.
+
 Final local commands: Pass — npm test (56 tests), npm run docs:test (14 tests), npm run build, npm run typecheck and npm run docs:check. The initial build exposed a tuple inference error in the new test fixture; it was fixed and the affected checks rerun successfully. Earlier sections retain historical release evidence.
 
 # Production payment rollout — 26 November 2026
