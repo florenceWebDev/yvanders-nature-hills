@@ -1,4 +1,5 @@
 'use client';
+import {readSession} from '@/lib/session-state';
 import{useEffect,useState}from'react';
 import dynamic from 'next/dynamic';
 const Dashboard=dynamic(()=>import('./admin-dashboard').then(m=>m.Dashboard));
@@ -18,7 +19,7 @@ import type{Offering,Resource,Settings}from'@/lib/types';
 type Blackout={id:string;resource_id:string;starts_at:string;ends_at:string;reason:string};
 type AdminData={offerings:Offering[];resources:Resource[];blackouts:Blackout[];site_content:{key:string;value:Settings}[]};
 export function Admin(){const[data,setData]=useState<AdminData|null>(null);const[state,setState]=useState('loading');const[tab,setTab]=useState('overview');useEffect(()=>{if(new URLSearchParams(location.search).has('booking'))setTab('bookings');},[]);const[message,setMessage]=useState('');const[preview,setPreview]=useState(false);const[revision,setRevision]=useState(0);
- async function load(){try{const s=await(await fetch('/api/session')).json();if(!s.configured){setData(null);setState('setup');return;}if(!s.admin){setData(null);setState('denied');return;}const r=await fetch('/api/admin');const d=await r.json();if(!r.ok)throw new Error(d.error);setData(d);setState('ready');setRevision(v=>v+1);}catch(e){setData(null);setMessage(e instanceof Error?e.message:'Unable to load dashboard');setState('error');}}
+ async function load(){try{const s=await readSession();if(!s.configured){setData(null);setState('setup');return;}if(!s.admin){setData(null);setState('denied');return;}const r=await fetch('/api/admin');const d=await r.json();if(!r.ok)throw new Error(d.error);setData(d);setState('ready');setRevision(v=>v+1);}catch(e){setData(null);setMessage(e instanceof Error?e.message:'Unable to load dashboard');setState('error');}}
  useEffect(()=>{load();},[]);
  const demo:AdminData={offerings:sampleOfferings,resources:[],blackouts:[],site_content:[{key:'settings',value:defaults}]};
  const d=preview?demo:data;

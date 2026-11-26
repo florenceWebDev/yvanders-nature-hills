@@ -5,11 +5,19 @@ import {HttpError,clientIdentity,rateKey,limit,readJson,publicFailure} from '../
 import {retryDelay,deliverEmails} from '../src/lib/email-worker';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {proxy} from '../src/proxy';
+import {readSession} from '../src/lib/session-state';
 
 test('JSON limits count streamed bytes even with a forged content length',async()=>{
  assert.deepEqual(await readJson(new Request('https://fictional.test',{method:'POST',body:'{"ok":true}'})),{ok:true});
  for(const headers of [{} as Record<string,string>,{'content-length':'1'},{'content-length':'300000'}])await assert.rejects(readJson(new Request('https://fictional.test',{method:'POST',headers,body:'x'.repeat(262145)})),(e:unknown)=>e instanceof HttpError&&e.status===413);
  await assert.rejects(readJson(new Request('https://fictional.test',{method:'POST',body:'broken'})),(e:unknown)=>e instanceof HttpError&&e.code==='INVALID_JSON');
+});
+test('session throttling and service failures remain errors instead of becoming setup or signed-out state',async()=>{
+ const original=globalThis.fetch;
+ try{
+  for(const status of [429,503]){globalThis.fetch=async()=>new Response(JSON.stringify({error:'Please try again later.',code:'RATE_LIMITED'}),{status});await assert.rejects(readSession(),/try again later/);}
+  const state={configured:true,user:{id:'fictional',email:'fictional@example.test'},admin:false};globalThis.fetch=async()=>new Response(JSON.stringify(state));assert.deepEqual(await readSession(),state);
+ }finally{globalThis.fetch=original;}
 });
 test('IP identity ignores forwarded headers, requires trusted hosting, and normalizes IPv6',()=>{
  const saved=process.env.SITE_ID;

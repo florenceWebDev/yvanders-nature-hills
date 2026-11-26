@@ -4,6 +4,7 @@
 
 - Correct availability to use peak concurrent allocation; preserve half-open boundaries and transactional resource locks.
 - Enforce three unresolved unpaid reservations and ten successful hold creations per rolling hour per guest, including direct authenticated RPC calls. Identical retries remain safe; deletion does not reset creation history.
+- Keep session throttling/service failures visible in guest, booking and staff flows instead of presenting setup or signed-out state.
 - Add Supabase-backed HMAC-keyed API throttles, bounded JSON bodies, stable public errors, service-only quote/batch availability RPCs, and script nonces.
 - Recover exhausted email leases, guard worker updates with lease tokens, respect provider cooldowns and bound work per run.
 - Group reporting by Manila date; index booking-linked lookups and queue selection; paginate guest history, email/activity and blackouts.
