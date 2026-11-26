@@ -1,3 +1,7 @@
+# Deployed audit follow-up — 26 November 2026
+
+The fixes below are now deployed through PR #10 at Published main 327cdc4 with migration 005. Postdeploy checks observe the limited CSP and explicit private/no-store API headers. Public/account/admin pages return 200; unauthenticated financial/settings writes return 401. Fourteen client JavaScript assets (784,379 decoded bytes across routes) had no privileged credential-pattern matches; no probed JSON source maps were accessible. HTTP samples remain individual unthrottled measurements, not Core Web Vitals or proof of every secret's absence. See [Testing](TESTING.md) for full rollout evidence and remaining isolated-service checks. The baseline/local-only language below describes the pre-release audit.
+
 # Production security, performance and quality audit — 26 November 2026
 
 Audited the deployed 004 baseline through read-only public requests and browser inspection; fixes below are local changes awaiting migration 005 and deployment. No live payment, guest record, QR or branding setting was changed.

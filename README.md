@@ -2,9 +2,7 @@
 
 A campsite promotion and booking app built with Next.js/TypeScript, Supabase Auth/PostgreSQL/Storage, and a Resend booking-email adapter. Public source: [florenceWebDev/yvanders-nature-hills](https://github.com/florenceWebDev/yvanders-nature-hills).
 
-**Current status:** [the Netlify website](https://yvanders-nature-hills.netlify.app/) runs the deployed appearance and booking-management changes from PR #8 with migration 004 applied. Admins can edit images, logo, palette and contact email, use the daily reservation table, and permanently delete cancelled reservations. Guests can delete active awaiting-payment bookings. The deployment preserved ten accommodations (three published), one booking and enabled payments. Local/CI checks and live route/admin/permission/scheduler checks passed; destructive live flows, real receipt cleanup and remaining service/recovery checks are documented in [Testing](docs/TESTING.md). See [current handoff](docs/PLAN.md).
-
-Pending feature branch: individual payments with methods and private proof links, separate Website/Payment Settings and Finished stays require migration 005 and coordinated deployment; they are not live yet. See [current handoff](docs/PLAN.md).
+**Current status:** [the live Netlify website](https://yvanders-nature-hills.netlify.app/) runs PR #10 with migration 005 applied. Website and Payment Settings are separate; guests choose a QR option, admins record individual cash/online payments with private proof links, balances reflect refunds, and fully paid arrived stays can be marked Finished. Live UI/SQL/permission/worker checks passed and booking holds are enabled. Existing QR details and ten accommodations (three published) were preserved. Real upload/concurrency, general guest mail and independent backup/restore limits remain in [Testing](docs/TESTING.md). See [current handoff](docs/PLAN.md).
 
 ## Start locally
 

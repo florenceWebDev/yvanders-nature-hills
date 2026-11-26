@@ -1,3 +1,11 @@
+# Live payment release — 26 November 2026
+
+Deployed through [PR #10](https://github.com/florenceWebDev/yvanders-nature-hills/pull/10): Netlify published main 327cdc4 with migration 005 applied. The owner explicitly approved the restricted same-database snapshot and temporary pause of new holds. Snapshot schema release_backup_005_20261126 has RLS on every copied table and no client/schema access; it is a migration recovery aid, not an independent backup. New holds were restored to their previous enabled setting after deployment.
+
+Verified live: separate Website/Payment settings, successful payment-settings save, existing QR classified as GCash with label/image/recipient/instructions retained, daily reservation payment/balance column, Finished filter and collections-by-method dashboard. SQL checks confirm new grants/private-helper denial, settings preservation and unchanged counts: ten accommodations (three published), zero bookings/payment entries/receipts. Rollback-only SQL checked GCash plus cash, retry idempotency, refund reopening, finish, scoped settings and nonadmin denial without retaining fixtures. Scheduled worker returned HTTP 200 at 12:15 Philippines time. Public route/asset and anonymous endpoint checks passed; see [Testing](TESTING.md).
+
+Next incomplete verification: actual staff file-upload transport and signed-proof expiry on isolated services, independent-connection contention, general guest SMTP/sender and independent backup/restore acceptance. No real booking/payment/proof was added as a deployment test. Earlier pending-release/blocker sections below are historical and superseded by this rollout.
+
 # Live release precheck — 26 November 2026
 
 Owner requested release to live. PR #10 is ready for review (no longer draft), with Application, Documentation and Netlify preview checks green on implementation commit 28ff7e0. Supabase precheck observed ten accommodations, zero bookings, zero payment entries, zero receipts, payment_ready=true and migration 005 absent. This supersedes the older one-booking checkpoint; no existing records were changed.
