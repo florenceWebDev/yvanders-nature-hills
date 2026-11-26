@@ -124,3 +124,7 @@ The existing authenticated GET /api/jobs scheduler processes receipt_cleanup_job
 Before admin deletion the UI warns that payment/refund entries and booking-specific audit history are erased. There is no application undo. Backups and previously delivered emails are outside this workflow; any backup restoration is a separate owner-approved recovery and may restore more data than one reservation. A currently sending email blocks deletion until the lease resolves. Existing signed receipt reads may work until their 60-second expiry or actual file removal.
 
 For rollback, deploy the previous application without dropping the additive migration or cleanup queue; keep the worker running until pending file cleanup completes. Rolling back code cannot restore erased records. No production migration or deployment is implied by local test success.
+
+## Observed migration 004 rollout
+
+On 26 November 2026 the owner explicitly requested deployment. SQL Editor applied the exact checked-in 004 migration transactionally before PR #8 merged. Postchecks confirmed expected grants/RLS and palette rejection with rollback; counts/settings were preserved. Netlify published main 51c4b84, staff controls loaded, and the minute scheduler returned the new cleanup counters with HTTP 200. No manual scheduler call or real guest deletion was used as a test. See TESTING for remaining live-service checks.

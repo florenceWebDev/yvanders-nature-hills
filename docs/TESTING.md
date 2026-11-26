@@ -1,3 +1,14 @@
+# Production appearance/deletion rollout — 26 November 2026
+
+- Pass: [PR #8](https://github.com/florenceWebDev/yvanders-nature-hills/pull/8) merged with passing Application, Documentation and Netlify preview checks. Netlify published main `51c4b84`; migration 004 was applied through SQL Editor before the merge.
+- Pass: pre/post schema checks preserve ten accommodations, three published accommodations, one booking, and enabled payments. No existing guest/financial records were deleted.
+- Pass: cleanup RLS and grants verified in production; anonymous DELETE RPC access and client queue/private-helper privileges are denied. Expected authenticated wrapper/service-worker grants exist. Invalid palette update was rejected inside a transaction that was rolled back.
+- Pass: existing staff session displays enabled appearance controls and recommended dimensions; administrator input/button bottom positions align; Daily list finishes loading successfully. Public home/admin/account/stays/gallery/contact return HTTP 200, /api/session reports configured, and anonymous POSTs to both deletion endpoints return 401.
+- Pass: the existing scheduler received HTTP 200 at 09:38 Philippines time with processed=0, sent=0, cleaned=0, cleanupFailed=0. This verifies worker availability with an empty queue, not real receipt removal.
+- Not run during production deployment: real booking deletion, live appearance replacement/upload/save, full signed-upload cleanup grace window, independent deletion/payment/review contention, >100-row daily browser pagination, backup restore and additional browser engines. Existing local/mocked tests remain separate evidence.
+
+The following local milestone notes describe the predeployment checkpoint and are superseded by the observed rollout above where applicable.
+
 # Appearance and permanent deletion — 26 November 2026
 
 - Pass: npm test, 38 tests. PGlite executes migrations 001–004, validates appearance writes and private helpers, owner/nonowner/anonymous deletion, ineligible states, financial/dependency erasure, capacity reuse and active email leases. Storage-worker tests use mocks for delayed uploads, cleanup completion and failed-storage retry; these are not real Supabase storage tests.
