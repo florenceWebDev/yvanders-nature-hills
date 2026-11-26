@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-11-26 — Audit hardening (prepared, not deployed)
+## 2026-11-27 — Audit hardening (deployed)
 
 - Correct availability to use peak concurrent allocation; preserve half-open boundaries and transactional resource locks.
 - Enforce three unresolved unpaid reservations and ten successful hold creations per rolling hour per guest, including direct authenticated RPC calls. Identical retries remain safe; deletion does not reset creation history.
@@ -9,7 +9,7 @@
 - Recover exhausted email leases, guard worker updates with lease tokens, respect provider cooldowns and bound work per run.
 - Group reporting by Manila date; index booking-linked lookups and queue selection; paginate guest history, email/activity and blackouts.
 - Cache public catalog data for 30 seconds with save invalidation, batch availability searches, load admin sections on demand, optimize trusted marketing images and self-host the existing fonts with their licenses.
-- Requires migration 007, RATE_LIMIT_HMAC_SECRET, trusted Netlify IP metadata and coordinated worker deployment. Existing business records are preserved. Production migration/deployment, independent PostgreSQL contention, provider integration and restore acceptance remain separate release gates.
+- Requires migration 007, RATE_LIMIT_HMAC_SECRET, trusted Netlify IP metadata and coordinated worker deployment. Existing business records are preserved. Migration 007 and application e447666 are deployed after independent PostgreSQL, hosted provider and application/receipt restore acceptance; real sender/SMTP and full Auth recovery remain separate limits.
 
 ## 2026-11-26 — Homepage mobile search
 
