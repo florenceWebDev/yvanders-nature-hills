@@ -22,19 +22,19 @@ Public. Returns `{configured, user, admin}`. `user` is null or `{id,email}`. Wit
 <!-- endpoint: POST /api/auth -->
 ### POST /api/auth
 
-Same-origin JSON: `{action,email?,password?}`. Actions: `signup`, `login`, `logout`, `reset`, `password`. Passwords supplied to this handler must be 10–128 characters; email must be valid. Signup/login require both; reset requires email; password update requires verified identity and password. Logout uses the current session.
+Same-origin JSON: `{action,email?,password?,returnTo?}`. Actions: `signup`, `login`, `logout`, `reset`, `password`. Passwords supplied to this handler must be 10–128 characters; email must be valid. Signup/login require both; reset requires email; password update requires verified identity and password. Logout uses the current session.
 
-Signup sends the provider verification email. Reset returns a generic response to avoid exposing whether an email is registered. Signup/login return `{message,session}`; other actions return `{message}`. Successful signup is not always a signed-in session. Auth mail uses Supabase Auth/SMTP configuration, separately from booking email delivery.
+Optional returnTo accepts only a local /stays/slug destination (including its draft query). Signup and recovery emails carry that destination through the callback. External or malformed destinations are ignored. Signup sends the provider verification email. Reset returns a generic response to avoid exposing whether an email is registered. Signup/login return `{message,session}`; other actions return `{message}`. Successful signup is not always a signed-in session. Auth mail uses Supabase Auth/SMTP configuration, separately from booking email delivery.
 
 <!-- endpoint: GET /auth/callback -->
 ### GET /auth/callback
 
-Query `code` is exchanged for a session. Only `next=/account?reset=1` is specially allowed; other successful callbacks go to `/account`. Invalid/missing code redirects to `/account?error=verification`. Response is a redirect, not JSON.
+Query `code` is exchanged for a session. A validated next=/stays/slug destination resumes the selection after exchange; other successful callbacks go to /account. reset=1 sends the user through /account?reset=1 with the validated next preserved until password update. The legacy next=/account?reset=1 remains supported. Invalid/missing code redirects to /account?error=verification with a safe next preserved. Response is a redirect, not JSON.
 
 <!-- endpoint: GET /api/bookings -->
 ### GET /api/bookings
 
-Verified account. Returns an array of accessible booking rows with `receipts` metadata. RLS limits guests to their own rows; staff identities may see all rows. Newest created rows first, capped at 500; there is no pagination parameter yet. Receipt metadata contains an object path, not a public download URL.
+Verified account. Returns only rows whose user_id equals the authenticated user ID, with receipts metadata. This server filter applies to admins too; caller-supplied owner filters are ignored. Database staff read permission remains available only for intentional staff workflows. Newest created rows first, capped at 500; there is no pagination parameter yet. Receipt metadata contains an object path, not a public download URL.
 
 <!-- endpoint: GET /api/admin -->
 ### GET /api/admin
@@ -51,20 +51,20 @@ Verified owner or admin. Query `id` is a receipt UUID. Returns `{url}` with a 60
 <!-- endpoint: POST /api/quote -->
 ### POST /api/quote
 
-Public with configured Supabase. Body: `{offering,arrival,departure?,slot?,guests,units,promo?,manual_email?}`. `offering` is a UUID; `departure` may be null for slots; slot defaults to empty string. Guests: 1–10000; units: 1–1000. SQL adds future-date, max-guest, duration, and availability checks. Quote checks published offerings unless the caller is an admin. A quote does not reserve inventory or a promo use. A promo requires a verified account; manual_email requires admin identity. Promo codes are case-insensitive and normalized to uppercase.
+Public with configured Supabase. Body: `{offering,arrival,departure,arrival_time,slot?,guests,units,promo?,manual_email?}`. `offering` is a UUID; departure is required for every offering; arrival_time is required in HH:mm format (00:00–23:59). All new reservations span 1–60 whole 24-hour days, ending at that same local time. Legacy slot defaults to empty string and is ignored. Guests: 1–10000; units: 1–1000. SQL adds future-date, max-guest, duration, and availability checks. Quote checks published offerings unless the caller is an admin. A quote does not reserve inventory or a promo use. A promo requires a verified account; manual_email requires admin identity. Promo codes are case-insensitive and normalized to uppercase.
 
 Example (replace the offering UUID with an existing published record):
 
 ```json
-{"offering":"30000000-0000-4000-8000-000000000001","arrival":"2027-08-01","departure":"2027-08-03","slot":"","guests":2,"units":1}
+{"offering":"30000000-0000-4000-8000-000000000001","arrival":"2027-08-01","departure":"2027-08-03","arrival_time":"09:15","slot":"","guests":2,"units":1}
 ```
 
-Response: `{starts_at,ends_at,allocation,subtotal,discount,promo_code,complimentary,total,deposit,available,remaining,name,nights,deposit_percent}`. Starts/ends are timestamps; `nights` is 1 for a venue slot. An unavailable quote can be a successful response with `available:false`.
+Response: `{starts_at,ends_at,allocation,subtotal,discount,promo_code,complimentary,total,deposit,available,remaining,name,nights,deposit_percent}`. Starts/ends are timestamps; nights is the number of booked 24-hour days for every offering. Responses also include arrival_time and schedule_policy=arrival_24h. An unavailable quote can be a successful response with `available:false`.
 
 <!-- endpoint: POST /api/hold -->
 ### POST /api/hold
 
-Verified account; configured secure storage, booking email settings, app URL, admin email, cron secret, and enabled QR instructions for positive totals. Complimentary reservations require the configured booking/email services but not QR instructions. Quote fields plus `{name,phone,request}`: trimmed name 2–120 characters, phone 6–40, request UUID. Reuse the request UUID to retry the same operation; create a new UUID for a new booking attempt. Do not reuse it for changed dates or inventory.
+Verified account; configured secure storage, booking email settings, app URL, cron secret, and enabled QR instructions for positive totals. Complimentary reservations require the configured booking/email services but not QR instructions. Quote fields plus `{name,phone,request}`: trimmed name 2–120 characters, phone 6–40, request UUID. Reuse the request UUID to retry the same operation; create a new UUID for a new booking attempt. Do not reuse it for changed dates or inventory.
 
 Returns a booking row with `awaiting_payment` and a 30-minute expiry for positive totals. A valid promo reducing total to zero instead returns `pending_review` with deposit zero, reserves capacity until staff resolve it, and queues an approval-pending email. It does not request a receipt. Price, deposit, time period, and payment settings are snapshotted. A race for the last unit returns an error from the transaction; choose dates again rather than trusting an earlier quote.
 
@@ -105,7 +105,7 @@ Returns the updated booking row. `note` is guest-visible; refund text is stored 
 
 Creates/updates an offering. Body fields: optional UUID `id` and `resource_id`; `slug`, `name`, `kind`, `description`, `images`, `amenities`, `published`, `allocation_basis`, `max_guests`, `capacity`, `price`, `price_basis`, `deposit_percent`, `schedule`, `check_in`, `check_out`, `slots`.
 
-Kinds: room/camping/pavilion/day-use. Allocation: unit/guest. Price basis: night/unit/guest. Schedule: overnight/slots. Deposit: 1–100%. At least one image is required; URLs must be HTTPS or allowed shipped image paths. Slots use unique `{id,label,start,end}` entries; slots cannot use nightly price basis. Images are limited to 20; amenities 30; slots 30. Positive price and capacity are required by this editor even for drafts. [Input schema](../src/lib/validation.ts) contains field limits.
+Kinds: room/camping/pavilion/day-use. Allocation: unit/guest. Price basis: night/unit/guest. Schedule: overnight/slots. Deposit: 1–100%. At least one image is required; URLs must be HTTPS or allowed shipped image paths. Legacy scheduling fields remain accepted for compatibility but do not control new booking intervals. The editor saves overnight and an empty slot list. If legacy slots are submitted, they use unique `{id,label,start,end}` entries; slots cannot use nightly price basis. Images are limited to 20; amenities 30; slots 30. Positive price and capacity are required by this editor even for drafts. [Input schema](../src/lib/validation.ts) contains field limits.
 
 Omit resource ID to create a new pool; provide it to share an existing pool. Active reservations prevent pool reassignment and capacity changes. Publishing requires enabled payment settings and a rate. Returns `{id}`. Archive by setting `published:false`; existing bookings remain.
 
@@ -132,7 +132,7 @@ Body `{id}` with job UUID. Resets a failed job to queued, attempts zero, and imm
 <!-- endpoint: GET /api/jobs -->
 ### GET /api/jobs
 
-Scheduler only: `Authorization: Bearer <CRON_SECRET>`. Requires configured email settings and service client. Claims up to 20 jobs, expires unpaid holds through the claim function, sends booking mail, and returns `{processed,sent}`. `sent` records provider acceptance plus successful database recording, not inbox delivery. Missing/invalid secret: 401. Missing email configuration or queue error: 503. The implementation's pre-claim configuration check means expiry cleanup also waits for email configuration; availability excludes expired holds regardless. See [operations](OPERATIONS.md) for retries and recovery.
+Scheduler only: `Authorization: Bearer <CRON_SECRET>`. Requires configured email settings and service client. Claims up to 20 jobs, expires unpaid holds through the claim function, sends guest/staff mail, and returns {processed,sent,cleaned,cleanupFailed}. Admin jobs link to /admin?booking=UUID; guest jobs link to /account. No blanket BCC is sent. `sent` records provider acceptance plus successful database recording, not inbox delivery. Missing/invalid secret: 401. Missing email configuration returns 200 with email status and cleanup counts; queue error returns 503. The implementation's pre-claim configuration check means expiry cleanup also waits for email configuration; availability excludes expired holds regardless. See [operations](OPERATIONS.md) for retries and recovery.
 
 ## Expanded administration
 
@@ -156,7 +156,7 @@ Query from/until are ISO dates, with until exclusive; optional offering UUID. Ra
 
 <!-- endpoint: GET /api/admin/bookings -->
 ### GET /api/admin/bookings
-Optional query from/until restricts overlapping intervals, status is a booking state, offering is a UUID, query searches guest name/email/reference (max 120 characters), page is zero-based (default 0). Returns {bookings,total,page}, 100 rows/page sorted by arrival then UUID. List view paginates; calendar fetches all pages in its visible date range and reports failure rather than displaying a silently incomplete result. Receipt metadata is loaded only on opening details. Status is the persisted state; an expired unpaid hold may remain awaiting_payment until job cleanup.
+Optional query from/until restricts overlapping intervals, status is a booking state, offering is a UUID, query searches guest name/email/reference (max 120 characters), page is zero-based (default 0). Returns {bookings,total,page}, 100 rows/page. Optional order=arrival (default) sorts by arrival then UUID; order=newest sorts by creation time descending then UUID descending. The New bookings view omits date limits and paginates across all arrivals. List view paginates; calendar fetches all pages in its visible date range and reports failure rather than displaying a silently incomplete result. Receipt metadata is loaded only on opening details. Status is the persisted state; an expired unpaid hold may remain awaiting_payment until job cleanup.
 
 <!-- endpoint: GET /api/admin/booking -->
 ### GET /api/admin/booking

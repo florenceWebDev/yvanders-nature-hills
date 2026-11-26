@@ -1,3 +1,18 @@
+# Booking experience checks — 26 November 2026
+
+- Pass: migration 006 applied locally after 001–005 in PGlite; existing booking timestamps/snapshots preserved. Every offering uses selected whole-minute arrival time and 24-hour days with correct price bases; missing/invalid time, duration, overlap boundaries, blackouts and Finished allocations checked.
+- Pass: new-booking fan-out to two verified admins, manual/complimentary final status/totals, proof versus verified-payment alerts, balance alerts, current admin membership, retry deduplication and private helper denial.
+- Pass: actual HTTP handler code executed against isolated adapters: two admins and a guest see only their own personal records, forged owner query ignored, shared newest-first staff listing retained, guest/anonymous staff access denied. Signup/recovery callback returns, expired links, unsafe redirects and worker failure/retry/BCC removal checked. Provider adapters are mocked; no live delivery is inferred.
+- Pass: versioned draft expiry, retained selection and unsafe-return validation. Full browser login/verification/draft restoration remains Not run against isolated services.
+- Pass: Chrome desktop homepage and accommodation detail; selected 09:15 time/date values and late-arrival note visible. At 390×844 mobile, booking panel overflow found and corrected; recheck showed content width within viewport and readable form/native required-field validation. Mobile listing arrival controls inspected and intrinsic input widths corrected/rechecked; small-screen search now stacks fields for full native date readability.
+- Blocked: rendered authenticated staff table/review and two-account browser history verification; local browser has no staff session. Handler and SQL tests cover the boundaries, not authenticated browser behavior.
+- Blocked: real SMTP/inbox delivery and unrestricted guest/admin recipients; owned sender domain unavailable.
+- Not run: production migration/deployment, real payment/proof creation, independent-connection contention and isolated recovery rehearsal. Local rendering reads published catalog only; no live booking/payment was created.
+
+- Pass: GitHub Application and Documentation workflows on implementation commit c69ecf7 in [PR #13](https://github.com/florenceWebDev/yvanders-nature-hills/pull/13). The PR remains draft for coordinated release and pending isolated integration acceptance.
+
+Final local commands: Pass — npm test (56 tests), npm run docs:test (14 tests), npm run build, npm run typecheck and npm run docs:check. The initial build exposed a tuple inference error in the new test fixture; it was fixed and the affected checks rerun successfully. Earlier sections retain historical release evidence.
+
 # Production payment rollout — 26 November 2026
 
 - Pass: owner approved the restricted snapshot and temporary hold pause. Created release_backup_005_20261126 copies of affected application tables and function definitions, with table RLS and revoked schema/table access for anon/authenticated/service_role. Verified authenticated schema access=false and all copied tables RLS=true. This is not an independent provider backup.

@@ -42,11 +42,11 @@ Repeated decisions that already match status return the row without another stat
 
 ## Availability and pricing
 
-- Allocation uses half-open overlap: existing start < requested end AND existing end > requested start. Adjacent periods can coexist; configured overnight times still determine actual overlap.
+- Allocation uses half-open overlap: existing start < requested end AND existing end > requested start. Adjacent periods can coexist; new booking intervals use the guest-selected arrival time on both dates.
 - Pending review, correction requested, confirmed and finished rows consume capacity for their original intervals. Unexpired awaiting-payment rows also consume it. Declined/cancelled/expired rows do not. No automatic timeout exists for uploaded proof or complimentary reservations awaiting review.
 - `allocation_basis=unit` consumes requested units/pitches; guest basis consumes party size. Guest count must not exceed offering max-guests × units. Shared-guest offerings should configure a suitable per-booking guest maximum.
-- Quote permits arrival within the next 730 days and 1–60 overnight nights; the arrival timestamp must be in the future. Venue slots use the selected local date; end ≤ start rolls into the following day.
-- Cost = price × (guests for guest pricing, otherwise units) × (1 for per-booking unit pricing, otherwise nights). Slot nights are 1. Deposit rounds upward from total × percentage / 100. Total is capped at 1,000,000,000 centavos.
+- Quote permits arrival within the next 730 days and 1–60 booked days for every offering. p_arrival_time is required, with whole-minute precision from 00:00 through 23:59. Both endpoints use that time in Asia/Manila; arrival must be in the future. Existing slot/check-in/check-out configuration no longer controls new intervals.
+- Cost = price × (guests for guest pricing, otherwise units) × (1 for per-booking unit pricing, otherwise nights). The nights field counts whole booked days, including venue/day-use bookings. Deposit rounds upward from total × percentage / 100. Total is capped at 1,000,000,000 centavos.
 - Bookings retain copied price, deposit, name, schedule, and payment instructions. Editing an offering/settings does not reprice existing bookings.
 - Hold creation takes a request advisory lock, locks the promo row when supplied, then the offering and resource rows, before rechecking availability. Admin offering edits use the same lock ordering; upcoming active reservations prevent pool reassignment/capacity changes. Blackouts lock the resource before checking overlaps.
 
@@ -122,3 +122,11 @@ save_settings_section locks the settings row and merges only the selected sectio
 ## Production operator snapshot
 
 Migration 005 is applied in production. The owner-approved release_backup_005_20261126 schema is outside the public application schema and contains restricted pre-release application-table copies and affected function definitions. Table RLS is enabled and client/service-role schema/table access revoked. It is not queried by the app or a fresh-install requirement, and does not provide an independent backup. Recovery/retention is operator-controlled; see [Operations](OPERATIONS.md#observed-migration-005-rollout).
+
+## Booking experience migration 006
+
+[006](../supabase/migrations/006_booking_experience.sql) replaces quote/hold function signatures with a final p_arrival_time time argument. Public quote/hold wrappers accept a null default only for function-call compatibility; missing/null arrival time is rejected. Private base functions remain nonexecutable by clients/service role. No existing booking, price, schedule snapshot, receipt or payment is rewritten. New snapshots include schedule_policy=arrival_24h and arrival_time.
+
+New email_jobs columns: audience (guest/admin, default guest), event_key (nullable), and a unique event_key/recipient constraint. The private queue helper snapshots verified current admin recipients, normalizes addresses and inserts one job per event/address. Final hold creation explicitly queues after discounts and status are saved; audit triggers queue receipt_submitted and payment_recorded events atomically. Retry paths return before creating another event. A private email trigger adds exact times and the late-arrival policy to new timed guest emails. Old queued emails retain their guest audience. All helpers deny direct client execution; jobs retain existing RLS and deletion behavior.
+
+The bookings_newest index supports creation-time/UUID ordering. Staff RLS still permits all-admin reads; GET /api/bookings separately enforces user_id=authenticated user for personal history. Manual bookings retain null ownership.

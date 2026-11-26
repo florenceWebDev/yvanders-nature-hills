@@ -54,7 +54,7 @@ Application validation: `npm test`. Generate Next.js types through dev/build bef
 
 ## Connect real booking services
 
-Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql, 004_appearance_deletion.sql and 005_payments_settings.sql; an existing 004 database needs only 005, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
+Follow [Configuration](docs/CONFIGURATION.md) in an isolated staging project. For a fresh Supabase project apply 001_booking.sql, 002_administration.sql, 003_payment_options.sql, 004_appearance_deletion.sql, 005_payments_settings.sql and 006_booking_experience.sql; an existing 005 database needs only the coordinated 006 release, configure auth callbacks/SMTP/storage and server secrets, register/verify a staff account, and explicitly promote the intended account:
 
 ```sql
 insert into public.admins(user_id)
@@ -62,6 +62,6 @@ select id from auth.users where email = 'YOUR_VERIFIED_STAFF_EMAIL'
 on conflict do nothing;
 ```
 
-Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and each payment QR/recipient before publishing. Configure up to three ordered payment options in Admin → Payment Settings. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
+Optionally seed unpublished drafts with `npx tsx --env-file=.env.local scripts/seed.ts`. Verify rates, room/photo mapping, capacities, schedules, deposits, contact/policies, and each payment QR/recipient before publishing. Configure up to three ordered payment options in Admin → Payment Settings. Administrators can add verified existing accounts through the Administrators section after the initial staff account is bootstrapped. Configure Resend, branded Auth SMTP and the authenticated scheduler, then complete the [acceptance matrix](docs/TESTING.md). Environment values being present are not proof of operational services.
 
 Keep `.env.local`, service keys, auth codes, real guest details, private receipts, and signed URLs out of this public repository. The [example environment](.env.example) contains variable names and placeholders only. No software license has been selected. [Screenshots](docs/screenshots/homepage.jpg) illustrate the local design, not live-service verification.

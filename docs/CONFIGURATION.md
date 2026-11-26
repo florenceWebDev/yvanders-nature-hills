@@ -23,7 +23,7 @@ For the temporary Netlify client preview, use [netlify.toml](../netlify.toml): r
 | Payment-enabled | Complete server settings plus verified public QR instructions | Verified guests can create holds; owner must still complete staged acceptance before taking money |
 | Production | HTTPS origin, isolated service configuration, verified sender, scheduler, policies and restore procedure | Real operation requires acceptance beyond the current fictional owner check |
 
-Providing only URL/key does not mean booking services are ready. The hold/settings endpoints additionally require service key, booking email key/from, admin email, app URL, and cron secret. After migration 003, a database `payment_ready` flag and one to three complete payment options are also required. Configure labels, images, recipients, instructions and order in Admin → Website & payment. No new environment variables are introduced. Presence checks do not validate actual provider credentials or prove deliverability.
+Providing only URL/key does not mean booking services are ready. The hold/settings endpoints additionally require service key, booking email key/from, app URL, and cron secret. After migration 003, a database `payment_ready` flag and one to three complete payment options are also required. Configure labels, images, recipients, instructions and order in Admin → Website & payment. No new environment variables are introduced. Presence checks do not validate actual provider credentials or prove deliverability.
 
 ## Environment inventory
 
@@ -57,7 +57,7 @@ Verified booking sender, e.g. `Yvander's Nature Hills <bookings@example.test>` a
 <!-- env: ADMIN_EMAIL -->
 ### ADMIN_EMAIL
 
-Campsite booking staff mailbox. Required by current online-payment readiness checks; booking messages are copied here using BCC as staff alerts. Not a password, but treat the operational address as owner configuration. Granting admin application access is a separate SQL step.
+Legacy optional mailbox setting retained for configuration compatibility. Migration 006 staff alerts use verified current admins from the database; the worker no longer BCCs this address and readiness checks do not require it. Granting admin application access remains a separate SQL step.
 
 <!-- env: APP_URL -->
 ### APP_URL
@@ -92,3 +92,13 @@ Apply migration 004 after 003 before deploying this application. Branding, marke
 ## Payment/settings audit configuration
 
 Migration 005 adds no environment variable, bucket or credential. Configure the method on each QR option in Payment Settings when next saving that section. Existing snapshots retain legacy options and remain readable. Bundled images use the existing Next image optimizer; remote owner URLs remain unoptimized, so no wildcard remote-image allowlist is introduced. next.config.ts adds a limited CSP and explicit private/no-store for API/auth routes. This CSP does not restrict scripts or Google Fonts.
+
+## Branded verification and recovery mail
+
+Supabase still verifies accounts. Configure custom SMTP using the existing email provider after the owner supplies an owned domain, verifies its sending DNS records and chooses an authorized sender. Use Yvander’s Nature Hills as the sender name. The booking-email API key alone does not configure Supabase SMTP. Do not put SMTP credentials in this repository or public site settings.
+
+Prepared dashboard templates: [confirmation](../supabase/templates/confirmation.html) and [recovery](../supabase/templates/recovery.html). Paste the matching HTML into Supabase Auth email templates while preserving the ConfirmationURL variable. Configure SMTP host/port/user/password in Supabase; use TLS settings required by the provider. Retain email confirmation. Test signup and password recovery with authorized isolated recipients and verify actual inbox delivery and return to the booking draft.
+
+Add the exact production callback pattern https://yvanders-nature-hills.netlify.app/auth/callback?** to Supabase’s redirect allowlist to permit encoded booking returns and reset=1. Keep the origin/path fixed; do not use an unrestricted host wildcard. Add only corresponding exact local/staging origins when needed. Keep the legacy callback/reset entries during transition.
+
+No owned domain is available yet. Custom sender activation and unrestricted guest delivery remain Blocked; these HTML files are prepared assets, not applied provider configuration. See the [official SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp) and [template guide](https://supabase.com/docs/guides/auth/auth-email-templates).
